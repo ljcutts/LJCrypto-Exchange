@@ -1,0 +1,12 @@
+Deploying onto Mumbai is a must, second would be Rinkeby and maybe BSC
+First thing to work on: Make a Lottery System/game where a random person receives ether/matic/bsc everyday
+Second thing to work on: Create some type of game where two people compete against each other to win some ether
+Third thing to work on: Integrate Chainlink Keepers and VRF for the Lottery System and game
+Fourth thing to work on: Make a section where people are able to buy 2 to 4 different types of tokens, which also includes Stablecoins
+Fifth thing to work on: Make a Staking Section where people have 2 to 4 tokens to stake and earn interest off of.
+Sixth thing to work on: Make a swapping Section and also add liquidity pools using Uniswap code
+Seventh thing to work on: Start implementing NFTS and maybe an NFT marketplace
+Eighth thing to work on: Implement a Dao where you are required to own "LJCrypto" tokens and an NFT(maybe ERC1155)
+Ninth thing to work on: Start to work on the frontend, maybe try to use Figma to draw out how the UI will look. Also use useContext
+Tenth thing to work on: Start to integrate IPFS using the client CLI and start making subgraphs for the smart contracts
+Make a Smart Contract Test for all smart contracts and test out the Dapp when everything is done.

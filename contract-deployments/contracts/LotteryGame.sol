@@ -16,27 +16,31 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     //use an event that keeps track of the winners
     //The same number generated with VRF will be used to pick a random winner and to select a random amount of ether
 
-    event Winners(address indexed winner);
+    event Winners(address winner, bytes32 requestId);
+    event PlayersOnLotteryDay(uint256 lotteryDay, address player, uint entryAmount);
     address payable[] players;
     mapping(address => bool) private playerInTheGame;
     uint public entryAmount;
-    uint public immutable deadline;
+    uint public deadline;
+    uint public maxPrize;
+    uint lotteryDay;
     address immutable owner;
-    address _linkToken = 0xa36085F69e2889c224210F603D836748e7dC0088;
-    address _vrfCoordinator = 0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9;
-    bytes32 _keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
-    uint256 _chainlinkFee = 0.1 * 10 ** 18;
+    address public lastWinner;
+    uint lastUpKeep;
+    //This is for the Rinkeby Testnet. The addresses and bytes differ depending on the network
+    address _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
+    address _vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
+    bytes32 _keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
+    uint256 _chainlinkFee = 0.25 * 10 ** 18;
 
-
-  
-
-constructor(uint _entryAmount) VRFConsumerBase (_vrfCoordinator, _linkToken) {
+constructor(uint _entryAmount, uint _maxPrize) VRFConsumerBase(_vrfCoordinator, _linkToken) {
        entryAmount = _entryAmount;
        owner = msg.sender;
        deadline = block.timestamp + 24 hours;
+       maxPrize = _maxPrize;
+       lastUpKeep = block.timestamp;
 }
 
-    //maybe use ownable contract instead
     modifier onlyOwner {
         require(msg.sender == owner, "You are not the owner");
         _;
@@ -45,23 +49,15 @@ constructor(uint _entryAmount) VRFConsumerBase (_vrfCoordinator, _linkToken) {
     function enterTheGame() public payable {
         require(msg.sender != address(0), "This address does not exist");
         require(!playerInTheGame[msg.sender], "You have already entered the lottery");
-        require(msg.value >= entryAmount, "Put in at least 0.1 ether/matic to enter the lottery");
+        require(msg.value >= entryAmount, "Your amount has to be equal or greater than the entryAmount");
         playerInTheGame[msg.sender] = true;
         players.push(payable(msg.sender));
-        //make it where they are paying 0.01 ether for every day they are in the lottery
+        emit PlayersOnLotteryDay(lotteryDay, msg.sender, entryAmount);
     }
 
-    // function exitTheGame() public {
-    //   require(playerInTheGame[msg.sender], "You never entered the lottery");
-    //   playerInTheGame[msg.sender] = false;
-    //   address payable[] memory player = players;
-    //   for(uint i = 0; i < players.length; i++) {
-    //      if(player[i] == msg.sender) {
-    //         delete player[i];
-    //         break;
-    //      }
-    //   }
-    // }
+    function changeMaxPrize(uint _maxPrize) public onlyOwner {
+       maxPrize = _maxPrize;
+    }
 
      function removeLotteryFunds() public onlyOwner {
        require(address(this).balance > 0, "There are no funds in the coontract");
@@ -71,7 +67,11 @@ constructor(uint _entryAmount) VRFConsumerBase (_vrfCoordinator, _linkToken) {
 
 
     function checkUpkeep(bytes calldata checkData) external view override returns (bool upkeepNeeded, bytes memory performData) {
-        upkeepNeeded = block.timestamp > deadline;
+        bool hasLink = LINK.balanceOf(address(this)) >= _chainlinkFee;
+        bool deadlinePassed = (block.timestamp - lastUpKeep) > deadline;
+        bool enoughPlayers = players.length > 1;
+        bool etherInContract = address(this).balance > 0;
+        upkeepNeeded = hasLink && deadlinePassed && enoughPlayers && etherInContract;
         performData = checkData;
     }
 
@@ -79,25 +79,20 @@ constructor(uint _entryAmount) VRFConsumerBase (_vrfCoordinator, _linkToken) {
        require(LINK.balanceOf(address(this)) >= _chainlinkFee, "not enough LINK");
        requestRandomness(_keyHash, _chainlinkFee);
        performData;
+       lastUpKeep = block.timestamp;
     }
 
-    // function playersPayContract() public payable {
-    //  address[] memory player = players;
-    //   for(uint i = 0; i < players.length; i++) {
-    //      if(player[i] != address(0)) {
-    //        (bool success, ) =  address(this).balance.call{value: 0.01 ether}("");
-    //        require(success, "Failed to send ether");
-    //      }
-    //   }
-    //  }
-
-    function fulfillRandomness(bytes32, uint256 randomness) internal override {
+    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
      uint256 randomWinner = randomness % players.length;
+     uint256 randomPrizeAmount = (randomness % maxPrize) * 1 ether;
      address payable winner = players[randomWinner];
-     emit Winners(winner);
+     (bool success, ) = winner.call{value: randomPrizeAmount}("");
+     require(success, "Failed to send lottery prize to winner");
+     if(success == true) {
+         lastWinner = winner;
+         emit Winners(winner, requestId);
+     }
    }
-
-
 
     function areYouIn() public view returns(bool) {
        return playerInTheGame[msg.sender];

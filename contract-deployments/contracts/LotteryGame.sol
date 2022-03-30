@@ -17,7 +17,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     //This is for the Rinkeby Testnet. The addresses and bytes differ depending on the network
     address _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
     address _vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
-    bytes32 _keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
+    bytes32 constant _keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
     uint64 _chainlinkFee = 0.25 * 10 ** 18;
     uint public entryAmount;
     uint public deadline;
@@ -28,9 +28,9 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     
     
    constructor(uint _entryAmount, uint _maxPrize) VRFConsumerBase(_vrfCoordinator, _linkToken) {
-       entryAmount = _entryAmount;
+       entryAmount = _entryAmount * 1 ether;
        owner = msg.sender;
-       deadline = block.timestamp + 24 hours;
+       deadline =  block.timestamp + 24 hours;
        maxPrize = _maxPrize * 1 ether;
        lastUpKeep = block.timestamp;
   }
@@ -50,7 +50,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     }
 
     function changeMaxPrize(uint _maxPrize) public onlyOwner {
-       maxPrize = _maxPrize;
+       maxPrize = _maxPrize * 1 ether;
     }
 
      function removeLotteryFunds() public onlyOwner {

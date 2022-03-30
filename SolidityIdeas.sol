@@ -25,5 +25,13 @@ contract SolidityIdeas {
     //      }
     //   }
     //  }
+
+     //store the amount of players in a mapping or array, which ever saves more gas and is more efficient
+    //set a time that will choose a winner every 24 hours/1 day
+    //use VRF to select a random winner and use Chainlink Keepers that will help with resetting the time and maybe even deleting the players
+    //Fund the Contract with a lot of ether and the contract will always pay out the winner
+    //use an event that keeps track of the winners
+    //The same number generated with VRF will be used to pick a random winner and to select a random amount of ether
+
     */
 }

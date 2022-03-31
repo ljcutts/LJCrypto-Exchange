@@ -11,25 +11,25 @@ interface KeeperCompatibleInterface {
 contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     event Winners(address winner, bytes32 requestId);
     event PlayersOnLotteryDay(address player, uint256 lotteryDay, uint entryAmount);
-    address payable[] players;
-    address immutable owner;
+    address payable[] public players;
+    address payable immutable owner;
     address private lastWinner;
     //This is for the Rinkeby Testnet. The addresses and bytes differ depending on the network
-    address _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
-    address _vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
+    address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
+    address constant _vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
     bytes32 constant _keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
-    uint64 _chainlinkFee = 0.25 * 10 ** 18;
-    uint public entryAmount;
-    uint public deadline;
-    uint public maxPrize;
-    uint lotteryDay;
+    uint64 public entryAmount;
+    uint64 public maxPrize;
+    uint64 public lotteryDay;
+    uint64 constant _chainlinkFee = 0.25 * 10 ** 18;
     uint lastUpKeep;
+    uint public immutable deadline;
     mapping(address => bool) private playerInTheGame;
     
     
-   constructor(uint _entryAmount, uint _maxPrize) VRFConsumerBase(_vrfCoordinator, _linkToken) {
+   constructor(uint64 _entryAmount, uint64 _maxPrize) VRFConsumerBase(_vrfCoordinator, _linkToken) payable {
        entryAmount = _entryAmount * 1 ether;
-       owner = msg.sender;
+       owner = payable(msg.sender);
        deadline =  block.timestamp + 24 hours;
        maxPrize = _maxPrize * 1 ether;
        lastUpKeep = block.timestamp;
@@ -49,14 +49,17 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
         emit PlayersOnLotteryDay(msg.sender, lotteryDay, entryAmount);
     }
 
-    function changeMaxPrize(uint _maxPrize) public onlyOwner {
+    function changeMaxPrize(uint64 _maxPrize) public onlyOwner {
        maxPrize = _maxPrize * 1 ether;
     }
 
-     function removeLotteryFunds() public onlyOwner {
+     function changeEntryAmount(uint64 _entryAmount) public onlyOwner {
+       entryAmount = _entryAmount * 1 ether;
+    }
+
+     function removeLotteryFunds() external onlyOwner {
        require(address(this).balance > 0, "There are no funds in the coontract");
-       (bool success, ) = owner.call{value: address(this).balance}("");
-       require(success, "Failed to send ether");
+       payable(msg.sender).transfer(address(this).balance);
     }
 
 
@@ -85,6 +88,14 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
          lastWinner = winner;
          emit Winners(winner, requestId);
      }
+   }
+
+   function balanceOfContract() public view returns(uint) {
+       return address(this).balance;
+   }
+
+   function getMsgSender() public view returns(address) {
+       return msg.sender;
    }
 
     function areYouIn() public view returns(bool) {

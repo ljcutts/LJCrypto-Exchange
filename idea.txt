@@ -10,3 +10,4 @@ Eighth thing to work on: Implement a Dao where you are required to own "LJCrypto
 Ninth thing to work on: Start to work on the frontend, maybe try to use Figma to draw out how the UI will look. Also use useContext
 Tenth thing to work on: Start to integrate IPFS using the client CLI and start making subgraphs for the smart contracts
 Make a Smart Contract Test for all smart contracts and test out the Dapp when everything is done.
+Maybe create a oracle that will keep track of the price of the coins

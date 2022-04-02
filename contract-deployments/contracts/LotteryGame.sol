@@ -25,7 +25,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     uint lastUpKeep;
     uint public immutable deadline;
     mapping(address => bool) private playerInTheGame;
-    
+
     
    constructor(uint64 _entryAmount, uint64 _maxPrize) VRFConsumerBase(_vrfCoordinator, _linkToken) payable {
        entryAmount = _entryAmount * 1 ether;
@@ -40,8 +40,11 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
         _;
     }
 
+    //The more the player pays for entryAmount the higher their chances
+    //or when they deposit ether to the contract manually, they will increase their chances, maybe put more functoinality in the receive or fallback function for this
+
     function enterTheGame() public payable {
-        require(msg.sender != address(0), "This address does not exist");
+        // require(msg.sender != address(0), "This address does not exist");  //maybe check if the msg.sender is a contract address
         require(!playerInTheGame[msg.sender], "You have already entered the lottery");
         require(msg.value >= entryAmount, "Your amount has to be equal or greater than the entryAmount");
         playerInTheGame[msg.sender] = true;
@@ -58,7 +61,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     }
 
      function removeLotteryFunds() external onlyOwner {
-       require(address(this).balance > 0, "There are no funds in the coontract");
+       require(address(this).balance > 0, "There are no funds in the contract");
        payable(msg.sender).transfer(address(this).balance);
     }
 
@@ -79,9 +82,8 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     }
 
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-     uint256 randomWinner = randomness % players.length;
      uint256 randomPrizeAmount = (randomness % maxPrize) * 1 ether;
-     address payable winner = players[randomWinner];
+     address payable winner = players[randomness % players.length];
      (bool success, ) = winner.call{value: randomPrizeAmount}("");
      require(success, "Failed to send lottery prize to winner");
      if(success == true) {
@@ -90,6 +92,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
      }
    }
 
+//maybe use the graph for more of these getter functions
    function balanceOfContract() public view returns(uint) {
        return address(this).balance;
    }
@@ -110,17 +113,20 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
         return lastWinner;
     }
 
+   //use the graph to query all players
     function getAllPlayers() public view returns (address payable[] memory) {
-        address payable[] memory allPlayers = new address payable[](players.length);
+        // address payable[] memory allPlayers = new address payable[](players.length);
 
-        for(uint i = 0; i < allPlayers.length; i++) {
-          allPlayers[i] = players[i];
-        }  
+        // for(uint i = 0; i < allPlayers.length; i++) {
+        //   allPlayers[i] = players[i];
+        // }  
 
-        return allPlayers;
+        // return allPlayers;
+        return players;
     }
 
     //Use the graph to ouput who the last winner was
+    
 
     receive() external payable{}
     fallback() external payable{}

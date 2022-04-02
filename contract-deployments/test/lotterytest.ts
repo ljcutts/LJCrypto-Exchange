@@ -8,7 +8,7 @@ describe("LotteryGame", async function () {
   it("Should be able to enter the game", async function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
     const LotteryGame = await ethers.getContractFactory("LotteryGame");
-    const lotteryGame = await LotteryGame.connect(owner).deploy(1, 1);
+    const lotteryGame = await LotteryGame.connect(owner).deploy(1, 1, {value: ethers.utils.parseEther("1000.0")});
     await lotteryGame.deployed();
     const joinGame = await lotteryGame.connect(addr1).enterTheGame({ value: ethers.utils.parseEther("1") });
     const lotteryDay = await lotteryGame.lotteryDay()
@@ -38,7 +38,7 @@ describe("LotteryGame", async function () {
   it("Should be able to receive all players", async function () {
     const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
     const LotteryGame = await ethers.getContractFactory("LotteryGame");
-    const lotteryGame = await LotteryGame.connect(owner).deploy(1, 1);
+    const lotteryGame = await LotteryGame.connect(owner).deploy(1, 1,);
     await lotteryGame.deployed();
     await lotteryGame.connect(owner).enterTheGame({ value: ethers.utils.parseEther("1") });
     await lotteryGame.connect(addr1) .enterTheGame({ value: ethers.utils.parseEther("1") });
@@ -103,13 +103,16 @@ describe("LotteryGame", async function () {
   it("Should be able to remove funds from lottery", async function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
     const LotteryGame = await ethers.getContractFactory("LotteryGame");
-    const lotteryGame = await LotteryGame.connect(owner).deploy(1, 1);
+    const lotteryGame = await LotteryGame.connect(owner).deploy(1, 1, {
+      value: ethers.utils.parseEther("1000.0"),
+    });
     await lotteryGame.deployed();
-    await lotteryGame.connect(owner).enterTheGame({ value: ethers.utils.parseEther("100") });
     const contractBalance = await lotteryGame.balanceOfContract()
-    console.log(`\nInital Balance: ${contractBalance}\n`);
-    expect(contractBalance).to.equal(ethers.utils.parseEther('100'))
+    const oldBalance = ethers.utils.formatEther(contractBalance)
+    console.log(`\nInital Balance: ${oldBalance}\n`);
     await lotteryGame.connect(owner).removeLotteryFunds();
+    const newBalance = await lotteryGame.balanceOfContract();
+    console.log(`\nNew Balance: ${newBalance}\n`);
   });
 
   xit("Should not be able to remove funds from lottery", async function () {
@@ -133,8 +136,6 @@ describe("LotteryGame", async function () {
 
   /* THIS IS FOR TESTING CHAINLINK KEEPERS AND CHAINLINK VRF*/
 
-
-
-  //test the removeLotteryFunds, checkUpKeep and performUpKeep, other getter functions
+ // checkUpKeep and performUpKeep, other getter functions
   //https://ethereum-waffle.readthedocs.io/en/latest/matchers.html#
 });

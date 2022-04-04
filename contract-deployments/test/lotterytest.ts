@@ -109,7 +109,7 @@ describe("LotteryGame", async function () {
     await lotteryGame.deployed();
     const contractBalance = await lotteryGame.balanceOfContract()
     const oldBalance = ethers.utils.formatEther(contractBalance)
-    console.log(`\nInital Balance: ${oldBalance}\n`);
+    console.log(`\nInitial Balance: ${oldBalance}\n`);
     await lotteryGame.connect(owner).removeLotteryFunds();
     const newBalance = await lotteryGame.balanceOfContract();
     console.log(`\nNew Balance: ${newBalance}\n`);

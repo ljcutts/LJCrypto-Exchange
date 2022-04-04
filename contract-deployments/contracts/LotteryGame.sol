@@ -96,6 +96,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
    function balanceOfContract() public view returns(uint) {
        return address(this).balance;
    }
+   
 
    function getMsgSender() public view returns(address) {
        return msg.sender;

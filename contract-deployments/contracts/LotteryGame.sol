@@ -16,8 +16,8 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     address private lastWinner;
     //This is for the Rinkeby Testnet. The addresses and bytes differ depending on the network
     address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
-    address constant _vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
-    bytes32 constant _keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
+    address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
+    bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
     uint64 public entryAmount;
     uint64 public maxPrize;
     uint64 public lotteryDay;

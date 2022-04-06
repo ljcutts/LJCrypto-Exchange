@@ -6,28 +6,23 @@ contract GuessingGame is VRFConsumerBase {
    //There will be two players and there will be a random generated uint
    //The two players will have to figure out the encoded version of that string value and whoever guesses the right answer first will get rewarded with 0.5-1 ether
    //Probably use Chainlink VRF for this one
+   //Continue to think about how you will use subgraphs
    event CurrentGame(address Player, uint GameId);
    event Winners(address winner, bytes32 requestId);
    address payable[] public players;
-   uint public currentNumberValue;
-   uint public currentGameId;
-   uint public nonce;
-   uint constant _chainlinkFee = 0.1 * 10 ** 18;
-   address payable immutable owner;
+   address public previousWinner;
    address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
    address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
    bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
    bytes32 currentRequestId;
+   uint public currentNumberValue;
+   uint public currentGameId;
+   uint128 public nonce;
+   uint128 constant _chainlinkFee = 0.1 * 10 ** 18;
    mapping(address => bool) public alreadyGuessed;
 
    constructor() VRFConsumerBase(_vrfCoordinator, _linkToken) payable {
-     owner = payable(msg.sender);
    }
-
-     modifier onlyOwner {
-        require(msg.sender == owner, "You are not the owner");
-        _;
-    }
 
    function enterGuessingGame() public payable {
      require(players.length < 2, "You will have to wait to enter the next game");
@@ -54,6 +49,8 @@ contract GuessingGame is VRFConsumerBase {
           delete players;
           currentGameId++;
           nonce = 0;
+          currentNumberValue = 0;
+          previousWinner = msg.sender;
           emit Winners(msg.sender, currentRequestId);
       } else {
          alreadyGuessed[msg.sender] = true;
@@ -62,6 +59,7 @@ contract GuessingGame is VRFConsumerBase {
       }
       if(nonce == 2) {
           delete players;
+          currentNumberValue = 0;
       }
    }
 

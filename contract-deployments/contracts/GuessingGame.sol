@@ -44,6 +44,7 @@ contract GuessingGame is VRFConsumerBase {
    function guessTheNumberValue(bool guess) public payable {
       require(msg.sender == players[0] || msg.sender == players[1], "You are not one of the players");
       require(!alreadyGuessed[msg.sender], "You already made a guess");
+      require(currentNumberValue > 0, "The number hasn't changed value yet");
       if((currentNumberValue > 10 ether) == guess) {
           payable(msg.sender).transfer(address(this).balance);
           delete players;

@@ -14,7 +14,7 @@ contract LJCryptoToken is ERC20 {
     bool public isPaused;
     address immutable owner;
     uint256 public constant maxTotalSupply = 200000 * 10**18;
-    
+    uint public time;
 
     constructor() ERC20("LJCryptoToken", "LJC") {
          _mint(address(this), 100000 * 10 ** 18);
@@ -60,7 +60,7 @@ contract LJCryptoToken is ERC20 {
     }
 
      function unstakeTokens(uint _amount) public isItPaused {
-       stakingBalance[msg.sender] = stakedBalance();
+       stakedBalance();
        require(_amount <= stakingBalance[msg.sender], "You don't have this many tokens staked");
        stakingBalance[msg.sender] -= _amount;
        tokenBalance[msg.sender] += _amount;
@@ -69,14 +69,17 @@ contract LJCryptoToken is ERC20 {
        }
     } 
 
-    function stakedBalance() internal returns(uint) {
+    function stakedBalance() public returns(uint) {
       require(totalSupply() <= maxTotalSupply, "We have reached the maxiumum supply");
       uint balance = stakingBalance[msg.sender];
       require(balance > 0, "You don't have any staked tokens");
-      uint timeElapsed = block.timestamp - stakingTimestamps[msg.sender]; //seconds
-      uint mintedTokens = uint((balance * 1000 * timeElapsed) / (100 * 365 * 24 * 60 * 60)) + 1; //10% interest per year
+      time = block.timestamp;
+      uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
+      uint mintedTokens = uint((balance * 100000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60)); //10000% interest per year
       _mint(address(this), mintedTokens * 10 ** 18);
-      return balance + mintedTokens; 
+      uint newBalance = balance + mintedTokens;
+      stakingBalance[msg.sender] = newBalance;
+      return newBalance; 
     }
 
     //Maybe refactor the balance in terms of the staked tokens and the staked tokens accuring interest
@@ -114,50 +117,7 @@ contract LJCryptoToken is ERC20 {
         require(msg.sender == owner, "You are not the owner");
         payable(msg.sender).transfer(address(this).balance);
     }
-
     
 }
 
 
-/*
-pragma solidity >=0.7.0 <0.9.0;
-
-contract SmartBankAccount {
-
-    uint totalContractBalance = 0;
-
-    function getContractBalance() public view returns(uint){
-        return totalContractBalance;
-    }
-    
-    mapping(address => uint) balances;
-    mapping(address => uint) depositTimestamps;
-    
-    function addBalance() public payable {
-        balances[msg.sender] = msg.value;
-        totalContractBalance = totalContractBalance + msg.value;
-        depositTimestamps[msg.sender] = block.timestamp;
-    }
-    
-    function getBalance(address userAddress) public view returns(uint) {
-        uint principal = balances[userAddress];
-        uint timeElapsed = block.timestamp - depositTimestamps[userAddress]; //seconds
-        return principal + uint((principal * 7 * timeElapsed) / (100 * 365 * 24 * 60 * 60)) + 1; //simple interest of 0.07%  per year
-    }
-    
-    function withdraw() public payable {
-        address payable withdrawTo = payable(msg.sender);
-        uint amountToTransfer = getBalance(msg.sender);
-        withdrawTo.transfer(amountToTransfer);
-        totalContractBalance = totalContractBalance - amountToTransfer;
-        balances[msg.sender] = 0;
-    }
-    
-    function addMoneyToContract() public payable {
-        totalContractBalance += msg.value;
-    }
-
-    
-}
-
-*/

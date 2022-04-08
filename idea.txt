@@ -11,3 +11,5 @@ Ninth thing to work on: Start to work on the frontend, maybe try to use Figma to
 Tenth thing to work on: Start to integrate IPFS using the client CLI and start making subgraphs for the smart contracts
 Make a Smart Contract Test for all smart contracts and test out the Dapp when everything is done.
 Maybe create a oracle that will keep track of the price of the coins
+Use pinata.cloud for your own nft collection and then allow a section where people can create their own collections and use IPFS that way
+Make a dark mode for your exchange

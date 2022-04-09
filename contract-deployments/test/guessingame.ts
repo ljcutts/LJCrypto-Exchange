@@ -6,7 +6,7 @@ chai.use(solidity);
 const pressAnyKey = require("press-any-key");
 
 describe("GuessingGame", async function () {
-  it("Should be able to enter game", async function () {
+  xit("Should be able to enter game", async function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
     const GuessingGame = await ethers.getContractFactory("GuessingGame");
     const guessingGame = await GuessingGame.deploy();
@@ -141,7 +141,7 @@ describe("GuessingGame", async function () {
     await guessingGame.connect(addr2).enterGuessingGame({ value: ethers.utils.parseEther("10") });
     await sleep(30000);
     const currenntNumber = await guessingGame.currentNumberValue();
-    console.log(`\nNumber: ${ethers.utils.formatEther(currenntNumber)}\n`);
+    console.log(`\nNumber: ${currenntNumber}\n`);
   });
 
 

@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract LJStableCoin is ERC20 {
+    //Try to do smart contract testing on rinkeby
   bool public isPaused;
   address immutable owner;
   mapping(address => uint) public tokenBalance;

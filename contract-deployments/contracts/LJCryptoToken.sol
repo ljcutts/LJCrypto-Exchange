@@ -4,10 +4,6 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract LJCryptoToken is ERC20 {
-    //Make a section where people are able to buy 2 to 4 different types of tokens, which also includes Stablecoins
-    //Also people can buy and sell these tokens and stake/earn interest off of them
-    //When staking the totalSupply will have to increase and maybe not all tokens are minted at once and there can be a limit
-   //Might do capped TotalSupply not mint out all tokens at once to provide staking
     mapping(address => uint) public tokenBalance;
     mapping(address => uint) public stakingBalance;
     mapping(address => uint) public stakingTimestamps;
@@ -53,6 +49,7 @@ contract LJCryptoToken is ERC20 {
     }
 
      function stakeTokens(uint _amount) public isItPaused {
+      require(totalSupply() <= maxTotalSupply, "We have reached the maxiumum supply");
       require(tokenBalance[msg.sender] >= _amount, "You do not have this many tokens");
       tokenBalance[msg.sender] -= _amount;
       stakingBalance[msg.sender] += _amount;
@@ -60,12 +57,18 @@ contract LJCryptoToken is ERC20 {
     }
 
      function unstakeTokens(uint _amount) public isItPaused {
+       if(totalSupply() >= maxTotalSupply) {
+         uint amount = stakingBalance[msg.sender];
+         stakingBalance[msg.sender] -= amount;
+         tokenBalance[msg.sender] += amount;
+       } else {
        stakedBalance();
        require(_amount <= stakingBalance[msg.sender], "You don't have this many tokens staked");
        stakingBalance[msg.sender] -= _amount;
        tokenBalance[msg.sender] += _amount;
        if(stakingBalance[msg.sender] == 0) {
            stakingTimestamps[msg.sender] = 0;
+        }
        }
     } 
 

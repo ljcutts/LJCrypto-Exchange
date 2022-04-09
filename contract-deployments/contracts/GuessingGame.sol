@@ -36,7 +36,7 @@ contract GuessingGame is VRFConsumerBase {
    }
 
    function generateRandomNumberValue() private returns(bytes32 requestId) {
-      require(LINK.balanceOf(address(this)) >= _chainlinkFee, "Not enough LINK");
+      // require(LINK.balanceOf(address(this)) >= _chainlinkFee, "Not enough LINK");
       return requestRandomness(_keyHash, _chainlinkFee);
    }
    

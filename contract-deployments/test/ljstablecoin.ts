@@ -15,7 +15,7 @@ describe("LJStablecoin", async function() {
       await ljstablecoin.deployed();
 
       const latestPrice = await ljstablecoin.getLatestPrice()
-     console.log(latestPrice)
+     console.log(ethers.utils.formatEther(latestPrice));
 
       
     });

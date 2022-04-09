@@ -23,7 +23,7 @@ describe("LJCryptoToken", async function() {
          .connect(addr2)
          .buyTokens(5, { value: ethers.utils.parseEther("0.000055") });
        const contractBalance = await ljcryptoToken.balanceOfContract();
-       const tokenCost = await ljcryptoToken.currentPricePerToken();
+       const tokenCost = await ljcryptoToken.currentPricePerTokenInEther();
        expect(tokenBalance).to.equal(5);
        console.log(
          `\nContract Balance: ${ethers.utils.formatEther(contractBalance)}\n`
@@ -62,25 +62,25 @@ describe("LJCryptoToken", async function() {
        );
        expect(tokenBalance).to.equal(0);
        const contractBalance = await ljcryptoToken.balanceOfContract();
-       const tokenCost = await ljcryptoToken.currentPricePerToken();
+       const tokenCost = await ljcryptoToken.currentPricePerTokenInEther();
        console.log(
          `\nContract Balance: ${ethers.utils.formatEther(contractBalance)}\n`
        );
        console.log(`\nToken Price: ${ethers.utils.formatEther(tokenCost)}\n`);
      });
 
-      xit("Should be able to stake tokens", async function () {
+      it("Should be able to stake tokens", async function () {
         const [owner, addr1, addr2] = await ethers.getSigners();
         const LJCryptoToken = await ethers.getContractFactory("LJCryptoToken");
         const ljcryptoToken = await LJCryptoToken.connect(owner).deploy();
         await ljcryptoToken.deployed();
-        await ljcryptoToken.connect(addr1).buyTokens(1000, { value: ethers.utils.parseEther("1") });
-        await ljcryptoToken.connect(addr1).stakeTokens(1000);
+        await ljcryptoToken.connect(addr1).buyTokens(1, { value: ethers.utils.parseEther("1") });
+        await ljcryptoToken.connect(addr1).stakeTokens(1);
          const stakingBalance = await ljcryptoToken.stakingBalance(
            "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
          );
          console.log(`\nStaking Balance: ${stakingBalance}\n`);
-         await network.provider.send("evm_increaseTime", [365 * 24 * 60 * 60]);
+         await network.provider.send("evm_increaseTime", [30 * 24 * 60 * 60]);
          await network.provider.send("evm_mine");
         await ljcryptoToken.connect(addr1).stakedBalance();
         const newStakingBalance = await ljcryptoToken.stakingBalance(

@@ -27,7 +27,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://eth-rinkeby.alchemyapi.io/v2/API_KEY",
+        url: "https://eth-rinkeby.alchemyapi.io/v2/Emiy8piVA9OqFcDwjxy87Vb24pQAgn7l",
       },
     },
     ropsten: {

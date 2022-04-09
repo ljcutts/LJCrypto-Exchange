@@ -10,7 +10,7 @@ contract LJCryptoToken is ERC20 {
     bool public isPaused;
     address immutable owner;
     uint256 public constant maxTotalSupply = 200000 * 10**18;
-    uint public time;
+    uint time;
 
     constructor() ERC20("LJCryptoToken", "LJC") {
          _mint(address(this), 100000 * 10 ** 18);
@@ -22,18 +22,14 @@ contract LJCryptoToken is ERC20 {
         _;
     }
 
-    // function currentPricePerToken() public view returns(uint) {
-    //     return address(this).balance/(totalSupply());
-    // }
-
-     function currentPricePerToken() public view returns(uint) {
+     function currentPricePerTokenInEther() public view returns(uint) {
         return address(this).balance/(totalSupply()/10 ** 18);
     }
 
 
    //The user might not be able to buy one whole of a token
     function buyTokens(uint _amount) public payable isItPaused {
-      uint priceOfAmount = _amount * currentPricePerToken();
+      uint priceOfAmount = _amount * currentPricePerTokenInEther();
       require(msg.value >= priceOfAmount, "You dont have enough funds to buy this many tokens");
       tokenBalance[msg.sender] += _amount;
       _transfer(address(this),msg.sender, _amount);
@@ -42,7 +38,7 @@ contract LJCryptoToken is ERC20 {
 
      function sellTokens(uint _amount) public payable isItPaused {
       require(_amount <= tokenBalance[msg.sender], "You don't have this many tokens");
-      uint priceOfAmount = _amount * currentPricePerToken();
+      uint priceOfAmount = _amount * currentPricePerTokenInEther();
       tokenBalance[msg.sender] -= _amount;
        _transfer(msg.sender, address(this), _amount);
       payable(msg.sender).transfer(priceOfAmount);
@@ -72,7 +68,7 @@ contract LJCryptoToken is ERC20 {
        }
     } 
 
-    function stakedBalance() public returns(uint) {
+    function stakedBalance() public {
       require(totalSupply() <= maxTotalSupply, "We have reached the maxiumum supply");
       uint balance = stakingBalance[msg.sender];
       require(balance > 0, "You don't have any staked tokens");
@@ -82,7 +78,6 @@ contract LJCryptoToken is ERC20 {
       _mint(address(this), mintedTokens * 10 ** 18);
       uint newBalance = balance + mintedTokens;
       stakingBalance[msg.sender] = newBalance;
-      return newBalance; 
     }
 
     //Maybe refactor the balance in terms of the staked tokens and the staked tokens accuring interest
@@ -102,13 +97,13 @@ contract LJCryptoToken is ERC20 {
 
 
     function userBalanceInEther() public view returns(uint) {
-       return tokenBalance[msg.sender] * currentPricePerToken();
+       return tokenBalance[msg.sender] * currentPricePerTokenInEther();
     }
 
     //Make a function for the staked balance in ether
 
     function stakingBalanceInEther() public view returns(uint) {
-        return stakingBalance[msg.sender] * currentPricePerToken();
+        return stakingBalance[msg.sender] * currentPricePerTokenInEther();
     }
 
     function setPauseValue(bool value) public {

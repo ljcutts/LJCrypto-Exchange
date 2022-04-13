@@ -112,25 +112,24 @@ describe("GuessingGame", async function () {
   //   expect(theNonce).to.equal(1);
   // });
 
-  // xit("Should delete players in array", async function () {
-  //   const [owner, addr1, addr2] = await ethers.getSigners();
-  //   const GuessingGame = await ethers.getContractFactory("GuessingGame");
-  //   const guessingGame = await GuessingGame.connect(owner).deploy();
-  //   await guessingGame.deployed();
-  //   await guessingGame.connect(owner).generateRandomNumberValue(2);
-  //   await guessingGame.connect(addr1).enterGuessingGame({ value: ethers.utils.parseEther("0.1") });
-  //   await guessingGame.connect(addr2).enterGuessingGame({ value: ethers.utils.parseEther("10") });
-  //   await guessingGame.connect(addr1).guessTheNumberValue(false);
-  //   await guessingGame.connect(addr2).guessTheNumberValue(false);
-  //   const theNonce = await guessingGame.nonce();
-  //   const didYouGuess = await guessingGame.connect(addr1).didYouGuess();
-  //   const playerLength = await guessingGame.playerLength();
-  //   expect(playerLength).to.equal(0);
-  //   expect(didYouGuess).to.equal(true);
-  //   expect(theNonce).to.equal(2);
-  // });
+  it("Should delete players in array", async function () {
+    const [owner, addr1, addr2] = await ethers.getSigners();
+    const GuessingGame = await ethers.getContractFactory("GuessingGame");
+    const guessingGame = await GuessingGame.connect(owner).deploy();
+    await guessingGame.deployed();
+    await guessingGame.connect(addr1).enterGuessingGame({ value: ethers.utils.parseEther("0.1") });
+    await guessingGame.connect(addr2).enterGuessingGame({ value: ethers.utils.parseEther("10") });
+    await guessingGame.connect(addr1).guessTheNumberValue(true);
+    await guessingGame.connect(addr2).guessTheNumberValue(true);
+     const newNonce = await guessingGame.nonce();
+    const didYouGuess = await guessingGame.connect(addr1).didYouGuess();
+    const playerLength = await guessingGame.playerLength();
+    expect(didYouGuess).to.equal(true);
+    expect(newNonce).to.equal(0);
+    expect(playerLength).to.equal(0);
+  });
 
-  it("Should get a random value", async function () {
+  xit("Should get a random value", async function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
     const GuessingGame = await ethers.getContractFactory("GuessingGame");
     const guessingGame = await GuessingGame.connect(owner).deploy({value: ethers.utils.parseEther('1000')});

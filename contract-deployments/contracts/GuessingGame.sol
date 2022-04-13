@@ -36,7 +36,7 @@ contract GuessingGame is VRFConsumerBase {
    }
 
    function generateRandomNumberValue() private returns(bytes32 requestId) {
-      // require(LINK.balanceOf(address(this)) >= _chainlinkFee, "Not enough LINK");
+      require(LINK.balanceOf(address(this)) >= _chainlinkFee, "Not enough LINK");
       return requestRandomness(_keyHash, _chainlinkFee);
    }
    
@@ -56,11 +56,11 @@ contract GuessingGame is VRFConsumerBase {
       } else {
          alreadyGuessed[msg.sender] = true;
          nonce++;
-         revert("Your guess is wrong");
       }
       if(nonce == 2) {
           delete players;
           currentNumberValue = 0;
+          nonce = 0;
       }
    }
 

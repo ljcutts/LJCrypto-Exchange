@@ -36,10 +36,10 @@ function currentPriceOfLJCryptoToken() public view returns(uint) {
 }
 
 
-  function addLiquidity(uint _amountA, uint _amountB) public payable returns(uint) {
+  function addLiquidityForERC20Pair(uint _amountA, uint _amountB) public returns(uint) {
     uint LJCryptoAmount = _amountA * currentPriceOfLJCryptoToken();
     uint LJStableCoinAmount = _amountB * 0.0004 ether;
-    require(LJCryptoAmount >= LJStableCoinAmount && LJStableCoinAmount >= LJCryptoAmount, "The amounts you added aren't balanced");
+    require(LJCryptoAmount >= LJStableCoinAmount || LJStableCoinAmount >= LJCryptoAmount, "The amounts you added aren't balanced");
     uint liquidity;
     uint LJCryptoTokenReserve = getLJCrytpoReserve();
     uint LJCryptoStableReserve = getLJStableReserve();
@@ -64,11 +64,11 @@ function currentPriceOfLJCryptoToken() public view returns(uint) {
 }
 
 
-function removeLiquidity(uint _amountA, uint _amountB) public returns(uint, uint) {
+function removeLiquidityForERC20Pair(uint _amountA, uint _amountB) public returns(uint, uint) {
     require(_amountA > 0 && _amountB > 0, '_amountA and B should be greater than zero');
     uint LJCryptoAmount = _amountA * currentPriceOfLJCryptoToken();
     uint LJStableCoinAmount = _amountB * 0.0004 ether;
-    require(LJCryptoAmount >= LJStableCoinAmount && LJStableCoinAmount >= LJCryptoAmount, "The amounts you added aren't balanced");
+    require(LJCryptoAmount >= LJStableCoinAmount || LJStableCoinAmount >= LJCryptoAmount, "The amounts you added aren't balanced");
     uint LJCryptoTokenReserve = getLJCrytpoReserve();
     uint LJCryptoStableReserve = getLJStableReserve();
     uint _totalSupply = totalSupply();
@@ -95,10 +95,11 @@ function getAmountOfTokens(
     }
 
       /**
-     @dev Swaps Ether for CryptoDev Tokens
+     @dev Swaps LJCrypto for LJStable
     */
-    function ethToCryptoDevToken(uint _minTokens) public payable {
-    uint256 tokenReserve = getLJCrytpoReserve();
+    function ljcryptoTokenToLJStableToken(uint _tokensSold, uint _minljStable) public {
+    uint256 ljstableTokenReserve = getLJStableReserve();
+    uint256 ljcryptoTokenReserve = getLJCrytpoReserve();
     // call the `getAmountOfTokens` to get the amount of crypto dev tokens
     // that would be returned to the user after the swap
     // Notice that the `inputReserve` we are sending is equal to
@@ -106,14 +107,14 @@ function getAmountOfTokens(
     // because `address(this).balance` already contains the `msg.value` user has sent in the given call
     // so we need to subtract it to get the actual input reserve
     uint256 tokensBought = getAmountOfTokens(
-        msg.value,
-        address(this).balance - msg.value,
-        tokenReserve
+        _tokensSold,
+        ljcryptoTokenReserve,
+        ljstableTokenReserve
     );
 
-    require(tokensBought >= _minTokens, "insufficient output amount");
+    require(tokensBought >= _minljStable, "insufficient output amount");
     // Transfer the `Crypto Dev` tokens to the user
-    ERC20(LJCryptoTokenAddress).transfer(msg.sender, tokensBought);
+    ERC20(LJStableCoinAddress).transfer(msg.sender, tokensBought);
     }
      /**
     @dev Swaps CryptoDev Tokens for Ether

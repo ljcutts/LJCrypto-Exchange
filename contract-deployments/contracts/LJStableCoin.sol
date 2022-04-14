@@ -9,7 +9,7 @@ contract LJStableCoin is ERC20 {
     mapping(address => uint) public stakingTimestamps;
     bool public isPaused;
     address immutable owner;
-    uint256 public constant maxTotalSupply = 200000 * 10**18;
+    uint256 public constant maxTotalSupply = 200000 * 10**18; //Get rid of maxSupply for StableCoin since stablecoins don't have a max supply
     uint public time;
 
    modifier isItPaused {

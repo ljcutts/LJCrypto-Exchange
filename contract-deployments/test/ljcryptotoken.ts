@@ -12,7 +12,6 @@ describe("LJCryptoToken", async function() {
        const LJCryptoToken = await ethers.getContractFactory("LJCryptoToken");
        const ljcryptoToken = await LJCryptoToken.connect(owner).deploy();
        await ljcryptoToken.deployed();
-
        await ljcryptoToken
          .connect(addr1)
          .buyTokens(5, { value: ethers.utils.parseEther("1") });

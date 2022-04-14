@@ -9,9 +9,7 @@ describe("LJStablecoin", async function() {
     it("Should be able to buy a token", async function () {
       const [owner, addr1, addr2] = await ethers.getSigners();
       const LJStableCoin = await ethers.getContractFactory("LJStableCoin");
-      const ljstablecoin = await LJStableCoin.connect(owner).deploy(
-        "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e"
-      );
+      const ljstablecoin = await LJStableCoin.connect(owner).deploy();
       await ljstablecoin.deployed();
 
       await ljstablecoin.connect(addr1).buyTokens(3000, {value: ethers.utils.parseEther('1')});
@@ -27,12 +25,10 @@ describe("LJStablecoin", async function() {
       
     });
 
-     it("Should be able to stake a token", async function () {
+     xit("Should be able to stake a token", async function () {
        const [owner, addr1, addr2] = await ethers.getSigners();
        const LJStableCoin = await ethers.getContractFactory("LJStableCoin");
-       const ljstablecoin = await LJStableCoin.connect(owner).deploy(
-         "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e"
-       );
+       const ljstablecoin = await LJStableCoin.connect(owner).deploy();
        await ljstablecoin.deployed();
        await ljstablecoin.connect(addr1).buyTokens(3000, { value: ethers.utils.parseEther("1") });
        await ljstablecoin.connect(addr1).stakeTokens(3000);
@@ -53,15 +49,15 @@ describe("LJStablecoin", async function() {
         );
      });
     
-     it("Should be able to get price", async function () {
-       const [owner, addr1, addr2] = await ethers.getSigners();
-       const LJStableCoin = await ethers.getContractFactory("LJStableCoin");
-       const ljstablecoin = await LJStableCoin.connect(owner).deploy(
-         "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e"
-       );
-       await ljstablecoin.deployed();
+    //  it("Should be able to get price", async function () {
+    //    const [owner, addr1, addr2] = await ethers.getSigners();
+    //    const LJStableCoin = await ethers.getContractFactory("LJStableCoin");
+    //    const ljstablecoin = await LJStableCoin.connect(owner).deploy(
+    //      "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e"
+    //    );
+    //    await ljstablecoin.deployed();
        
        
-     })
+    //  })
     
 })

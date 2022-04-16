@@ -9,13 +9,8 @@ interface ILJCrypto {
 
 
 contract LiquidityAndSwapping is ERC20 {
-
     address public LJCryptoTokenAddress;
     address public LJStableCoinAddress;
-    //maybe use a mapping to keep track of a users liquidity, maybe can act as liquidity tokens
-    mapping(address => uint) public liquidityBalance;
-
-   //Exchange is inheriting ERC20, because our exchange would keep track of Crypto Dev LP Tokens 
    constructor(address _LJCryptoTokenAddress, address _LJStableCoinAddress) ERC20("LJCrypto LP Token", "LJLP") {
     require(_LJCryptoTokenAddress != address(0) && _LJStableCoinAddress != address(0), "Token address passed is a null address");
        LJCryptoTokenAddress = _LJCryptoTokenAddress;
@@ -100,12 +95,6 @@ function getAmountOfTokens(
     function ljcryptoTokenToLJStableToken(uint _tokensSold, uint _minljStable) public {
     uint256 ljstableTokenReserve = getLJStableReserve();
     uint256 ljcryptoTokenReserve = getLJCrytpoReserve();
-    // call the `getAmountOfTokens` to get the amount of crypto dev tokens
-    // that would be returned to the user after the swap
-    // Notice that the `inputReserve` we are sending is equal to
-    //  `address(this).balance - msg.value` instead of just `address(this).balance`
-    // because `address(this).balance` already contains the `msg.value` user has sent in the given call
-    // so we need to subtract it to get the actual input reserve
     uint256 tokensBought = getAmountOfTokens(
         _tokensSold,
         ljcryptoTokenReserve,
@@ -113,30 +102,22 @@ function getAmountOfTokens(
     );
 
     require(tokensBought >= _minljStable, "insufficient output amount");
-    // Transfer the `Crypto Dev` tokens to the user
-    ERC20(LJStableCoinAddress).transfer(msg.sender, tokensBought);
+    IERC20(LJCryptoTokenAddress).transferFrom(msg.sender, address(this), _tokensSold);
+    IERC20(LJStableCoinAddress).transfer(msg.sender, tokensBought);
     }
      /**
-    @dev Swaps CryptoDev Tokens for Ether
+    @dev Swaps LJStable for LJCrypto
     */
-    function cryptoDevTokenToEth(uint _tokensSold, uint _minEth) public {
-    uint256 tokenReserve = getLJCrytpoReserve();
-        // call the `getAmountOfTokens` to get the amount of ether
-        // that would be returned to the user after the swap
-        uint256 ethBought = getAmountOfTokens(
+    function ljstableTokenToLJCryptoToken(uint _tokensSold, uint _minljCrypto) public {
+        uint256 ljstableTokenReserve = getLJStableReserve();
+        uint256 ljcryptoTokenReserve = getLJCrytpoReserve();
+        uint256 tokensBought = getAmountOfTokens(
             _tokensSold,
-            tokenReserve,
-            address(this).balance
+            ljstableTokenReserve,
+            ljcryptoTokenReserve
         );
-        require(ethBought >= _minEth, "insufficient output amount");
-        // Transfer `Crypto Dev` tokens from the user's address to the contract
-        ERC20(LJCryptoTokenAddress).transferFrom(
-            msg.sender,
-            address(this),
-            _tokensSold
-        );
-        // send the `ethBought` to the user from the contract
-        payable(msg.sender).transfer(ethBought);
+        require(tokensBought >= _minljCrypto, "insufficient output amount");
+        IERC20(LJStableCoinAddress).transferFrom(msg.sender, address(this), _tokensSold);
+        IERC20(LJCryptoTokenAddress).transfer(msg.sender, tokensBought);
     }
-
 }

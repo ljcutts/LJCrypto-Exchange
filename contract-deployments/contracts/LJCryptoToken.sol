@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract LJCryptoToken is ERC20 {
+  //maybe use balanceOf function instead of tokenBalance as a way of keeping track of tokens
     mapping(address => uint) public tokenBalance;
     mapping(address => uint) public stakingBalance;
     mapping(address => uint) public stakingTimestamps;

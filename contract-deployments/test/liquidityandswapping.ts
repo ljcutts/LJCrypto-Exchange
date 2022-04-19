@@ -6,8 +6,8 @@ chai.use(solidity);
 
 
 describe("LiquidityAndSwapping", async function () {
-  xit("Should be able to add liquidity", async function(){
-     const [owner, addr1, addr2] = await ethers.getSigners();
+  it("Should be able to add liquidity", async function(){
+     const [owner, addr1, addr2, addr3] = await ethers.getSigners();
       const LJCryptoToken = await ethers.getContractFactory("LJCryptoToken");
       const ljcryptoToken = await LJCryptoToken.connect(owner).deploy();
       await ljcryptoToken.deployed();
@@ -122,7 +122,7 @@ describe("LiquidityAndSwapping", async function () {
      console.log(`\n New LJCryptoBalance: ${newljcryptoBalance}\n`);
   })
 
-  it("Should be able to swap LJStable to LJCrypto", async function() {
+  xit("Should be able to swap LJStable to LJCrypto", async function() {
      const [owner, addr1, addr2] = await ethers.getSigners();
      const LJCryptoToken = await ethers.getContractFactory("LJCryptoToken");
      const ljcryptoToken = await LJCryptoToken.connect(owner).deploy();

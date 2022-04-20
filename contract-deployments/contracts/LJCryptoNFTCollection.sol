@@ -6,11 +6,12 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 
-contract NFT is ERC1155 {
+contract LJCryptoNFTCollection is ERC1155 {
     //make an ERC1155 contract that will be used to get into the DAO
     //users will have to pay a certain amount for the ERC1155 tokens and the ether amount will get sent to the DAO contract
     //make ERC721s for the NFT Marketplace
-    //Maybe use Chainlink VRF where someone can get a random NFT where there's 3 different NFTs
+    //Maybe use Chainlink VRF where someone can get a random NFT where there's 10 different NFTs
+    //depending on the number NFT you get is the amount of propsoals you can vote and create id 10 will give you 10 votes/creates for example
     using Counters for Counters.Counter;
     Counters.Counter private _currentSupply;
     bool public _paused;

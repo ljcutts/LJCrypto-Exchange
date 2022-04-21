@@ -13,7 +13,6 @@ interface ILJCryptoToken {
    function transfer(address to, uint256 amount) external returns (bool);
 } 
 
-
 contract LJCryptoDAO {
     //users can create one propsal per NFT
     //also can maybe use their LJCryptoToken and maybe do a transfer?

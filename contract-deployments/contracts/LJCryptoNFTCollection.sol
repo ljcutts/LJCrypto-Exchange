@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
@@ -22,12 +23,12 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     Counters.Counter private _currentSupply;
     bool public _paused;
     address immutable owner;
+    address public thisContract = address(this);
     address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
     address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
     bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
     uint constant _chainlinkFee = 0.1 * 10 ** 18;
-    uint randomNumber = 1;
-    uint time;
+    uint randomNumber = 0;
     // uint32 public constant TIER1 = 0;
     // uint32 public constant TIER2 = 1;
     // uint32 public constant TIER3 = 2;
@@ -39,8 +40,6 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     // uint128 public constant TIER9 = 8;
     // uint128 public constant TIER10 = 9;
     // uint256 public constant STAKING = 10;
-   mapping(address => uint) stakingBalance;
-   mapping(address => uint) public stakingTimestamps;
     constructor() ERC1155("https://gateway.pinata.cloud/ipfs/QmdTLaJeFdRwgMvBynK892uG8mAuSN9UYvkG9R2QPRsd4b/{id}.json") VRFConsumerBase(_vrfCoordinator, _linkToken)  {
          owner = msg.sender;
     }
@@ -57,16 +56,8 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     require(msg.value >= tokenAmount, "You didn't pay enough to receive NFT");
     uint randomId = randomNumber % 10;
     _mint(msg.sender, randomId, 1, "");
-    _mint(msg.sender, 9, 1, "");
-    _mint(msg.sender, 7, 1, "");
-    _mint(msg.sender, 8, 1, "");
-    _mint(msg.sender, 8, 1, "");
     _currentSupply.increment();
-    uint balance = totalNFTBalance();
-    if(balance >= 10 && stakingTimestamps[msg.sender] == 0) {
-       stakingTimestamps[msg.sender] = block.timestamp;
-    }
-    // randomNumber = 0;
+    randomNumber = 0;
    }
 
     function checkUpkeep(bytes calldata /*checkData*/) external view returns (bool upkeepNeeded, bytes memory /*performData*/) {
@@ -99,31 +90,6 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
         return amountofNFTs;
     }
 
-
-
-   function updateStakingBalance() public {
-      uint balance = totalNFTBalance();
-      if(balance < 10) {
-          stakingTimestamps[msg.sender] = 0;
-      }
-      require(balance >= 10, "You need to keep 10 NFTs or more in your account");
-      time = block.timestamp;
-      uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
-      uint mintedTokens = uint(balance * 1000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //100% interest per year
-      stakingBalance[msg.sender] += mintedTokens;
-    }
-
-    function claimNFTStakingRewards(uint _amount) public {
-      updateStakingBalance();
-      require(stakingBalance[msg.sender] >= _amount, "Your staking balance is not this high");
-      stakingBalance[msg.sender] -= _amount;
-     _mint(msg.sender, 10, _amount, "");
-    }
-
-    function checkStakingBalance() public view returns (uint) {
-        return stakingBalance[msg.sender];
-    }
-
    function setPause(bool _value) public {
        require(msg.sender == owner, "You are not the owner");
        _paused = _value;
@@ -132,14 +98,15 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
    function burn(address user, uint id, uint amount) public {
        require(msg.sender == user, "You can only get rid of your own token");
        _burn(user, id, amount);
-      uint balance = totalNFTBalance();
-      if(balance < 10) {
-          stakingTimestamps[msg.sender] = 0;
-      }
    }
 
    function uri(uint _tokenId) override public pure returns(string memory) {
        return string(abi.encodePacked("https://gateway.pinata.cloud/ipfs/QmdTLaJeFdRwgMvBynK892uG8mAuSN9UYvkG9R2QPRsd4b/", Strings.toString(_tokenId), ".json"));
+   }
+
+   function mintTokensToStakingContract(address _stakingContract, uint _amount) public {
+        require(msg.sender == owner, "You are not the owner");
+        _mint(_stakingContract, 10, _amount, "");
    }
 
          function withdraw() public  {

@@ -26,7 +26,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
     bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
     uint constant _chainlinkFee = 0.1 * 10 ** 18;
-    uint randomNumber = 0;
+    uint randomNumber = 1;
     uint time;
     // uint32 public constant TIER1 = 0;
     // uint32 public constant TIER2 = 1;
@@ -57,12 +57,17 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     require(msg.value >= tokenAmount, "You didn't pay enough to receive NFT");
     uint randomId = randomNumber % 10;
     _mint(msg.sender, randomId, 1, "");
+    _mint(msg.sender, 9, 1, "");
+    _mint(msg.sender, 7, 1, "");
+    _mint(msg.sender, 8, 1, "");
+    _mint(msg.sender, 8, 1, "");
     _currentSupply.increment();
-    randomNumber = 0;
+    uint balance = totalNFTBalance();
+    if(balance >= 10 && stakingTimestamps[msg.sender] == 0) {
+       stakingTimestamps[msg.sender] = block.timestamp;
+    }
+    // randomNumber = 0;
    }
-
-
-
 
     function checkUpkeep(bytes calldata /*checkData*/) external view returns (bool upkeepNeeded, bytes memory /*performData*/) {
         bool hasLink = LINK.balanceOf(address(this)) >= _chainlinkFee;
@@ -80,7 +85,8 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
    }
 
     function totalNFTBalance()
-        internal
+        public
+        view
         virtual
         returns (uint256)
     {
@@ -93,21 +99,25 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
         return amountofNFTs;
     }
 
-   function stakedBalance() public {
-      (uint balance) = totalNFTBalance();
+
+
+   function updateStakingBalance() public {
+      uint balance = totalNFTBalance();
+      if(balance < 10) {
+          stakingTimestamps[msg.sender] = 0;
+      }
       require(balance >= 10, "You need to keep 10 NFTs or more in your account");
       time = block.timestamp;
       uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
-      uint mintedTokens = uint(balance * 100000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //10000% interest per year
-      _mint(address(this), 10, mintedTokens, "");
+      uint mintedTokens = uint(balance * 1000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //100% interest per year
       stakingBalance[msg.sender] += mintedTokens;
     }
 
     function claimNFTStakingRewards(uint _amount) public {
-      stakedBalance();
+      updateStakingBalance();
       require(stakingBalance[msg.sender] >= _amount, "Your staking balance is not this high");
       stakingBalance[msg.sender] -= _amount;
-      _safeTransferFrom(address(this), msg.sender, 10, _amount, "");
+     _mint(msg.sender, 10, _amount, "");
     }
 
     function checkStakingBalance() public view returns (uint) {
@@ -122,6 +132,10 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
    function burn(address user, uint id, uint amount) public {
        require(msg.sender == user, "You can only get rid of your own token");
        _burn(user, id, amount);
+      uint balance = totalNFTBalance();
+      if(balance < 10) {
+          stakingTimestamps[msg.sender] = 0;
+      }
    }
 
    function uri(uint _tokenId) override public pure returns(string memory) {

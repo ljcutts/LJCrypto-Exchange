@@ -26,6 +26,8 @@ struct Proposal {
     uint256 yes;
     uint256 no;
     address proposalOwner;
+    bool executed;
+    bool proposalApproved;
     mapping(address => bool) votedYet;
 }
 
@@ -42,8 +44,6 @@ constructor(address _ljcryptoNFT, address _ljcryptoToken) payable {
      LJCryptoToken = ILJCryptoToken(_ljcryptoToken);
 }
 
-
-
 modifier needPower() {
     require(powerAmount[msg.sender] > 0, "You don't have any power to create or vote on proposals");
     _;
@@ -58,18 +58,34 @@ modifier activeProposalOnly(uint256 proposalIndex) {
     _;
 }
 
+modifier inactiveProposalOnly(uint256 proposalIndex) {
+    require(
+        proposals[proposalIndex].deadline <= block.timestamp,
+        "DEADLINE_NOT_EXCEEDED"
+    );
+    require(
+        proposals[proposalIndex].executed == false,
+        "PROPOSAL_ALREADY_EXECUTED"
+    );
+    _;
+}
+
 
 function receivePowerThroughNFT(uint _id) public {
-  require(powerAmountNotEmpty[msg.sender] == false, "You need to use up your voting power first");
+  require(powerAmountNotEmpty[msg.sender] == false, "You need to use up your proposal power first");
   require(LJCryptoNFT.balanceOf(msg.sender, _id) > 0, "Your balance for this tokenId is 0");
-  powerAmount[msg.sender] += _id;
+  if(_id == 0) {
+      powerAmount[msg.sender] += 1;
+  } else {
+    powerAmount[msg.sender] += _id;
+  }
   powerAmountNotEmpty[msg.sender] = true;
   LJCryptoNFT._safeTransferFrom(msg.sender, address(this), _id, 1, ""); //maybe do transfer instead for the DAO contract to be able to hold  NFTS
 }
 
 function receivePowerThroughToken(uint _amount) public {
   require(powerAmountNotEmpty[msg.sender] == false, "You need to use up your voting power first");
-  require(LJCryptoToken.balanceOf(msg.sender) >= _amount, "Your balance for this token is 0");
+  require(LJCryptoToken.balanceOf(msg.sender) >= _amount, "You don't own this many tokens");
   powerAmount[msg.sender] += _amount;
   powerAmountNotEmpty[msg.sender] = true;
   LJCryptoToken.transferFrom(msg.sender, address(this), _amount); //maybe do transfer instead for the DAO contract to be able to hold tokens
@@ -115,6 +131,21 @@ function voteOnProposal(uint256 proposalIndex, uint _vote)
     proposal.votedYet[msg.sender] = true;
 }
 
+function executeProposal(uint256 proposalIndex)
+    external
+    inactiveProposalOnly(proposalIndex)
+{
+    Proposal storage proposal = proposals[proposalIndex];
+    require(msg.sender == proposal.proposalOwner, "Only the creator of the proposal can execute it");
+    if (proposal.yes > proposal.no) {
+       proposal.proposalApproved = true;
+    } 
+     proposal.executed = true;
+}
+
+function powerBalance() public view returns(uint) {
+    return powerAmount[msg.sender];
+}
 
 function withdrawTokens(uint _amount) external {
     require(msg.sender == owner, "You are not the owner");

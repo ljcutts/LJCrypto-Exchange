@@ -1,10 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+
 
 interface ILJCryptoNFT {
     function balanceOf(address account, uint256 id) external view returns (uint256);
-    function _safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) external;
+    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) external;
 }
 
 interface ILJCryptoToken {
@@ -13,7 +15,7 @@ interface ILJCryptoToken {
    function transfer(address to, uint256 amount) external returns (bool);
 } 
 
-contract LJCryptoDAO {
+contract LJCryptoDAO is ERC1155Holder {
     //users can create one propsal per NFT
     //also can maybe use their LJCryptoToken and maybe do a transfer?
     //users can only vote on a proposal one time
@@ -32,8 +34,7 @@ struct Proposal {
 }
 
 mapping(address => uint) powerAmount;
-mapping(address => bool) powerAmountNotEmpty;
-
+mapping(address => bool) public powerAmountNotEmpty;
 mapping(uint256 => Proposal) public proposals;
 uint256 public numProposals;
 
@@ -51,11 +52,12 @@ modifier needPower() {
 
 
 modifier activeProposalOnly(uint256 proposalIndex) {
+    _;
     require(
         proposals[proposalIndex].deadline > block.timestamp,
         "DEADLINE_EXCEEDED"
     );
-    _;
+   
 }
 
 modifier inactiveProposalOnly(uint256 proposalIndex) {
@@ -80,11 +82,11 @@ function receivePowerThroughNFT(uint _id) public {
     powerAmount[msg.sender] += _id;
   }
   powerAmountNotEmpty[msg.sender] = true;
-  LJCryptoNFT._safeTransferFrom(msg.sender, address(this), _id, 1, ""); //maybe do transfer instead for the DAO contract to be able to hold  NFTS
+  LJCryptoNFT.safeTransferFrom(msg.sender, address(this), _id, 1, ""); //maybe do transfer instead for the DAO contract to be able to hold  NFTS
 }
 
 function receivePowerThroughToken(uint _amount) public {
-  require(powerAmountNotEmpty[msg.sender] == false, "You need to use up your voting power first");
+  require(powerAmountNotEmpty[msg.sender] == false, "You need to use up your proposal power first");
   require(LJCryptoToken.balanceOf(msg.sender) >= _amount, "You don't own this many tokens");
   powerAmount[msg.sender] += _amount;
   powerAmountNotEmpty[msg.sender] = true;
@@ -123,7 +125,9 @@ function voteOnProposal(uint256 proposalIndex, uint _vote)
     } else {
         proposal.no++;
     }
-    proposal.deadline = block.timestamp + 24 hours;
+    if(proposal.deadline == 0) {
+      proposal.deadline = block.timestamp + 24 hours;
+    }
     powerAmount[msg.sender]--;
     if(powerAmount[msg.sender] == 0) {
         powerAmountNotEmpty[msg.sender] = false;
@@ -136,7 +140,7 @@ function executeProposal(uint256 proposalIndex)
     inactiveProposalOnly(proposalIndex)
 {
     Proposal storage proposal = proposals[proposalIndex];
-    require(msg.sender == proposal.proposalOwner, "Only the creator of the proposal can execute it");
+    require(msg.sender == proposal.proposalOwner, "Only the creator of the proposal can execute this proposal");
     if (proposal.yes > proposal.no) {
        proposal.proposalApproved = true;
     } 
@@ -154,7 +158,7 @@ function withdrawTokens(uint _amount) external {
 
 function withdrawNFTs(uint _id, uint _amount) external {
     require(msg.sender == owner, "You are not the owner");
-    LJCryptoNFT._safeTransferFrom(address(this), msg.sender, _id, _amount, "");
+    LJCryptoNFT.safeTransferFrom(address(this), msg.sender, _id, _amount, "");
 }
 
 

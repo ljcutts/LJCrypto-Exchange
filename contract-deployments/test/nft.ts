@@ -7,21 +7,47 @@ const pressAnyKey = require("press-any-key");
 
 
 describe("NFT", async function() {
-    xit("Should be able to mint an NFT and get the uri", async function() {
+    it("Should be able to mint an NFT and get the uri", async function() {
          const [owner, addr1, addr2] = await ethers.getSigners();
          const NFT = await ethers.getContractFactory("LJCryptoNFTCollection");
-         const nft = await  NFT.deploy();
+         const nft = await  NFT.connect(owner).deploy();
          await nft.deployed();
         //  console.log(`Please fund ${nft.address} with LINK`);
         //  await pressAnyKey();
          await nft.connect(addr1).mintToken({value: ethers.utils.parseEther('1')});
          await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
          await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
+         await nft.connect(owner).withdraw();
+        const balance = await nft.connect(owner).balance();
+        console.log(ethers.utils.formatEther(balance));
         const metadata = await nft.uri(0)
          console.log(`\nURL: ${metadata}\n`);
     })
 
-      it("Should be able to stake NFTs", async function () {
+     xit("Should be able to pause the contract", async function () {
+       const [owner, addr1, addr2] = await ethers.getSigners();
+       const NFT = await ethers.getContractFactory("LJCryptoNFTCollection");
+       const nft = await NFT.connect(owner).deploy();
+       await nft.deployed();
+       await nft.connect(owner).setPause(true);
+       const pauseValue = await nft._paused();
+       expect(pauseValue).to.equal(true);
+     });
+
+      xit("Should be able to burn nft", async function () {
+        const [owner, addr1, addr2] = await ethers.getSigners();
+        const NFT = await ethers.getContractFactory("LJCryptoNFTCollection");
+        const nft = await NFT.connect(owner).deploy();
+        await nft.deployed();
+        await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
+        const balance = await nft.connect(addr1).totalNFTBalance();
+        console.log("Original Balance", balance);
+        await nft.connect(addr1).burn(addr1.address, 1, 1);
+         const newbalance = await nft.connect(addr1).totalNFTBalance();
+         console.log("New Balance", newbalance);
+      });
+
+      xit("Should be able to stake NFTs", async function () {
         const [owner, addr1, addr2] = await ethers.getSigners();
         const NFT = await ethers.getContractFactory("LJCryptoNFTCollection");
         const nft = await NFT.deploy();

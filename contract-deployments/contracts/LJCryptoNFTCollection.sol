@@ -28,7 +28,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
     bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
     uint constant _chainlinkFee = 0.1 * 10 ** 18;
-    uint randomNumber = 0;
+    uint randomNumber = 1;
     // uint32 public constant TIER1 = 0;
     // uint32 public constant TIER2 = 1;
     // uint32 public constant TIER3 = 2;
@@ -57,7 +57,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     uint randomId = randomNumber % 10;
     _mint(msg.sender, randomId, 1, "");
     _currentSupply.increment();
-    randomNumber = 0;
+    // randomNumber = 0;
    }
 
     function checkUpkeep(bytes calldata /*checkData*/) external view returns (bool upkeepNeeded, bytes memory /*performData*/) {
@@ -95,7 +95,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
        _paused = _value;
    }
 
-   function burn(address user, uint id, uint amount) public {
+   function burn(address user, uint id, uint amount) public onlyWhenNotPaused {
        require(msg.sender == user, "You can only get rid of your own token");
        _burn(user, id, amount);
    }
@@ -104,7 +104,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
        return string(abi.encodePacked("https://gateway.pinata.cloud/ipfs/QmdTLaJeFdRwgMvBynK892uG8mAuSN9UYvkG9R2QPRsd4b/", Strings.toString(_tokenId), ".json"));
    }
 
-   function mintTokensToStakingContract(address _stakingContract, uint _amount) public {
+   function mintTokensToStakingContract(address _stakingContract, uint _amount) public onlyWhenNotPaused {
         require(msg.sender == owner, "You are not the owner");
         _mint(_stakingContract, 10, _amount, "");
    }
@@ -114,6 +114,10 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
             uint256 amount = address(this).balance;
             (bool sent, ) =  payable(msg.sender).call{value: amount}("");
             require(sent, "Failed to send Ether");
+        }
+
+        function balance() public view returns(uint) {
+            return address(msg.sender).balance;
         }
 
          // Function to receive Ether. msg.data must be empty

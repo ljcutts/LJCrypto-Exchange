@@ -90,6 +90,13 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
         return amountofNFTs;
     }
 
+    function breedNFTs(uint[2] memory ids) public {
+       for(uint i = 0; i < ids.length; ++i) {
+           burn(msg.sender, ids[i], 1);
+       }
+        _mint(msg.sender, 11, 1, "");
+    }
+    
    function setPause(bool _value) public {
        require(msg.sender == owner, "You are not the owner");
        _paused = _value;

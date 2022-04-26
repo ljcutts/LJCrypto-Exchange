@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 chai.use(solidity);
@@ -112,7 +112,7 @@ describe("GuessingGame", async function () {
   //   expect(theNonce).to.equal(1);
   // });
 
-  it("Should delete players in array", async function () {
+  xit("Should delete players in array", async function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
     const GuessingGame = await ethers.getContractFactory("GuessingGame");
     const guessingGame = await GuessingGame.connect(owner).deploy();
@@ -129,16 +129,18 @@ describe("GuessingGame", async function () {
     expect(playerLength).to.equal(0);
   });
 
-  xit("Should get a random value", async function () {
+  it("Should get a random value", async function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
     const GuessingGame = await ethers.getContractFactory("GuessingGame");
     const guessingGame = await GuessingGame.connect(owner).deploy({value: ethers.utils.parseEther('1000')});
     await guessingGame.deployed();
+    await guessingGame.sendLink(ethers.utils.parseEther('1'))
     console.log(`Please fund ${guessingGame.address} with LINK`);
     await pressAnyKey();
     await guessingGame.connect(addr1).enterGuessingGame({ value: ethers.utils.parseEther("0.1") });
     await guessingGame.connect(addr2).enterGuessingGame({ value: ethers.utils.parseEther("10") });
-    await sleep(30000);
+     await network.provider.send("evm_increaseTime", [31536000]);
+     await network.provider.send("evm_mine");
     const currenntNumber = await guessingGame.currentNumberValue();
     console.log(`\nNumber: ${currenntNumber}\n`);
   });

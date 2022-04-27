@@ -5,16 +5,22 @@ module.exports = {
   ],
   theme: {
     backgroundSize: {
-      'auto': 'auto',
-      'cover': 'cover',
-      'contain': 'contain',
-      '50%': '50%',
-      '16': '4rem',
+      auto: "auto",
+      cover: "cover",
+      contain: "contain",
+      "50%": "50%",
+      16: "4rem",
     },
     extend: {
       backgroundImage: {
-        "background": "url('/background.jpeg')",
+        background: "url('/background.jpeg')",
         "footer-texture": "url('/img/footer-texture.png')",
+      },
+      translate: {
+        "down50%": "-50%",
+      },
+      maxWidth: {
+       
       },
     },
   },

@@ -9,7 +9,7 @@ const links = () => {
 interface IProps {
   setModal: React.Dispatch<React.SetStateAction<Props["modal"]>>;
   modal: Props["modal"];
-  modalToggle: () => void ;
+  modalToggle: () => void;
 }
 
 const SideBarMenu: React.FC<IProps> = ({modalToggle}) => {

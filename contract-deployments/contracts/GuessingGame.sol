@@ -9,23 +9,23 @@ contract GuessingGame is VRFConsumerBase {
    //Probably use Chainlink VRF for this one
    //Continue to think about how you will use subgraphs
    event CurrentGame(address Player, uint GameId);
-   event Winners(address winner, bytes32 requestId);
+   event Winners(address Winner, bytes32 requestId);
    address payable[] players;
-   address previousWinner;
+   address immutable owner;
    address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
    address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
    bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
    bytes32 currentRequestId;
-   uint currentNumberValue;
+   uint currentNumberValue = 0;
    uint public currentGameId = 1;
    uint128 public nonce;
    uint128 constant _chainlinkFee = 0.1 * 10 ** 18;
    mapping(address => bool) public alreadyGuessed;
 
    constructor() VRFConsumerBase(_vrfCoordinator, _linkToken) payable {
+      owner = msg.sender;
    }
    
-
    function enterGuessingGame() public payable {
      require(players.length < 2, "You will have to wait to enter the next game");
      require(msg.value >= 0.1 ether, "You need to at least put in 0.1 ether to join the game");
@@ -53,7 +53,6 @@ contract GuessingGame is VRFConsumerBase {
           currentGameId++;
           nonce = 0;
           currentNumberValue = 0;
-          previousWinner = msg.sender;
           emit Winners(msg.sender, currentRequestId);
       } else {
          alreadyGuessed[msg.sender] = true;
@@ -63,6 +62,7 @@ contract GuessingGame is VRFConsumerBase {
           delete players;
           currentNumberValue = 0;
           nonce = 0;
+          currentGameId++;
       }
    }
 
@@ -71,18 +71,12 @@ contract GuessingGame is VRFConsumerBase {
       currentRequestId = requestId;
    }
 
-
-   // function getMsgSender() public view returns(address) {
-   //     return msg.sender;
-   // }
-
-   // function receiveBalance() public view returns(uint) {
-   //    return address(msg.sender).balance;
-   // }
-
-   // function playerLength() public view returns(uint) {
-   //    return players.length;
-   // }
+    function withdraw() public  {
+            require(msg.sender == owner, "You are not the owner");
+            uint256 amount = address(this).balance;
+            (bool sent, ) =  payable(msg.sender).call{value: amount}("");
+            require(sent, "Failed to send Ether");
+   }
 
    function didYouGuess() public view returns(bool) {
       return alreadyGuessed[msg.sender];

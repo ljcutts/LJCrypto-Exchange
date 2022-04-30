@@ -1,28 +1,45 @@
-import {useState, useEffect, useRef} from 'react'
+import { useState, useEffect, useRef } from "react";
 import { IState as Props } from "./index";
 import Link from "next/link";
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import Web3Modal from "web3modal";
+import { FETCH_GUESSINGGAME } from "../queries";
+import { subgraphQuery } from "../utils";
 
 import {
   GUESSING_GAME_ABI,
-  GUESSING_GAME_ADDRESS
+  GUESSING_GAME_ADDRESS,
 } from "../constants/guessingGame";
+
+
+//subgraphs weren't queried/made right
+//might have to redeploy a new contract and make better events
 
 type IState = {
   account: string | null;
   setAccount: React.Dispatch<React.SetStateAction<string | null>>;
-  amount: string
+  player: string | null;
+  setPlayer: React.Dispatch<React.SetStateAction<string | null>>;
+  otherPlayer: string | null;
+  setOtherPlayer: React.Dispatch<React.SetStateAction<string | null>>;
+  amount: string;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
+  numberIsZero: boolean;
+  setNumberIsZero: React.Dispatch<React.SetStateAction<boolean>>;
+  page: boolean;
+  setPage: React.Dispatch<React.SetStateAction<boolean>>;
 };
-
- 
 
 const GuessingGame: React.FC = () => {
   const zero = BigNumber.from(0);
   const [account, setAccount] = useState<IState["account"]>(null);
   const [walletConnected, setWalletConnected] = useState(false);
   const [thisAmount, setAmount] = useState<IState["amount"]>("");
+  const [player, setPlayer] = useState<IState["player"]>("");
+  const [otherPlayer, setOtherPlayer] = useState<IState["otherPlayer"]>("");
+  const [numberisZero, setNumberIsZero] =
+    useState<IState["numberIsZero"]>(false);
+  const [page, setPage] = useState<IState["page"]>(false);
 
   const getGuessingGameContractInstance = (providerOrSigner: any) => {
     return new Contract(
@@ -32,35 +49,65 @@ const GuessingGame: React.FC = () => {
     );
   };
 
-  const joinGame = async(amount:string) => {
-    try {
-       const signer = await getProviderOrSigner(true);
-       const daoContract = getGuessingGameContractInstance(signer);
-       const txn = await daoContract.enterGuessingGame({value: ethers.utils.parseEther(`${amount}`)});
-       await txn.wait();
-    } catch (error) {
-      console.log(error)
+  async function fetchFromGame() {
+    const gameArray = await subgraphQuery(FETCH_GUESSINGGAME());
+    const player1 = gameArray.guessingGames[0].Player[0];
+    const player2 = gameArray.guessingGames[0].Player[1];
+    if (player === undefined) {
+      setPlayer("");
+    } else {
+      setPlayer(player1);
+    }
+    if (player2 === undefined) {
+      setOtherPlayer("");
+    } else {
+      setOtherPlayer(player2);
     }
   }
 
-  const isNumberAboveZero = async () :Promise<boolean> => {
+  const joinGame = async (amount: string) => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const daoContract = getGuessingGameContractInstance(signer);
+      const txn = await daoContract.enterGuessingGame({
+        value: ethers.utils.parseEther(`${amount}`),
+      });
+      await txn.wait();
+    } catch (error) {
+      console.log(error);
+      window.alert("Either You Didn't Enter Enough Ether, Two Players Are Already In The Game Or Chainlink Needs To Be Funded")
+    }
+  };
+
+  const isNumberAboveZero = async (): Promise<boolean> => {
     const provider = await getProviderOrSigner(true);
     const contract = getGuessingGameContractInstance(provider);
-    const value = await contract.numberAboveZero(); 
-    console.log(value)
+    const value = await contract.numberAboveZero();
+    setNumberIsZero(value);
     return value;
   };
 
   const web3ModalRef: any = useRef();
 
-  const getAddress = async() => {
-     const provider = await web3ModalRef.current.connect();
-     const web3Provider = new providers.Web3Provider(provider);
-     setAccount(await web3Provider.getSigner().getAddress());
-     //Fetch the balance of the User
-  }
-  
+  const getAddress = async () => {
+    const provider = await web3ModalRef.current.connect();
+    const web3Provider = new providers.Web3Provider(provider);
+    const thisAccount = await web3Provider.getSigner().getAddress();
+    setAccount(await web3Provider.getSigner().getAddress());
+    return thisAccount;
+  };
 
+  const makeAGuess = async (guess: boolean) => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const daoContract = getGuessingGameContractInstance(signer);
+      const txn = await daoContract.guessTheNumberValue(guess);
+      await txn.wait();
+      //Figure out how to alert whether or not the player guesses correctly
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getProviderOrSigner = async (needSigner = false) => {
     // Connect to Metamask
@@ -82,36 +129,86 @@ const GuessingGame: React.FC = () => {
     return web3Provider;
   };
 
-
-   const connectWallet = async () => {
-     try {
-       // Get the provider from web3Modal, which in our case is MetaMask
-       // When used for the first time, it prompts the user to connect their wallet
-       await getProviderOrSigner();
-       setWalletConnected(true);
-     } catch (err) {
-       console.error(err);
-     }
-   };
+  const connectWallet = async () => {
+    try {
+      // Get the provider from web3Modal, which in our case is MetaMask
+      // When used for the first time, it prompts the user to connect their wallet
+      await getProviderOrSigner();
+      setWalletConnected(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-     if (!walletConnected) {
-       // Assign the Web3Modal class to the reference object by setting it's `current` value
-       // The `current` value is persisted throughout as long as this page is open
-       web3ModalRef.current = new Web3Modal({
-         network: "rinkeby",
-         providerOptions: {},
-         //  disableInjectedProvider: false,
-       });
-     } 
-    getAddress()
-  }, [walletConnected])
+    if (!walletConnected) {
+      // Assign the Web3Modal class to the reference object by setting it's `current` value
+      // The `current` value is persisted throughout as long as this page is open
+      web3ModalRef.current = new Web3Modal({
+        network: "rinkeby",
+        providerOptions: {},
+        //  disableInjectedProvider: false,
+      });
+    }
+     setInterval(async function () {
+       await getAddress();
+       await isNumberAboveZero()
+       await fetchFromGame();
+     }, 1 * 1000);
+  }, [walletConnected, account]);
 
- const handleChange = (
-   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
- ) => {
-   setAmount(e.target.value);
- };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setAmount(e.target.value);
+  };
+
+  const togglePage = () => {
+    setPage(!page);
+  };
+
+  const guessPage = () => {
+    if (page === true) {
+      return (
+        <button
+          onClick={togglePage}
+          className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out mb-10"
+        >
+          Join The Game
+        </button>
+      );  
+    }
+  };
+
+  const renderPage = () => {
+    if (page === false) {
+      return thisAmount === "0" || thisAmount === "" ? (
+        <div className="flex justify-start">
+          <button className="rounded-2xl mx-auto bg-yellow-500 md:relative md:left-40 text-white h-8 shadow-button w-40 font-bold transition ease-in-out  opacity-50 mb-10">
+            Enter Game
+          </button>
+          <button
+            onClick={togglePage}
+            className="rounded-2xl mx-auto bg-black md:relative md:right-40 text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out mb-10"
+          >
+            Make Guess Here
+          </button>
+        </div>
+      ) : (
+        <div className="flex justify-start">
+          <button onClick={() => joinGame(thisAmount)} className="rounded-2xl mx-auto bg-yellow-500 md:relative md:left-40 text-white h-8 shadow-button w-40 font-bold transition ease-in-out mb-10">
+            Enter Game
+          </button>
+          <button
+            onClick={togglePage}
+            className="rounded-2xl mx-auto bg-black md:relative md:right-40 text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out mb-10"
+          >
+            Make Guess Here
+          </button>
+        </div>
+      );
+    }
+  };
 
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
@@ -145,47 +242,108 @@ const GuessingGame: React.FC = () => {
         </p>
       </div>
       <div className="flex flex-col justify-center mx-auto relative top-32">
-        <p className="text-white text-2xl font-bold uppercase mx-auto px-4 mb-10">
-          You need to pay 0.1 Ether Or More To Enter The Game
-        </p>
-        <div className="flex flex-col">
-          <p className="mx-auto text-white text-2xl uppercase font-bold mb-3 ">
-            Enter Amount Here
+        {page === true &&
+          (numberisZero === false ? (
+            <p className="text-white text-2xl font-bold uppercase mx-auto px-4 mb-10">
+              Please Wait Until a number has been generated
+            </p>
+          ) : (
+            <p className="text-white text-2xl font-bold uppercase mx-auto px-4 mb-10">
+              You can now enter your guess!!!
+            </p>
+          ))}
+
+        {page === false && (
+          <p className="text-white text-2xl font-bold uppercase mx-auto px-4 mb-10">
+            You need to pay 0.1 Ether Or More To Enter The Game
           </p>
-          <input
-            className="px-4 w-40 mx-auto rounded-xl mb-10 focus:outline-none border border-solid border-yellow-500 bg-black text-yellow-500"
-            type="number"
-            placeholder="Amount In Ether"
-            onChange={handleChange}
-          />
-        </div>
-        {thisAmount === "0" || thisAmount === "" ? (
-          <button className="rounded-2xl mx-auto bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 opacity-50 mb-10">
-            Join Game
-          </button>
-        ) : (
-          <button
-            onClick={() => joinGame(thisAmount)}
-            className="rounded-2xl mx-auto bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
-          >
-            Join Game
-          </button>
         )}
+
+        <div className="flex flex-col">
+          {page === false ? (
+            <p className="mx-auto text-white text-2xl uppercase font-bold mb-3 ">
+              Enter Amount Here
+            </p>
+          ) : (
+            <p className="mx-auto text-white text-2xl uppercase font-bold mb-3 ">
+              What is the correct answer?
+            </p>
+          )}
+          {page === false && (
+            <input
+              className="px-4 w-40 mx-auto rounded-xl mb-10 focus:outline-none border border-solid border-yellow-500 bg-black text-yellow-500"
+              type="number"
+              placeholder="Amount In Ether"
+              onChange={handleChange}
+            />
+          )}
+          {page === true &&
+            (numberisZero === false ? (
+              <div className="flex justify-start">
+                <button
+                  onClick={() => makeAGuess(true)}
+                  className="rounded-2xl mx-auto opacity-50 md:relative md:left-20 bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
+                >
+                  True
+                </button>
+                <button
+                  onClick={() => makeAGuess(false)}
+                  className="rounded-2xl mx-auto opacity-50 bg-yellow-500 md:relative md:right-20 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
+                >
+                  False
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-start">
+                <button
+                  onClick={() => makeAGuess(true)}
+                  className="rounded-2xl mx-auto md:relative md:left-20 bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
+                >
+                  True
+                </button>
+                <button
+                  onClick={() => makeAGuess(false)}
+                  className="rounded-2xl mx-auto bg-yellow-500 md:relative md:right-20 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
+                >
+                  False
+                </button>
+              </div>
+            ))}
+        </div>
+        {/* player !== account && otherPlayer !== account ?  */}
+        {/* {player !== account && otherPlayer !== account ? 
+         
+      } */}
+        {renderPage()}
+        {guessPage()}
+
         <p className="mx-auto text-white text-2xl font-bold uppercase mt-5">
           Current Players:
         </p>
-        <p className="mx-auto text-white text-2xl font-bold uppercase mb-5">
+        <p className="mx-auto text-white text-xl font-bold uppercase mb-5 md:text-2xl">
           (Only 2 players can enter at a time)
         </p>
-        <div className="flex flex-col h-12 w-80 mx-auto pl-3 bg-black rounded-md text-yellow-500 font-bold">
-          {/* <div>
-            1. {account.slice(0, 25)}...
-            {account.slice(-4)}
+        <div className="flex flex-col h-14 w-80 mx-auto pl-3 bg-black rounded-md text-yellow-500 font-bold">
+          <div>
+            {player !== null ? (
+              <p className="text-xl">
+                1. {player.slice(0, 20)}...
+                {player.slice(-4)}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div>
-            2. {account.slice(0, 25)}...
-            {account.slice(-4)}
-          </div> */}
+            {otherPlayer !== null ? (
+              <p className="text-xl">
+                2. {otherPlayer.slice(0, 20)}...
+                {otherPlayer.slice(-4)}
+              </p>
+            ) : (
+              <p className="text-xl">2. {otherPlayer}</p>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex flex-row justify-between mx-auto translate-x-1/2 translate-y-down50% justify-self-center max-w-xs bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 fixed bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
@@ -201,4 +359,10 @@ const GuessingGame: React.FC = () => {
   );
 };
 
-export default GuessingGame
+// export async function getStaticProps() {
+//  const _gameArray = await subgraphQuery(FETCH_GUESSINGGAME());
+//   const gameArray = _gameArray.guessingGames[0].Player;
+//   return { props: { gameArray } };
+// }
+
+export default GuessingGame;

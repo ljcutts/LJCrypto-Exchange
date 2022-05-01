@@ -29,6 +29,25 @@ export const GUESSING_GAME_ABI = [
       {
         indexed: false,
         internalType: "address",
+        name: "Player",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "GameId",
+        type: "uint256",
+      },
+    ],
+    name: "Ended",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
         name: "Winner",
         type: "address",
       },
@@ -38,6 +57,12 @@ export const GUESSING_GAME_ABI = [
         name: "requestId",
         type: "bytes32",
       },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "GameId",
+        type: "uint256",
+      },
     ],
     name: "Winners",
     type: "event",
@@ -45,6 +70,25 @@ export const GUESSING_GAME_ABI = [
   {
     stateMutability: "payable",
     type: "fallback",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "alreadyEntered",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
   },
   {
     inputs: [
@@ -157,6 +201,13 @@ export const GUESSING_GAME_ABI = [
   },
   {
     inputs: [],
+    name: "timeIsUp",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "withdraw",
     outputs: [],
     stateMutability: "nonpayable",
@@ -167,5 +218,4 @@ export const GUESSING_GAME_ABI = [
     type: "receive",
   },
 ];
-
-export const GUESSING_GAME_ADDRESS = "0xF21848502D120519617cd4327743AD0070DfF976";
+export const GUESSING_GAME_ADDRESS = "0xf76b8E784B522093151b4578e57c6F8428ecF005";

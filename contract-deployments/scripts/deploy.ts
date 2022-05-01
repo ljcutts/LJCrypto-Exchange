@@ -32,6 +32,4 @@ function sleep(ms: number) {
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
-});
-
-//0x6D810fdc20f250642c07decd051e24e1B80A1E4a
+})

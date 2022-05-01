@@ -1,0 +1,30 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: GuessingGame
+    network: rinkeby
+    source:
+      address: "0xf76b8E784B522093151b4578e57c6F8428ecF005"
+      abi: GuessingGame
+      startBlock: 10601554
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - CurrentGame
+        - Ended
+        - Winners
+      abis:
+        - name: GuessingGame
+          file: ./abis/GuessingGame.json
+      eventHandlers:
+        - event: CurrentGame(address,uint256)
+          handler: handleCurrentGame
+        - event: Ended(address,uint256)
+          handler: handleEnded
+        - event: Winners(address,bytes32,uint256)
+          handler: handleWinners
+      file: ./src/mapping.ts

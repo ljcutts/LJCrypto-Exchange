@@ -4,12 +4,9 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
 
 contract GuessingGame is VRFConsumerBase {
-   //There will be two players and there will be a random generated uint
-   //The two players will have to figure out the encoded version of that string value and whoever guesses the right answer first will get rewarded with 0.5-1 ether
-   //Probably use Chainlink VRF for this one
-   //Continue to think about how you will use subgraphs
    event CurrentGame(address Player, uint GameId);
-   event Winners(address Winner, bytes32 requestId);
+   event Winners(address Winner, bytes32 requestId, uint GameId);
+   event Ended(address Player, uint GameId);
    address payable[] players;
    address immutable owner;
    address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
@@ -18,9 +15,11 @@ contract GuessingGame is VRFConsumerBase {
    bytes32 currentRequestId;
    uint currentNumberValue = 0;
    uint public currentGameId = 1;
+   uint timeLimit;
    uint128 public nonce;
    uint128 constant _chainlinkFee = 0.1 * 10 ** 18;
    mapping(address => bool) public alreadyGuessed;
+   mapping(address => bool) public alreadyEntered;
 
    constructor() VRFConsumerBase(_vrfCoordinator, _linkToken) payable {
       owner = msg.sender;
@@ -29,11 +28,14 @@ contract GuessingGame is VRFConsumerBase {
    function enterGuessingGame() public payable {
      require(players.length < 2, "You will have to wait to enter the next game");
      require(msg.value >= 0.1 ether, "You need to at least put in 0.1 ether to join the game");
+     require(alreadyEntered[msg.sender] == false, "You can't enter twice");
      players.push(payable(msg.sender));
      alreadyGuessed[msg.sender] = false;
      if(players.length == 2) {
       generateRandomNumberValue();
+      timeLimit = 10 minutes;
      }
+     alreadyEntered[msg.sender] = true;
      emit CurrentGame(msg.sender, currentGameId);
    }
 
@@ -47,18 +49,25 @@ contract GuessingGame is VRFConsumerBase {
       require(msg.sender == players[0] || msg.sender == players[1], "You are not one of the players");
       require(!alreadyGuessed[msg.sender], "You already made a guess");
       require(currentNumberValue > 0, "The number hasn't changed value yet");
-      if((currentNumberValue > 10 ether) == guess) {
+      if((currentNumberValue > 50) == guess) {
           payable(msg.sender).transfer(address(this).balance);
+          alreadyEntered[players[0]] = false;
+          alreadyEntered[players[1]] = false;
           delete players;
+          emit Winners(msg.sender, currentRequestId, currentGameId);
           currentGameId++;
           nonce = 0;
           currentNumberValue = 0;
-          emit Winners(msg.sender, currentRequestId);
       } else {
          alreadyGuessed[msg.sender] = true;
+         alreadyEntered[msg.sender] = false;
          nonce++;
       }
       if(nonce == 2) {
+          alreadyEntered[players[0]] = false;
+          alreadyEntered[players[1]] = false;
+          emit Ended(players[0], currentGameId);
+          emit Ended(players[1], currentGameId);
           delete players;
           currentNumberValue = 0;
           nonce = 0;
@@ -66,8 +75,20 @@ contract GuessingGame is VRFConsumerBase {
       }
    }
 
+   function timeIsUp() public {
+      require(block.timestamp > timeLimit && currentNumberValue > 0, "Hasn't Been 10 Minutes After Number Was Generated");
+          alreadyEntered[players[0]] = false;
+          alreadyEntered[players[1]] = false;
+          emit Ended(players[0], currentGameId);
+          emit Ended(players[1], currentGameId);
+          delete players;
+          currentNumberValue = 0;
+          nonce = 0;
+          timeLimit = 0;
+   }
+
    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal virtual override {
-      currentNumberValue = (randomness % 100) * 1 ether;
+      currentNumberValue = (randomness % 100);
       currentRequestId = requestId;
    }
 

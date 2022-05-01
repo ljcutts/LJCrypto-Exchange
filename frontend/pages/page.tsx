@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { IState as Props } from "./index";
 import Link from "next/link";
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import Web3Modal from "web3modal";
-import { FETCH_GUESSINGGAME } from "../queries";
+import { FETCH_GUESSINGGAME} from "../queries";
 import { subgraphQuery } from "../utils";
 
 import {
@@ -12,14 +11,13 @@ import {
 } from "../constants/guessingGame";
 
 
-//subgraphs weren't queried/made right
-//might have to redeploy a new contract and make better events
-
 type IState = {
   account: string | null;
   setAccount: React.Dispatch<React.SetStateAction<string | null>>;
   player: string | null;
   setPlayer: React.Dispatch<React.SetStateAction<string | null>>;
+  winner: string | null;
+  setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   otherPlayer: string | null;
   setOtherPlayer: React.Dispatch<React.SetStateAction<string | null>>;
   amount: string;
@@ -36,6 +34,7 @@ const GuessingGame: React.FC = () => {
   const [walletConnected, setWalletConnected] = useState(false);
   const [thisAmount, setAmount] = useState<IState["amount"]>("");
   const [player, setPlayer] = useState<IState["player"]>("");
+  const [winner, setWinner] = useState<IState["winner"]>("");
   const [otherPlayer, setOtherPlayer] = useState<IState["otherPlayer"]>("");
   const [numberisZero, setNumberIsZero] =
     useState<IState["numberIsZero"]>(false);
@@ -53,7 +52,8 @@ const GuessingGame: React.FC = () => {
     const gameArray = await subgraphQuery(FETCH_GUESSINGGAME());
     const player1 = gameArray.guessingGames[0].Player[0];
     const player2 = gameArray.guessingGames[0].Player[1];
-    if (player === undefined) {
+    const winner = gameArray.guessingGames[0].Winner
+    if (player1 === undefined) {
       setPlayer("");
     } else {
       setPlayer(player1);
@@ -63,7 +63,29 @@ const GuessingGame: React.FC = () => {
     } else {
       setOtherPlayer(player2);
     }
+
+    if(winner === undefined) {
+      setWinner("")
+    } else {
+      setWinner(winner)
+    }
   }
+
+  const restartGame = async () => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const daoContract = getGuessingGameContractInstance(signer);
+      const txn = await daoContract.timeIsUp()
+      await txn.wait();
+    } catch (error) {
+      console.log(error);
+      window.alert(
+        "10 Minutes Haven't Passed Since Both Players Joined The Game"
+      );
+    }
+  };
+
+
 
   const joinGame = async (amount: string) => {
     try {
@@ -97,15 +119,16 @@ const GuessingGame: React.FC = () => {
     return thisAccount;
   };
 
+
   const makeAGuess = async (guess: boolean) => {
     try {
       const signer = await getProviderOrSigner(true);
       const daoContract = getGuessingGameContractInstance(signer);
       const txn = await daoContract.guessTheNumberValue(guess);
       await txn.wait();
-      //Figure out how to alert whether or not the player guesses correctly
     } catch (error) {
       console.log(error);
+      window.alert("Either You are Not A Player Or You Have Already Guessed")
     }
   };
 
@@ -154,8 +177,8 @@ const GuessingGame: React.FC = () => {
        await getAddress();
        await isNumberAboveZero()
        await fetchFromGame();
-     }, 1 * 1000);
-  }, [walletConnected, account]);
+     }, 0.5 * 1000);
+  }, [walletConnected, account, numberisZero]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -184,10 +207,10 @@ const GuessingGame: React.FC = () => {
     if (page === false) {
       return thisAmount === "0" || thisAmount === "" ? (
         <div className="flex justify-start">
-          <button className="rounded-2xl mx-auto bg-yellow-500 md:relative md:left-40 text-white h-8 shadow-button w-40 font-bold transition ease-in-out  opacity-50 mb-10">
+          <button  className="rounded-2xl mx-auto bg-yellow-500 md:relative md:left-40 text-white h-8 shadow-button w-40 font-bold transition ease-in-out  opacity-50 mb-10">
             Enter Game
           </button>
-          <button
+          <button 
             onClick={togglePage}
             className="rounded-2xl mx-auto bg-black md:relative md:right-40 text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out mb-10"
           >
@@ -237,8 +260,7 @@ const GuessingGame: React.FC = () => {
       </nav>
       <div className="flex items-center h-32 w-auto bg-black rounded-2xl relative top-10">
         <p className="flex items-center text-yellow-500 mx-auto text-xl font-bold uppercase px-4 ">
-          Guess correctly if the random number generated is greater than 10
-          ether and money will be sent to your account!!!
+          Guess correctly if the random number generated is greater than 50 and money will be sent to your account!!!
         </p>
       </div>
       <div className="flex flex-col justify-center mx-auto relative top-32">
@@ -281,13 +303,11 @@ const GuessingGame: React.FC = () => {
             (numberisZero === false ? (
               <div className="flex justify-start">
                 <button
-                  onClick={() => makeAGuess(true)}
                   className="rounded-2xl mx-auto opacity-50 md:relative md:left-20 bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
                 >
                   True
                 </button>
                 <button
-                  onClick={() => makeAGuess(false)}
                   className="rounded-2xl mx-auto opacity-50 bg-yellow-500 md:relative md:right-20 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
                 >
                   False
@@ -310,20 +330,28 @@ const GuessingGame: React.FC = () => {
               </div>
             ))}
         </div>
-        {/* player !== account && otherPlayer !== account ?  */}
-        {/* {player !== account && otherPlayer !== account ? 
-         
-      } */}
         {renderPage()}
         {guessPage()}
-
+        <p className="mx-auto text-white text-2xl font-bold uppercase mt-5">
+          The Winner:
+        </p>
+        <div className="flex flex-col h-7 text-xl w-80 mx-auto pl-3 bg-black rounded-md text-yellow-500 font-bold mb-5">
+          {winner !== null ? (
+            <p className="text-xl">
+               {winner.slice(0, 20)}...
+              {winner.slice(-4)}
+            </p>
+          ) : (
+            ""
+          )}
+        </div>
         <p className="mx-auto text-white text-2xl font-bold uppercase mt-5">
           Current Players:
         </p>
         <p className="mx-auto text-white text-xl font-bold uppercase mb-5 md:text-2xl">
           (Only 2 players can enter at a time)
         </p>
-        <div className="flex flex-col h-14 w-80 mx-auto pl-3 bg-black rounded-md text-yellow-500 font-bold">
+        <div className="flex flex-col h-14 w-80 mx-auto pl-3 bg-black rounded-md text-yellow-500 font-bold mb-5">
           <div>
             {player !== null ? (
               <p className="text-xl">
@@ -345,6 +373,19 @@ const GuessingGame: React.FC = () => {
             )}
           </div>
         </div>
+        <p className="mx-auto text-white text-2xl font-bold uppercase mt-5 mb-5">
+          Restart The Game
+        </p>
+        <p className="mx-auto text-white text-xl font-bold uppercase mb-5 md:text-2xl">
+          (This is only if 10 minutes passed and the 2 players have not guessed
+          yet)
+        </p>
+        <button
+          onClick={restartGame}
+          className="rounded-2xl mx-auto bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out mb-10"
+        >
+          Restart
+        </button>
       </div>
       <div className="flex flex-row justify-between mx-auto translate-x-1/2 translate-y-down50% justify-self-center max-w-xs bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 fixed bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
         <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
@@ -358,11 +399,5 @@ const GuessingGame: React.FC = () => {
     </main>
   );
 };
-
-// export async function getStaticProps() {
-//  const _gameArray = await subgraphQuery(FETCH_GUESSINGGAME());
-//   const gameArray = _gameArray.guessingGames[0].Player;
-//   return { props: { gameArray } };
-// }
 
 export default GuessingGame;

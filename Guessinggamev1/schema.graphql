@@ -1,0 +1,6 @@
+type GuessingGame @entity {
+  id: ID!
+  Winner: Bytes!
+  requestId: Bytes
+  Player: [Bytes!]!
+}

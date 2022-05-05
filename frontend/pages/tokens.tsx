@@ -13,6 +13,9 @@ import {
   LJSTABLE_COIN_ADDRESS,
 } from "../constants/ljstablecoin";
 
+
+//Fix the userBalanceInEther
+
 type IState = {
   account: string | null;
   setAccount: React.Dispatch<React.SetStateAction<string | null>>;
@@ -20,6 +23,8 @@ type IState = {
   setLJCryptoPrice: React.Dispatch<React.SetStateAction<string>>;
   ljcryptoBalance: string;
   setLJCryptoBalance: React.Dispatch<React.SetStateAction<string>>;
+  ljcryptoEtherBalance: string;
+  setLJCryptoEtherBalance: React.Dispatch<React.SetStateAction<string>>;
   ljstablecoinBalance: string;
   setLJStableCoinBalance: React.Dispatch<React.SetStateAction<string>>;
   amount: string;
@@ -32,6 +37,7 @@ const Tokens: React.FC = () => {
      const [account, setAccount] = useState<IState["account"]>(null);
      const [ljcryptoPrice, setLJCryptoPrice] = useState<IState["ljcryptoPrice"]>("0");
      const [ljcryptoBalance, setLJCryptoBalance] = useState<IState["ljcryptoBalance"]>("0");
+     const [ljcryptoEtherBalance, setLJCryptoEtherBalance] = useState<IState["ljcryptoEtherBalance"]>("0");
      const [ljstablecoinBalance, setLJStableCoinBalance] = useState<IState["ljstablecoinBalance"]>("0");
      const [walletConnected, setWalletConnected] = useState(false);
      const [thisAmount, setAmount] = useState<IState["amount"]>("");
@@ -136,6 +142,24 @@ const Tokens: React.FC = () => {
         }
       }
 
+      const ljcryptoBalanceInEther = async() => {
+        try {
+           const provider = await getProviderOrSigner(true);
+           const contract = getLJCryptoTokenInstance(provider);
+           const price = await contract.currentPricePerTokenInEther()
+           const correctPrice = ethers.utils.formatEther(price)
+            const currentAccount = await getAddress();
+            const balance = await contract.balanceOf(currentAccount);
+           const correctBalance = ethers.utils.formatEther(balance)
+           const balanceInEther = (parseInt(correctPrice) * parseInt(correctBalance))
+           setLJCryptoEtherBalance("0");
+          //  console.log(balanceInEther)
+           return balanceInEther;
+        } catch (error) {
+          console.log(error)
+        }
+      }
+
       const buyljStableCoin = async(amount: string) => {
         try {
            const signer = await getProviderOrSigner(true);
@@ -228,6 +252,7 @@ const Tokens: React.FC = () => {
          await getLJCryptoTokenPrice()
          await getLJCryptoTokenBalance()
          await getLJStableCoinBalance()
+         await ljcryptoBalanceInEther()
        }, 0.5 * 1000);
      }, [walletConnected, account]);
 
@@ -257,18 +282,31 @@ const Tokens: React.FC = () => {
           </div>
         </button>
       </nav>
-      <div className="flex items-center h-32 w-auto bg-black rounded-2xl relative top-10 mb-20">
+      <div className="flex items-center h-32 w-auto bg-black rounded-2xl relative top-10 mb-16">
         <div className="flex items-center text-yellow-500 mx-auto sm:text-lg text-xl font-bold uppercase px-4">
           <p className="">
             Available tokens to buy: ljcryptotoken, ljstablecoin
           </p>
         </div>
       </div>
-      <div className="flex justify-start w-32 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+      <div className="flex justify-start md:mx-auto w-40 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+        Contract Addresses:
+      </div>
+      <div className="flex flex-col md:mx-auto justify-center h-32 pl-2 w-350 md:w-700 bg-black rounded-md font-semibold relative top-10 ml-4 mb-20">
+        <p className="text-yellow-400 mb-5 md:mx-auto md:text-xl">
+          LJCryptoToken:{" "}
+          <span className="text-sm md:text-xl">{LJCRYPTO_TOKEN_ADDRESS}</span>
+        </p>
+        <p className="text-yellow-400 md:text-xl md:mx-auto">
+          LJStableCoin:{" "}
+          <span className="text-sm md:text-xl">{LJSTABLE_COIN_ADDRESS}</span>
+        </p>
+      </div>
+      <div className="flex justify-start w-32 md:mx-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
         Your Balances:
       </div>
-      <div className="flex flex-col h-32 w-80 bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 ">
+      <div className="flex flex-col h-32 w-80 md:mx-auto md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
+        <div className="flex mt-5 ml-3 md:text-xl md:mx-auto">
           <img
             src="/ljcrypto.webp"
             alt=""
@@ -278,7 +316,7 @@ const Tokens: React.FC = () => {
             LjcryptoToken: <span>{ljcryptoBalance} Tokens</span>
           </p>
         </div>
-        <div className="flex mt-5 ml-3 ">
+        <div className="flex mt-5 ml-3 md:text-xl md:mx-auto">
           <img
             src="/ljstable.png"
             alt=""
@@ -289,11 +327,40 @@ const Tokens: React.FC = () => {
           </p>
         </div>
       </div>
-      <div className="flex justify-start w-28 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold  whitespace-nowrap">
+      <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+        Balance Amounts:
+      </div>
+      <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
+        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+          <img
+            src="/ljcrypto.webp"
+            alt=""
+            className="rounded-3xl w-8 h-8 mr-3"
+          />
+          <p className="text-yellow-500 font-semibold capitalize">
+            LjcryptoToken: <span>{ljcryptoEtherBalance} Ether</span>
+          </p>
+        </div>
+        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+          <img
+            src="/ljstable.png"
+            alt=""
+            className="rounded-3xl w-8 h-8 mr-3"
+          />
+          <p className="text-yellow-500 font-semibold capitalize">
+            Ljstablecoin: <span>{ljstablecoinBalance} Tokens</span>
+          </p>
+        </div>
+      </div>
+      <div className="flex justify-start md:mx-auto w-28 items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-5 ml-4  whitespace-nowrap">
         Token Prices:
       </div>
-      <div className="flex flex-col h-32 w-80 bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 ">
+      <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
+        DISCLAIMER: THESE PRICES ARE IN ETHER CURRENCY AND NOT
+        FIAT(USD/CAD/EUD....)
+      </p>
+      <div className="flex flex-col md:mx-auto h-32 w-80 md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
+        <div className="flex mt-5 ml-3 md:mx-auto md:text-lg">
           <img
             src="/ljcrypto.webp"
             alt=""
@@ -303,7 +370,7 @@ const Tokens: React.FC = () => {
             LjcryptoToken: <span>{ljcryptoPrice} Ether</span>
           </p>
         </div>
-        <div className="flex mt-5 ml-3 ">
+        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
           <img
             src="/ljstable.png"
             alt=""
@@ -314,23 +381,23 @@ const Tokens: React.FC = () => {
           </p>
         </div>
       </div>
-      <div className="flex justify-start w-28 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mt-15  whitespace-nowrap">
+      <div className="flex justify-start md:mx-auto w-28 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mt-15  whitespace-nowrap">
         Buy And Sell:
       </div>
-      <div className="flex flex-col  h-32 w-80 bg-black rounded-md ml-4 relative top-10 mb-20">
+      <div className="flex flex-col md:mx-auto md:text-xl h-32 w-80 bg-black rounded-md ml-4 relative top-10 mb-20">
         <div className="flex mt-5 ml-3 ">
           <img
             src="/ljcrypto.webp"
             alt=""
             className="rounded-3xl w-8 h-8 mr-3"
           />
-          <div className="flex items-center">
+          <div className="flex justify-start items-center">
             <p className="text-yellow-500 font-semibold capitalize">
               LjcryptoToken:
             </p>
             <button
               onClick={toggleBuyLJCrypto}
-              className="rounded-md ml-3 mx-auto md:relative md:left-20 bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
+              className="rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
             >
               Buy
             </button>
@@ -353,13 +420,13 @@ const Tokens: React.FC = () => {
                     </p>
                     <input
                       type="number"
-                      placeholder="Amount To Buy"
+                      placeholder="Amount"
                       onChange={handleChange}
                       className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
                     />
                   </div>
                   <button
-                    className="rounded-2xl mx-auto bg-black md:relative md:right-40 text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                    className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
                     onClick={() => buyLJCrytptoToken(thisAmount)}
                   >
                     Buy Tokens
@@ -369,7 +436,7 @@ const Tokens: React.FC = () => {
             )}
             <button
               onClick={toggleSellLJCrypto}
-              className=" rounded-md ml-3 mx-auto md:relative md:left-20 bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 "
+              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 "
             >
               Sell
             </button>
@@ -392,13 +459,13 @@ const Tokens: React.FC = () => {
                     </p>
                     <input
                       type="number"
-                      placeholder="Amount To Sell"
+                      placeholder="Amount"
                       onChange={handleChange}
                       className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
                     />
                   </div>
                   <button
-                    className="rounded-2xl mx-auto bg-black md:relative md:right-40 text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                    className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
                     onClick={() => sellLJCryptoToken(thisAmount)}
                   >
                     Sell Tokens
@@ -420,12 +487,12 @@ const Tokens: React.FC = () => {
             </p>
             <button
               onClick={toggleBuyLJStableCoin}
-              className=" rounded-md ml-3 mx-auto md:relative md:left-20 bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
+              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
             >
               Buy
             </button>
             {buyljStable && (
-              <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
+              <div className="fixed top-0 left-0 w-full  h-full bg-shade grid z-50 place-items-center">
                 <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
                   <svg
                     viewBox="0 0 24 24"
@@ -443,13 +510,13 @@ const Tokens: React.FC = () => {
                     </p>
                     <input
                       type="number"
-                      placeholder="Amount To Buy"
+                      placeholder="Amount"
                       onChange={handleChange}
                       className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
                     />
                   </div>
                   <button
-                    className="rounded-2xl mx-auto bg-black md:relative md:right-40 text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                    className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
                     onClick={() => buyljStableCoin(thisAmount)}
                   >
                     Buy Tokens
@@ -457,7 +524,10 @@ const Tokens: React.FC = () => {
                 </div>
               </div>
             )}
-            <button onClick={toggleSellLJStableCoin} className=" rounded-md ml-3 mx-auto md:relative md:left-20 bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 ">
+            <button
+              onClick={toggleSellLJStableCoin}
+              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 "
+            >
               Sell
             </button>
             {sellljStable && (
@@ -479,13 +549,13 @@ const Tokens: React.FC = () => {
                     </p>
                     <input
                       type="number"
-                      placeholder="Amount To Sell"
+                      placeholder="Amount"
                       onChange={handleChange}
                       className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
                     />
                   </div>
                   <button
-                    className="rounded-2xl mx-auto bg-black md:relative md:right-40 text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                    className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
                     onClick={() => sellLJStableCoin(thisAmount)}
                   >
                     Sell Tokens
@@ -495,6 +565,19 @@ const Tokens: React.FC = () => {
             )}
           </div>
         </div>
+      </div>
+      <div className="flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
+        <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
+          Tokens
+        </a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+          Lottery Game
+        </a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+          Liquidity Pools
+        </a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">Tokens&NFTs</a>
       </div>
     </main>
   );

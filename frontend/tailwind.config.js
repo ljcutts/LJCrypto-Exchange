@@ -20,7 +20,9 @@ module.exports = {
         "down50%": "-50%",
       },
       spacing: {
-        '280': '285px',
+        280: "285px",
+        350: "350px",
+        700: "700px",
       },
       colors: {
         shade: "rgba(0, 0, 0, 0.5)",

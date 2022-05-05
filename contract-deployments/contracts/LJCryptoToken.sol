@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract LJCryptoToken is ERC20 {
     mapping(address => uint) public stakingBalance;
-    mapping(address => uint) public stakingTimestamps; //update stakingTimeStamps
+    mapping(address => uint) public stakingTimestamps; 
     bool public isPaused;
     address immutable owner;
     uint256 public constant maxTotalSupply = 200000 * 10**18;
@@ -91,7 +91,7 @@ contract LJCryptoToken is ERC20 {
 
 
     function userBalanceInEther() external view returns(uint) {
-       return  balanceOf(msg.sender) * currentPricePerTokenInEther();
+       return  (balanceOf(msg.sender)/1e18) * currentPricePerTokenInEther();
     }
 
 

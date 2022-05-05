@@ -55,7 +55,7 @@ const Home: NextPage = () => {
      // When used for the first time, it prompts the user to connect their wallet
      await getProviderOrSigner();
      setWalletConnected(true);
-     router.push("/page");
+     router.push("/guessinggame");
    } catch (err) {
      console.error(err);
    }

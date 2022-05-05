@@ -15,15 +15,13 @@ describe("LJCryptoToken", async function() {
        await ljcryptoToken
          .connect(addr1)
          .buyTokens(5, { value: ethers.utils.parseEther("1") });
-       const tokenBalance = await ljcryptoToken.tokenBalance(
-         "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
-       );
+       const balanceOf = await ljcryptoToken.balanceOf(addr1.address)
        await ljcryptoToken
          .connect(addr2)
          .buyTokens(5, { value: ethers.utils.parseEther("0.000055") });
        const contractBalance = await ljcryptoToken.balanceOfContract();
        const tokenCost = await ljcryptoToken.currentPricePerTokenInEther();
-       expect(tokenBalance).to.equal(5);
+       expect(balanceOf).to.equal(5);
        console.log(
          `\nContract Balance: ${ethers.utils.formatEther(contractBalance)}\n`
        );
@@ -47,19 +45,13 @@ describe("LJCryptoToken", async function() {
        await ljcryptoToken.connect(addr2).buyTokens(1, { value: ethers.utils.parseEther("9998") });
        const userBalance = await ljcryptoToken.connect(addr1).receiveBalance();
        console.log( `\nUser Balance: ${ethers.utils.formatEther(userBalance)}\n`);
-         await ljcryptoToken
-           .connect(addr1)
-           .sellTokens(5);
-            const newBalance = await ljcryptoToken
-              .connect(addr1)
-              .receiveBalance();
+       await ljcryptoToken.connect(addr1).sellTokens(5);
+       const newBalance = await ljcryptoToken.connect(addr1).receiveBalance();
             console.log(
               `\nNew Balance: ${ethers.utils.formatEther(newBalance)}\n`
             );
-       const tokenBalance = await ljcryptoToken.tokenBalance(
-         "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
-       );
-       expect(tokenBalance).to.equal(0);
+       const balanceOf = await ljcryptoToken.balanceOf(addr1.address)
+       expect(balanceOf).to.equal(0);
        const contractBalance = await ljcryptoToken.balanceOfContract();
        const tokenCost = await ljcryptoToken.currentPricePerTokenInEther();
        console.log(
@@ -68,14 +60,14 @@ describe("LJCryptoToken", async function() {
        console.log(`\nToken Price: ${ethers.utils.formatEther(tokenCost)}\n`);
      });
 
-      it("Should be able to stake tokens", async function () {
+      xit("Should be able to stake tokens", async function () {
         const [owner, addr1, addr2] = await ethers.getSigners();
         const LJCryptoToken = await ethers.getContractFactory("LJCryptoToken");
         const ljcryptoToken = await LJCryptoToken.connect(owner).deploy();
         await ljcryptoToken.deployed();
-        await ljcryptoToken.connect(addr1).buyTokens(1, { value: ethers.utils.parseEther("1") });
-        await ljcryptoToken.connect(addr1).stakeTokens(1);
-         const stakingBalance = await ljcryptoToken.stakingBalance(
+        await ljcryptoToken.connect(addr1).buyTokens(2, { value: ethers.utils.parseEther("1") });
+        await ljcryptoToken.connect(addr1).stakeTokens(2);
+        const stakingBalance = await ljcryptoToken.stakingBalance(
            "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
          );
          console.log(`\nStaking Balance: ${stakingBalance}\n`);

@@ -19,9 +19,13 @@ module.exports = {
       translate: {
         "down50%": "-50%",
       },
-      maxWidth: {
-       
+      spacing: {
+        '280': '285px',
       },
+      colors: {
+        shade: "rgba(0, 0, 0, 0.5)",
+      },
+      maxWidth: {},
     },
   },
   plugins: [],

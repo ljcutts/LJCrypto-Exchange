@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import Web3Modal from "web3modal";
-import { FETCH_GUESSINGGAME} from "../queries";
+import { FETCH_GUESSINGGAME } from "../queries";
 import { subgraphQuery } from "../utils";
 
 import {
@@ -36,9 +36,9 @@ const GuessingGame: React.FC = () => {
   const [player, setPlayer] = useState<IState["player"]>("");
   const [winner, setWinner] = useState<IState["winner"]>("");
   const [otherPlayer, setOtherPlayer] = useState<IState["otherPlayer"]>("");
-  const [numberisZero, setNumberIsZero] =
-    useState<IState["numberIsZero"]>(false);
+  const [numberisZero, setNumberIsZero] = useState<IState["numberIsZero"]>(false);
   const [page, setPage] = useState<IState["page"]>(false);
+  
 
   const getGuessingGameContractInstance = (providerOrSigner: any) => {
     return new Contract(
@@ -246,7 +246,7 @@ const GuessingGame: React.FC = () => {
           </a>
         </Link>
         <button className="rounded-2xl bg-yellow-500 text-white h-8 shadow-button w-40 font-bold ml-2 transition ease-in-out hover:bg-yellow-300">
-          <p className="text-xl text-black">
+          <div className="text-xl text-black">
             {account !== null ? (
               <p className="text-xl">
                 {account.slice(0, 6)}...
@@ -255,12 +255,13 @@ const GuessingGame: React.FC = () => {
             ) : (
               <p onClick={connectWallet}> Connect </p>
             )}
-          </p>
+          </div>
         </button>
       </nav>
       <div className="flex items-center h-32 w-auto bg-black rounded-2xl relative top-10">
         <p className="flex items-center text-yellow-500 mx-auto text-xl font-bold uppercase px-4 ">
-          Guess correctly if the random number generated is greater than 50 and money will be sent to your account!!!
+          Guess correctly if the random number generated is greater than 50 and
+          money will be sent to your account!!!
         </p>
       </div>
       <div className="flex flex-col justify-center mx-auto relative top-32">
@@ -302,14 +303,10 @@ const GuessingGame: React.FC = () => {
           {page === true &&
             (numberisZero === false ? (
               <div className="flex justify-start">
-                <button
-                  className="rounded-2xl mx-auto opacity-50 md:relative md:left-20 bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
-                >
+                <button className="rounded-2xl mx-auto opacity-50 md:relative md:left-20 bg-yellow-500 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12">
                   True
                 </button>
-                <button
-                  className="rounded-2xl mx-auto opacity-50 bg-yellow-500 md:relative md:right-20 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12"
-                >
+                <button className="rounded-2xl mx-auto opacity-50 bg-yellow-500 md:relative md:right-20 text-white h-8 shadow-button w-40 font-bold transition ease-in-out hover:bg-yellow-300 mb-12">
                   False
                 </button>
               </div>
@@ -338,7 +335,7 @@ const GuessingGame: React.FC = () => {
         <div className="flex flex-col h-7 text-xl w-80 mx-auto pl-3 bg-black rounded-md text-yellow-500 font-bold mb-5">
           {winner !== null ? (
             <p className="text-xl">
-               {winner.slice(0, 20)}...
+              {winner.slice(0, 20)}...
               {winner.slice(-4)}
             </p>
           ) : (
@@ -391,10 +388,14 @@ const GuessingGame: React.FC = () => {
         <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
           Guessing Game
         </a>
-        <a className="pr-4 hover:text-yellow-500">Lottery Game</a>
-        <a className="pr-4">Staking</a>
-        <a className="pr-4">Liquidity Pools</a>
-        <a className="pr-4">Tokens&NFTs</a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+          Lottery Game
+        </a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+          Liquidity Pools
+        </a>
+        <a className="pr-4 hover:text-yellow-500 cursor-pointer">Tokens&NFTs</a>
       </div>
     </main>
   );

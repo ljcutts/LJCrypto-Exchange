@@ -23,12 +23,11 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     Counters.Counter private _currentSupply;
     bool public _paused;
     address immutable owner;
-    address public thisContract = address(this);
     address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
     address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
     bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
     uint constant _chainlinkFee = 0.1 * 10 ** 18;
-    uint randomNumber = 1;
+    uint randomNumber;
     // uint32 public constant TIER1 = 0;
     // uint32 public constant TIER2 = 1;
     // uint32 public constant TIER3 = 2;
@@ -49,7 +48,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
             _;
         }
      
-   function mintToken() public payable onlyWhenNotPaused {
+   function mintToken() external payable onlyWhenNotPaused {
     require(_currentSupply.current() < 1000, "We have reached the maxiumum supply");
     require(randomNumber > 0, "A random number hasn't been generated yet");
     uint tokenAmount = 0.01 ether;
@@ -57,7 +56,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     uint randomId = randomNumber % 10;
     _mint(msg.sender, randomId, 1, "");
     _currentSupply.increment();
-    // randomNumber = 0;
+    randomNumber = 0;
    }
 
     function checkUpkeep(bytes calldata /*checkData*/) external view returns (bool upkeepNeeded, bytes memory /*performData*/) {
@@ -76,7 +75,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
    }
 
     function totalNFTBalance()
-        public
+        external
         view
         virtual
         returns (uint256)
@@ -90,14 +89,14 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
         return amountofNFTs;
     }
 
-    function breedNFTs(uint[2] memory ids) public {
+    function breedNFTs(uint[2] memory ids) external {
        for(uint i = 0; i < ids.length; ++i) {
            burn(msg.sender, ids[i], 1);
        }
         _mint(msg.sender, 11, 1, "");
     }
     
-   function setPause(bool _value) public {
+   function setPause(bool _value) external {
        require(msg.sender == owner, "You are not the owner");
        _paused = _value;
    }
@@ -111,21 +110,25 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
        return string(abi.encodePacked("https://gateway.pinata.cloud/ipfs/QmdTLaJeFdRwgMvBynK892uG8mAuSN9UYvkG9R2QPRsd4b/", Strings.toString(_tokenId), ".json"));
    }
 
-   function mintTokensToStakingContract(address _stakingContract, uint _amount) public onlyWhenNotPaused {
+   function mintTokensToStakingContract(address _stakingContract, uint _amount) external onlyWhenNotPaused {
         require(msg.sender == owner, "You are not the owner");
         _mint(_stakingContract, 10, _amount, "");
    }
 
-         function withdraw() public  {
+   function numberAboveZero() external view returns(bool) {
+      return randomNumber > 0;
+   }
+
+         function withdraw() external {
             require(msg.sender == owner, "You are not the owner");
             uint256 amount = address(this).balance;
             (bool sent, ) =  payable(msg.sender).call{value: amount}("");
             require(sent, "Failed to send Ether");
         }
 
-        function balance() public view returns(uint) {
-            return address(msg.sender).balance;
-        }
+        // function balance() public view returns(uint) {
+        //     return address(msg.sender).balance;
+        // }
 
          // Function to receive Ether. msg.data must be empty
         receive() external payable {}

@@ -27,6 +27,8 @@ type IState = {
   setLJCryptoEtherBalance: React.Dispatch<React.SetStateAction<string>>;
   ljstablecoinBalance: string;
   setLJStableCoinBalance: React.Dispatch<React.SetStateAction<string>>;
+  ljstablecoinEtherBalance: string;
+  setLJStableCoinEtherBalance: React.Dispatch<React.SetStateAction<string>>;
   amount: string;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
 };
@@ -39,6 +41,7 @@ const Tokens: React.FC = () => {
      const [ljcryptoBalance, setLJCryptoBalance] = useState<IState["ljcryptoBalance"]>("0");
      const [ljcryptoEtherBalance, setLJCryptoEtherBalance] = useState<IState["ljcryptoEtherBalance"]>("0");
      const [ljstablecoinBalance, setLJStableCoinBalance] = useState<IState["ljstablecoinBalance"]>("0");
+     const [ljstablecoinEtherBalance, setLJStableCoinEtherBalance] = useState<IState["ljstablecoinBalance"]>("0");
      const [walletConnected, setWalletConnected] = useState(false);
      const [thisAmount, setAmount] = useState<IState["amount"]>("");
      const [buyljCrypto, setbuyLJCrypto] = useState(false);
@@ -48,7 +51,7 @@ const Tokens: React.FC = () => {
 
       const web3ModalRef: any = useRef();
 
-      const getLJCryptoTokenInstance = (providerOrSigner: any) => {
+      const getLJCryptoTokenInstance = (providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner) => {
         return new Contract(
           LJCRYPTO_TOKEN_ADDRESS,
           LJCRYPTO_TOKEN_ABI,
@@ -56,7 +59,7 @@ const Tokens: React.FC = () => {
         );
       };
 
-       const getLJStableCoinInstance = (providerOrSigner: any) => {
+       const getLJStableCoinInstance = (providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner) => {
          return new Contract(
            LJSTABLE_COIN_ADDRESS,
            LJSTABLE_COIN_ABI,
@@ -146,15 +149,10 @@ const Tokens: React.FC = () => {
         try {
            const provider = await getProviderOrSigner(true);
            const contract = getLJCryptoTokenInstance(provider);
-           const price = await contract.currentPricePerTokenInEther()
-           const correctPrice = ethers.utils.formatEther(price)
-            const currentAccount = await getAddress();
-            const balance = await contract.balanceOf(currentAccount);
-           const correctBalance = ethers.utils.formatEther(balance)
-           const balanceInEther = (parseInt(correctPrice) * parseInt(correctBalance))
-           setLJCryptoEtherBalance("0");
-          //  console.log(balanceInEther)
-           return balanceInEther;
+           const currentAccount = await getAddress()
+           const value = await contract.userBalanceInEther({from: currentAccount});
+           setLJCryptoEtherBalance(ethers.utils.formatEther(value));
+           return value;
         } catch (error) {
           console.log(error)
         }
@@ -185,6 +183,22 @@ const Tokens: React.FC = () => {
           window.alert("You Don't Own This Many Tokens")
         }
       }
+
+      const ljstableBalanceInEther = async () => {
+        try {
+          const provider = await getProviderOrSigner(true);
+          const contract = getLJStableCoinInstance(provider);
+          const currentAccount = await getAddress();
+          const value = await contract.userBalanceInEther({
+            from: currentAccount,
+          });
+          setLJStableCoinEtherBalance(ethers.utils.formatEther(value));
+          return value;
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
 
       const getLJStableCoinBalance = async () => {
         const provider = await getProviderOrSigner(true);
@@ -253,6 +267,7 @@ const Tokens: React.FC = () => {
          await getLJCryptoTokenBalance()
          await getLJStableCoinBalance()
          await ljcryptoBalanceInEther()
+         await ljstableBalanceInEther()
        }, 0.5 * 1000);
      }, [walletConnected, account]);
 
@@ -338,7 +353,7 @@ const Tokens: React.FC = () => {
             className="rounded-3xl w-8 h-8 mr-3"
           />
           <p className="text-yellow-500 font-semibold capitalize">
-            LjcryptoToken: <span>{ljcryptoEtherBalance} Ether</span>
+            LjcryptoToken: <span>{ljcryptoEtherBalance} ETH</span>
           </p>
         </div>
         <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
@@ -348,7 +363,7 @@ const Tokens: React.FC = () => {
             className="rounded-3xl w-8 h-8 mr-3"
           />
           <p className="text-yellow-500 font-semibold capitalize">
-            Ljstablecoin: <span>{ljstablecoinBalance} Tokens</span>
+            Ljstablecoin: <span>{ljstablecoinEtherBalance} ETH</span>
           </p>
         </div>
       </div>
@@ -367,7 +382,7 @@ const Tokens: React.FC = () => {
             className="rounded-3xl w-8 h-8 mr-3"
           />
           <p className="text-yellow-500 font-semibold capitalize">
-            LjcryptoToken: <span>{ljcryptoPrice} Ether</span>
+            LjcryptoToken: <span>{ljcryptoPrice} ETH</span>
           </p>
         </div>
         <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
@@ -377,7 +392,7 @@ const Tokens: React.FC = () => {
             className="rounded-3xl w-8 h-8 mr-3"
           />
           <p className="text-yellow-500 font-semibold capitalize">
-            Ljstablecoin: <span>0.0004 Ether</span>
+            Ljstablecoin: <span>0.0004 ETH</span>
           </p>
         </div>
       </div>

@@ -36,7 +36,9 @@ contract LJStableCoin is ERC20 {
      function stakeTokens(uint _amount) external isItPaused {
       stakingBalance[msg.sender] += _amount;
       _transfer(msg.sender, address(this), (_amount * 10 ** 18));
-      stakingTimestamps[msg.sender] = block.timestamp;
+       if(stakingTimestamps[msg.sender] == 0) {
+        stakingTimestamps[msg.sender] = block.timestamp;
+      }
     }
 
      function unstakeTokens(uint _amount) external isItPaused {
@@ -75,7 +77,7 @@ contract LJStableCoin is ERC20 {
 
 
     function userBalanceInEther() external view returns(uint) {
-       return balanceOf(msg.sender) * 0.0004 ether;
+       return (balanceOf(msg.sender)/1e18) * 0.0004 ether;
     }
 
 

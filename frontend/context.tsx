@@ -10,7 +10,9 @@ type Props = {
 };
 
 export type useWeb3 = {
-  getProviderOrSigner: (needSinger: boolean) => Promise<providers.Web3Provider | providers.JsonRpcSigner>;
+  getProviderOrSigner: (
+    needSinger: boolean
+  ) => Promise<providers.Web3Provider | providers.JsonRpcSigner>;
   getAddress: () => Promise<string>;
   connectWallet: () => void;
   account: string | null;
@@ -18,6 +20,8 @@ export type useWeb3 = {
   walletConnected: boolean;
   setWalletConnected: React.Dispatch<React.SetStateAction<boolean>>;
   web3ModalRef: any;
+  numberIsZero: boolean;
+  setNumberIsZero: React.Dispatch<React.SetStateAction<boolean>>;
 };
  
 
@@ -27,6 +31,7 @@ const Web3Context = createContext<useWeb3 | null>(null);
 const Web3Provider = ({ children }: Props) => {
   const [account, setAccount] = useState<useWeb3["account"]>(null);
   const [walletConnected, setWalletConnected] = useState<useWeb3["walletConnected"]>(false);
+   const [numberIsZero, setNumberIsZero] =useState<useWeb3["numberIsZero"]>(false);
   const web3ModalRef: any = useRef();
   const getAddress = async () => {
     const provider = await web3ModalRef.current.connect();
@@ -81,7 +86,9 @@ const Web3Provider = ({ children }: Props) => {
     web3ModalRef,
     getAddress,
     getProviderOrSigner,
-    connectWallet
+    connectWallet,
+    numberIsZero,
+    setNumberIsZero,
   };
 
   return (

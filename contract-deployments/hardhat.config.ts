@@ -30,8 +30,8 @@ const config: HardhatUserConfig = {
         url: "https://eth-rinkeby.alchemyapi.io/v2/Emiy8piVA9OqFcDwjxy87Vb24pQAgn7l",
       },
     },
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
+    mumbai: {
+      url: process.env.MUMBAI_URL || "",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },

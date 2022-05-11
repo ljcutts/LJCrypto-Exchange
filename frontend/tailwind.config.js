@@ -23,6 +23,7 @@ module.exports = {
         280: "285px",
         350: "350px",
         700: "700px",
+        120: "120px",
       },
       colors: {
         shade: "rgba(0, 0, 0, 0.5)",

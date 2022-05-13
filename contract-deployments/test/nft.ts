@@ -7,22 +7,22 @@ const pressAnyKey = require("press-any-key");
 
 
 describe("NFT", async function() {
-    it("Should be able to mint an NFT and get the uri", async function() {
-         const [owner, addr1, addr2] = await ethers.getSigners();
-         const NFT = await ethers.getContractFactory("LJCryptoNFTCollection");
-         const nft = await  NFT.connect(owner).deploy();
-         await nft.deployed();
-        //  console.log(`Please fund ${nft.address} with LINK`);
-        //  await pressAnyKey();
-         await nft.connect(addr1).mintToken({value: ethers.utils.parseEther('1')});
-         await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
-         await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
-         await nft.connect(owner).withdraw();
-        const balance = await nft.connect(owner).balance();
-        console.log(ethers.utils.formatEther(balance));
-        const metadata = await nft.uri(0)
-         console.log(`\nURL: ${metadata}\n`);
-    })
+//     it("Should be able to mint an NFT and get the uri", async function() {
+//          const [owner, addr1, addr2] = await ethers.getSigners();
+//          const NFT = await ethers.getContractFactory("LJCryptoNFTCollection");
+//          const nft = await  NFT.connect(owner).deploy();
+//          await nft.deployed();
+//         //  console.log(`Please fund ${nft.address} with LINK`);
+//         //  await pressAnyKey();
+//          await nft.connect(addr1).mintToken({value: ethers.utils.parseEther('1')});
+//          await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
+//          await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
+//          await nft.connect(owner).withdraw();
+//         const balance = await nft.connect(owner).balance();
+//         console.log(ethers.utils.formatEther(balance));
+//         const metadata = await nft.uri(0)
+//          console.log(`\nURL: ${metadata}\n`);
+//     })
 
      xit("Should be able to pause the contract", async function () {
        const [owner, addr1, addr2] = await ethers.getSigners();
@@ -58,8 +58,13 @@ describe("NFT", async function() {
         await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
         await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
         await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
+        await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
+        await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
+        await nft.connect(addr1).mintToken({ value: ethers.utils.parseEther("1") });
         await nft.connect(addr1).setApprovalForAll(nftstaking.address, true);
          await nftstaking.connect(addr1).stakeNFTs([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+         const oldStakingBalance = await nftstaking.connect(addr1).checkStakingBalance()
+         console.log("Old Staking Balance", oldStakingBalance)
          await network.provider.send("evm_increaseTime", [31536000]);
          await network.provider.send("evm_mine");
          await nftstaking.connect(addr1).updateStakingBalance();
@@ -71,7 +76,7 @@ describe("NFT", async function() {
         console.log(`\nURL: ${metadata}\n`);
       });
 
-      xit("Should be able to unstake NFTs", async function() {
+      it("Should be able to unstake NFTs", async function() {
            const [owner, addr1, addr2] = await ethers.getSigners();
            const NFT = await ethers.getContractFactory("LJCryptoNFTCollection");
            const nft = await NFT.deploy();

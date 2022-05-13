@@ -33,6 +33,7 @@ const Web3Provider = ({ children }: Props) => {
   const [walletConnected, setWalletConnected] = useState<useWeb3["walletConnected"]>(false);
    const [numberIsZero, setNumberIsZero] =useState<useWeb3["numberIsZero"]>(false);
   const web3ModalRef: any = useRef();
+  
   const getAddress = async () => {
     const provider = await web3ModalRef.current.connect();
     const web3Provider = new providers.Web3Provider(provider);

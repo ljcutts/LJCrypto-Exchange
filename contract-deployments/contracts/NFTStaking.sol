@@ -16,6 +16,7 @@ contract NFTStaking is ERC1155Holder {
    mapping(address => uint) stakingBalance;
    mapping(address => uint) originalBalance;
    mapping(address => uint) public stakingTimestamps;
+   mapping(uint => mapping(address => uint)) stakedNFTs;
 
    constructor(address _ljcryptoNFT) {
      owner = msg.sender;
@@ -27,44 +28,37 @@ contract NFTStaking is ERC1155Holder {
             _;
         }
 
-function totalNFTBalance()
-        public
-        view
-        virtual
-        returns (uint256)
-    {
-        uint amountofNFTs;
-        for (uint256 i = 0; i < 10; ++i) {
-            uint nftCount = LJCryptoNFT.balanceOf(msg.sender, i);
-            amountofNFTs += nftCount;
-        }
-
-        return amountofNFTs;
-    }
-
-  function stakeNFTs(uint[] memory ids) public onlyWhenNotPaused {
-        uint balance = totalNFTBalance();
-        require(balance >= 10, "You dont have enough NFTs to stake");
+  function stakeNFTs(uint[] memory ids) external onlyWhenNotPaused {
         require(ids.length >= 10, "You have to transfer 10 or more NFTs to start staking");
+        require(ids.length % 10 == 0, "HAVE_TO_BE_DIVISIBLE_BY_10");
           for (uint256 i = 0; i < ids.length; ++i) {
-           LJCryptoNFT.safeTransferFrom(msg.sender, address(this), ids[i], 1, "");
            stakingBalance[msg.sender]++;
            originalBalance[msg.sender]++;
+           stakedNFTs[ids[i]][msg.sender]++;
+           LJCryptoNFT.safeTransferFrom(msg.sender, address(this), ids[i], 1, "");
         }
         if(stakingTimestamps[msg.sender] == 0) {
             stakingTimestamps[msg.sender] = block.timestamp;
         }
     }
 
-    function unstakeNFTs(uint[] memory ids) public onlyWhenNotPaused {
+    function unstakeNFTs(uint[] memory ids) external onlyWhenNotPaused {
         require(stakingTimestamps[msg.sender] > 0, "You don't have any NFTs staked");
         require(ids.length >= 10, "You need to unstake 10 or more NFTs from your original balance");
+        updateStakingBalance();
+        uint balance = stakingBalance[msg.sender];
         for (uint256 i = 0; i < ids.length; ++i) {
-           LJCryptoNFT.safeTransferFrom(address(this), msg.sender, ids[i], 1, "");
            stakingBalance[msg.sender]--;
            originalBalance[msg.sender]--;
+           stakedNFTs[ids[i]][msg.sender]--;
+           LJCryptoNFT.safeTransferFrom(address(this), msg.sender, ids[i], 1, "");
         }
         if(stakingBalance[msg.sender] < 10) {
+          uint idLength = ids.length;
+          uint difference = balance - idLength;
+          if(difference > 0) {
+               claimNFTStakingRewards(difference);
+          }
             stakingTimestamps[msg.sender] = 0;
             stakingBalance[msg.sender] = 0;
             originalBalance[msg.sender] = 0;
@@ -89,11 +83,15 @@ function totalNFTBalance()
       LJCryptoNFT.safeTransferFrom(address(this), msg.sender, 10, _amount, "");
     }
 
-    function checkStakingBalance() public view returns (uint) {
+    function checkStakingBalance() external view returns (uint) {
         return stakingBalance[msg.sender];
     }
 
-     function withdraw() public  {
+    function checkStakedNFTs(uint _id) external view returns(uint) {
+       return stakedNFTs[_id][msg.sender];
+    }
+
+     function withdraw() external  {
             require(msg.sender == owner, "You are not the owner");
             uint256 amount = address(this).balance;
             (bool sent, ) =  payable(msg.sender).call{value: amount}("");

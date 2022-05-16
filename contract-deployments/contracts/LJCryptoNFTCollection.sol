@@ -81,7 +81,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
         returns (uint256)
     {
         uint amountofNFTs;
-        for (uint256 i = 0; i < 10; ++i) {
+        for (uint256 i = 0; i < 12; ++i) {
             uint nftCount = balanceOf(msg.sender, i);
             amountofNFTs += nftCount;
         }

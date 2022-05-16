@@ -28,7 +28,9 @@ module.exports = {
       colors: {
         shade: "rgba(0, 0, 0, 0.5)",
       },
-      maxWidth: {},
+      borderRadius: {
+       1400: "14rem"
+      },
     },
   },
   plugins: [],

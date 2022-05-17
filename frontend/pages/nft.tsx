@@ -293,7 +293,7 @@ function NFT() {
             const split = amount.split(",");
             const tx = await contract.stakeNFTs(split);
             await tx.wait();
-            window.alert(`You Have Successfully Staked ${amount} NFTs`)
+            window.alert(`You Have Successfully Staked TokenIds of ${amount}`)
             setIsLoading(false)
           } catch (error:any) {
              setStakingTab(false);
@@ -456,6 +456,16 @@ useEffect(() => {
           </>
         ) : (
           <>
+            <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
+              View NFT Collection Here
+            </p>
+            <Link href="https://testnets.opensea.io/collection/unidentified-contract-pp3ki7zvnb">
+              <a className="md:flex md:justify-content" target="_blank">
+                <button className="rounded-2xl ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white mb-12">
+                  View NFTs
+                </button>
+              </a>
+            </Link>
             <div className="flex mt-5 justify-start w-120 md:mx-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-4  font-semibold mb-5  whitespace-nowrap">
               NFT Balances:
             </div>
@@ -542,14 +552,14 @@ useEffect(() => {
                 )}
               </div>
               <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-                {nftBalanceTen !== "0" && (
+                {nftBalanceEleven !== "0" && (
                   <p className="text-yellow-500 font-semibold capitalize">
                     TIER-STAKING(ID 10): <span>{nftBalanceEleven} TOKENS</span>
                   </p>
                 )}
               </div>
               <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-                {nftBalanceTen !== "0" && (
+                {nftBalanceTwelve !== "0" && (
                   <p className="text-yellow-500 font-semibold capitalize">
                     TIER-BREEDING(ID 11): <span>{nftBalanceTwelve} TOKENS</span>
                   </p>
@@ -999,6 +1009,23 @@ useEffect(() => {
               </div>
             )}
           </>
+        )}
+        {isLoading === false && (
+          <div className="flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
+            <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
+              NFTs
+            </a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Lottery Game
+            </a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Liquidity Pools
+            </a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Tokens&NFTs
+            </a>
+          </div>
         )}
       </main>
     </>

@@ -14,11 +14,6 @@ interface KeeperCompatibleInterface {
 
 
 contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
-    //make an ERC1155 contract that will be used to get into the DAO
-    //users will have to pay a certain amount for the ERC1155 tokens and the ether amount will get sent to the DAO contract
-    //make ERC721s for the NFT Marketplace
-    //Maybe use Chainlink VRF where someone can get a random NFT where there's 10 different NFTs
-    //depending on the number NFT you get is the amount of propsoals you can vote and create id 10 will give you 10 votes/creates for example
     using Counters for Counters.Counter;
     Counters.Counter private _currentSupply;
     bool public _paused;
@@ -39,7 +34,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     // uint128 public constant TIER9 = 8;
     // uint128 public constant TIER10 = 9;
     // uint256 public constant STAKING = 10;
-    constructor() ERC1155("https://gateway.pinata.cloud/ipfs/QmdTLaJeFdRwgMvBynK892uG8mAuSN9UYvkG9R2QPRsd4b/{id}.json") VRFConsumerBase(_vrfCoordinator, _linkToken)  {
+    constructor() ERC1155("https://gateway.pinata.cloud/ipfs/QmRyToa47VAA9sDHAX8DymcBR98jqML7PgPppFHt6uTwxK/{id}.json") VRFConsumerBase(_vrfCoordinator, _linkToken)  {
          owner = msg.sender;
     }
 
@@ -125,10 +120,6 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
             (bool sent, ) =  payable(msg.sender).call{value: amount}("");
             require(sent, "Failed to send Ether");
         }
-
-        // function balance() public view returns(uint) {
-        //     return address(msg.sender).balance;
-        // }
 
          // Function to receive Ether. msg.data must be empty
         receive() external payable {}

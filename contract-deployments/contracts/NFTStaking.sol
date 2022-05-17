@@ -70,7 +70,7 @@ contract NFTStaking is ERC1155Holder {
       uint balance = stakingBalance[msg.sender];
       uint time = block.timestamp;
       uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
-      uint mintedTokens = uint(balance * 10000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //1000% interest per year
+      uint mintedTokens = uint(balance * 100000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //10000% interest per year
       uint newBalance = balance + mintedTokens;
       stakingBalance[msg.sender] = newBalance;
     }

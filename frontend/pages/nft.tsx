@@ -3,7 +3,7 @@ import Link from "next/link";
 import {Web3Context, useWeb3} from "../context"
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import styles from "../styles/Home.module.css";
-
+import Web3Modal from "web3modal";
 import {NFT_COLLECTION_ABI, NFT_COLLECTION_ADDRESS} from "../constants/nft"
 import {NFT_STAKING_ABI, NFT_STAKING_ADDRESS} from "../constants/nftstaking"
 
@@ -17,7 +17,7 @@ type IState = {
 };
 
 function NFT() {
-  const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSigner, getAddress } = useContext(Web3Context) as useWeb3;
+  const { account, numberIsZero, setNumberIsZero, getProviderOrSigner, getAddress, connectWallet, walletConnected, web3ModalRef} = useContext(Web3Context) as useWeb3;
 
   const [nftBalanceOne, setNftBalanceOne] = useState("0");
   const [nftBalanceTwo, setNftBalanceTwo] = useState("0");
@@ -83,6 +83,8 @@ function NFT() {
     };
 
 
+
+
   const getNFTContractInstance = (providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner) => {
     return new Contract(
       NFT_COLLECTION_ADDRESS,
@@ -100,6 +102,7 @@ function NFT() {
       providerOrSigner
     );
   };
+
 
   const isNumberAboveZero = async (): Promise<boolean> => {
       const provider = await getProviderOrSigner(true);
@@ -148,7 +151,7 @@ function NFT() {
   const fetchNFTBalances = async() => {
     const provider = await getProviderOrSigner(true);
     const contract = getNFTContractInstance(provider);
-    const thisAccount = getAddress()
+    const thisAccount =  await new providers.Web3Provider(window.ethereum).getSigner().getAddress()
     const balanceOne =  await contract.balanceOf(thisAccount, 0);
     setNftBalanceOne(BigNumber.from(balanceOne).toString())
     const balanceTwo = await contract.balanceOf(thisAccount, 1);
@@ -396,15 +399,22 @@ function NFT() {
     
 
 useEffect(() => {
-    setInterval(async function () {
-      await isNumberAboveZero();
-      await fetchNFTBalances()
-      await totalNFTBalance()
-      await getStakingBalance()
-      await fetchStakedNFTBalances()
-      await claimAmount()
-    }, 5 * 1000);
-})
+  if (!walletConnected) {
+          web3ModalRef.current = new Web3Modal({
+            network: "mumbai",
+            providerOptions: {},
+          });
+        }
+  setInterval(async function () {
+    await getAddress();
+    await isNumberAboveZero();
+    await fetchNFTBalances();
+    await totalNFTBalance();
+    await getStakingBalance();
+    await fetchStakedNFTBalances();
+    await claimAmount();
+  }, 2 * 1000);
+}, [walletConnected, account]);
 
   return (
     <>
@@ -448,7 +458,6 @@ useEffect(() => {
                   <img
                     className="rounded-1400"
                     src="/ljcrypto.webp"
-                    alt="QR Code"
                   />
                 </h1>
               </section>
@@ -460,7 +469,7 @@ useEffect(() => {
               View NFT Collection Here
             </p>
             <Link href="https://testnets.opensea.io/collection/unidentified-contract-pp3ki7zvnb">
-              <a className="md:flex md:justify-content" target="_blank">
+              <a className="md:flex md:justify-content md:mx-auto w-40" target="_blank">
                 <button className="rounded-2xl ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white mb-12">
                   View NFTs
                 </button>

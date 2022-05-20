@@ -95,9 +95,9 @@ const GuessingGame: React.FC = () => {
         value: ethers.utils.parseEther(`${amount}`),
       });
       await txn.wait();
-    } catch (error) {
+    } catch (error:any) {
       console.log(error);
-      window.alert("Either You Didn't Enter Enough Ether, Two Players Are Already In The Game Or Chainlink Needs To Be Funded")
+      window.alert(error.error.message)
     }
   };
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import Web3Modal from "web3modal";
+import styles from "../styles/Home.module.css";
 
 import {
   LJCRYPTO_TOKEN_ABI,
@@ -88,7 +89,7 @@ const Tokens: React.FC = () => {
   const getLJCryptoTokenPrice = async () => {
     const provider = await getProviderOrSigner(true);
     const contract = getLJCryptoTokenInstance(provider);
-    const value = await contract.currentPricePerTokenInEther();
+    const value = await contract.currentPricePerToken();
     setLJCryptoPrice(ethers.utils.formatEther(value));
     return value;
   };
@@ -148,37 +149,53 @@ const Tokens: React.FC = () => {
       const priceZero = ethers.utils.formatEther(number);
       const thisZero = ethers.utils.formatEther(zero);
       if (priceZero === thisZero) {
+        setbuyLJCrypto(false)
+        setLoading(true)
         const signer = await getProviderOrSigner(true);
         const contract = getLJCryptoTokenInstance(signer);
         const tx = await contract.buyTokens(amount, {
           value: ethers.utils.parseEther(`0.1`),
         });
         await tx.wait();
+        window.alert(`You have successfully bought ${amount} LJCryptoTokens `)
+        setLoading(false)
       } else {
-        const price: number = await getLJCryptoTokenPrice();
+        setbuyLJCrypto(false)
+        setLoading(true)
+        const price = await getLJCryptoTokenPrice();
         const signer = await getProviderOrSigner(true);
         const contract = getLJCryptoTokenInstance(signer);
-        const paidAmount = parseInt(amount) * price;
+        const amountToPay = price.mul(parseInt(amount));
         const tx = await contract.buyTokens(amount, {
-          value: ethers.utils.parseEther(`${paidAmount}`),
+          value: amountToPay
         });
         await tx.wait();
+        window.alert(`You have successfully bought ${amount} LJCryptoTokens `);
+        setLoading(false)
       }
     } catch (error:any) {
+      setbuyLJCrypto(false)
+      setLoading(false)
       console.log(error);
-      window.alert(error.message);
+      window.alert(error.error.message);
     }
   };
 
   const sellLJCryptoToken = async (amount: string) => {
     try {
+      setSellLJCrypto(false)
+      setLoading(true)
       const signer = await getProviderOrSigner(true);
       const contract = getLJCryptoTokenInstance(signer);
       const tx = await contract.sellTokens(amount);
       await tx.wait();
+      window.alert(`You have successfully sold ${amount} LJCryptoTokens`)
+      setLoading(false)
     } catch (error:any) {
+      setSellLJCrypto(false)
+      setLoading(false)
       console.log(error);
-      window.alert(error.data.message)
+      window.alert(error.error.message)
     }
   };
 
@@ -197,31 +214,41 @@ const Tokens: React.FC = () => {
 
   const buyljStableCoin = async (amount: string) => {
     try {
+      setbuyLJStable(false)
+      setLoading(true)
       const signer = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(signer);
       const price = 0.0004;
       const paidAmount = parseInt(amount) * price;
       const tx = await contract.buyTokens(amount, {
-        value: ethers.utils.parseEther(`${paidAmount}`),
+        value: ethers.utils.parseEther(`${paidAmount}`)
       });
       await tx.wait();
-    } catch (error) {
+      window.alert(`You Have Successfully Bought ${amount} LJStableCoins`)
+      setLoading(false)
+    } catch (error:any) {
+      setbuyLJStable(false)
+      setLoading(false)
       console.log(error);
-      window.alert(
-        "Make Sure You Have Enough Funds For The Amount Of Tokens You Are Buying"
-      );
+      window.alert(error.data.message);
     }
   };
 
   const sellLJStableCoin = async (amount: string) => {
     try {
+      setsellLJStable(false)
+      setLoading(true)
       const signer = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(signer);
       const tx = await contract.sellTokens(amount);
       await tx.wait();
-    } catch (error) {
+      window.alert(`You Have Successfully Sold ${amount} LJStableCoins`)
+      setLoading(false)
+    } catch (error:any) {
+      setsellLJStable(false);
+      setLoading(false)
       console.error(error);
-      window.alert("You Don't Own This Many Tokens");
+      window.alert(error.error.message);
     }
   };
 
@@ -271,59 +298,87 @@ const Tokens: React.FC = () => {
 
   const stakeLJCryptoTokens = async (amount: string) => {
     try {
+      setStakeLJCrypto(false)
+      setLoading(true)
       const provider = await getProviderOrSigner(true);
       const contract = getLJCryptoTokenInstance(provider);
       const tx = await contract.stakeTokens(amount);
       await tx.wait();
+      window.alert(`You Have Successfully staked ${amount} LJCryptoTokens`)
+      setLoading(false)
     } catch (error: any) {
+      setStakeLJCrypto(false);
+      setLoading(false)
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error.error.message);
     }
   };
 
   const unstakeLJCryptoTokens = async (amount: string) => {
     try {
+      setUnstakeLJCrypto(false);
+      setLoading(true)
       const provider = await getProviderOrSigner(true);
       const contract = getLJCryptoTokenInstance(provider);
       const tx = await contract.unstakeTokens(amount);
       await tx.wait();
+      window.alert(`You Have Successfully Unstaked ${amount} LJCryptoTokens`)
+      setLoading(false)
     } catch (error: any) {
+      setUnstakeLJCrypto(false);
+      setLoading(false)
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error.error.message);
     }
   };
 
   const stakeLJStableCoins = async (amount: string) => {
     try {
+      setStakeLJStable(false);
+      setLoading(true)
       const provider = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(provider);
       const tx = await contract.stakeTokens(amount);
       await tx.wait();
+      window.alert(`You Have Successfully Staked ${amount} LJStableCoins`)
+      setLoading(false)
     } catch (error: any) {
+       setStakeLJStable(false);
+      setLoading(false)
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error.error.message);
     }
   };
 
   const unstakeLJStableCoins = async (amount: string) => {
     try {
+      setUnstakeLJStable(false)
+      setLoading(true)
       const provider = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(provider);
       const tx = await contract.unstakeTokens(amount);
       await tx.wait();
+      window.alert(`You Have Successfully Unstaked ${amount} LJStableCoins`)
+      setLoading(false)
     } catch (error: any) {
+      setUnstakeLJStable(false);
+      setLoading(false)
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error.error.message);
     }
   };
 
   const updateLJCryptoStakingBalance = async() => {
     try {
+        setLoading(true)
         const provider = await getProviderOrSigner(true);
         const contract = getLJCryptoTokenInstance(provider)
         const tx = await contract.stakedBalance();
         await tx.wait()
+        window.alert(`You Have Successfully Updated Your LJCryptoToken Balance`)
+        setLoading(false)
     } catch (error:any) {
+       setLoading(false)
        console.log(error);
        window.alert(error.data.message);
     }
@@ -331,11 +386,15 @@ const Tokens: React.FC = () => {
 
   const updateLJStableCoinStakingBalance = async() => {
     try {
+       setLoading(true)
        const provider = await getProviderOrSigner(true);
        const contract = getLJStableCoinInstance(provider);
        const tx = await contract.stakedBalance()
        await tx.wait()
+       window.alert(`You Have Successfully Updated Your LJStableCoin Balance`);
+       setLoading(false)
     } catch (error:any) {
+       setLoading(false)
        console.log(error);
        window.alert(error.data.message);
     }
@@ -357,9 +416,9 @@ const Tokens: React.FC = () => {
 
     // If user is not connected to the Rinkeby network, let them know and throw an error
     const { chainId } = await web3Provider.getNetwork();
-    if (chainId !== 4) {
-      alert("Change the network to Rinkeby");
-      throw new Error("Change network to Rinkeby");
+    if (chainId !== 80001) {
+      alert("Change the network to Mumbai");
+      throw new Error("Change network to Mumbai");
     }
 
     if (needSigner) {
@@ -385,7 +444,7 @@ const Tokens: React.FC = () => {
       // Assign the Web3Modal class to the reference object by setting it's `current` value
       // The `current` value is persisted throughout as long as this page is open
       web3ModalRef.current = new Web3Modal({
-        network: "rinkeby",
+        network: "mumbai",
         providerOptions: {},
         //  disableInjectedProvider: false,
       });
@@ -398,7 +457,7 @@ const Tokens: React.FC = () => {
       await ljcryptoBalanceInEther();
       await ljstableBalanceInEther();
       await getStakingBalances();
-    }, 0.5 * 1000);
+    }, 2 * 1000);
   }, [walletConnected, account]);
 
   return (
@@ -433,588 +492,619 @@ const Tokens: React.FC = () => {
           </p>
         </div>
       </div>
-      <div className="flex justify-start md:mx-auto w-40 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
-        Contract Addresses:
-      </div>
-      <div className="flex flex-col md:mx-auto justify-center h-32 pl-2 w-350 md:w-700 bg-black rounded-md font-semibold relative top-10 ml-4 mb-20">
-        <p className="text-yellow-400 mb-5 md:mx-auto md:text-xl">
-          LJCryptoToken:{" "}
-          <span className="text-sm md:text-xl">{LJCRYPTO_TOKEN_ADDRESS}</span>
-        </p>
-        <p className="text-yellow-400 md:text-xl md:mx-auto">
-          LJStableCoin:{" "}
-          <span className="text-sm md:text-xl">{LJSTABLE_COIN_ADDRESS}</span>
-        </p>
-      </div>
-      <div className="flex justify-start md:mx-auto w-28 items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-5 ml-4  whitespace-nowrap">
-        Token Prices:
-      </div>
-      <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
-        DISCLAIMER: THESE PRICES ARE IN ETHER CURRENCY AND NOT
-        FIAT(USD/CAD/EUD....)
-      </p>
-      <div className="flex flex-col md:mx-auto h-32 w-80 md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-lg">
-          <img
-            src="/ljcrypto.webp"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3 ml-1"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            LjcryptoToken: <span className="md:text-lg">{ljcryptoPrice} ETH</span>
-          </p>
-        </div>
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-          <img
-            src="/ljstable.png"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            Ljstablecoin: <span>0.0004 ETH</span>
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-start w-32 md:mx-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
-        Your Balances:
-      </div>
-      <div className="flex flex-col h-32 w-80 md:mx-auto md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 md:text-xl md:mx-auto">
-          <img
-            src="/ljcrypto.webp"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            LjcryptoToken: <span>{ljcryptoBalance} Tokens</span>
-          </p>
-        </div>
-        <div className="flex mt-5 ml-3 md:text-xl md:mx-auto">
-          <img
-            src="/ljstable.png"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            Ljstablecoin: <span>{ljstablecoinBalance} Tokens</span>
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
-        Balance Amounts:
-      </div>
-      <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-          <img
-            src="/ljcrypto.webp"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            LjcryptoToken: <span>{ljcryptoEtherBalance} ETH</span>
-          </p>
-        </div>
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-          <img
-            src="/ljstable.png"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            Ljstablecoin: <span>{ljstablecoinEtherBalance} ETH</span>
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
-        Staking Balances:
-      </div>
-      <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-          <img
-            src="/ljcrypto.webp"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            LjcryptoToken: <span>{ljcryptoStakingBalance}</span>
-          </p>
-        </div>
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-          <img
-            src="/ljstable.png"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            Ljstablecoin: <span>{ljstablecoinStakingBalance}</span>
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-start md:mx-auto w-52 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-5 whitespace-nowrap">
-        Update Staking Balances:
-      </div>
-      {ljcryptoStakingBalance === "0" || ljstablecoinStakingBalance === "0" ? (
+      {loading ? (
         <>
-          <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
-            You don't have a staking balance to update
+          <p className="text-white text-3xl font-bold uppercase flex justify-center md:px-0 px-4 mb-3">
+            Loading...
           </p>
-          <div className="md:flex md:justify-center">
-            <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12">
-              LJCryptoToken
-            </button>
-          </div>
-          <div className="md:flex md:justify-center">
-            <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12">
-              LJStableCoin
-            </button>
-          </div>
+          <article className={styles.card}>
+            <section className={styles.cardSideFront}>
+              <h1 className="h1">
+                <img className="rounded-1400" src="/ljcrypto.webp" />
+              </h1>
+            </section>
+          </article>
         </>
       ) : (
         <>
-          <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
-            Recommended To Update Balance Every Day
-          </p>
-          <div className="md:flex md:justify-center">
-            {ljcryptoStakingBalance === "0" ? (
-              <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white">
-                LJCryptoToken
-              </button>
-            ) : (
-              <button
-                onClick={updateLJCryptoStakingBalance}
-                className="rounded-2xl  whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white"
-              >
-                LJCryptoToken
-              </button>
-            )}
+          <div className="flex justify-start md:mx-auto w-40 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+            Contract Addresses:
           </div>
-          <div className="md:flex md:justify-center">
-            {ljstablecoinStakingBalance === "0" ? (
-              <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white">
-                LJStableCoin
-              </button>
-            ) : (
-              <button
-                onClick={updateLJStableCoinStakingBalance}
-                className="rounded-2xl whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white"
-              >
-                LJStableCoin
-              </button>
-            )}
+          <div className="flex flex-col md:mx-auto justify-center h-32 pl-2 w-350 md:w-700 bg-black rounded-md font-semibold relative top-10 ml-4 mb-20">
+            <p className="text-yellow-400 mb-5 md:mx-auto md:text-xl">
+              LJCryptoToken:{" "}
+              <span className="text-sm md:text-xl">
+                {LJCRYPTO_TOKEN_ADDRESS}
+              </span>
+            </p>
+            <p className="text-yellow-400 md:text-xl md:mx-auto">
+              LJStableCoin:{" "}
+              <span className="text-sm md:text-xl">
+                {LJSTABLE_COIN_ADDRESS}
+              </span>
+            </p>
+          </div>
+          <div className="flex justify-start md:mx-auto w-28 items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-5 ml-4  whitespace-nowrap">
+            Token Prices:
+          </div>
+          <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
+            DISCLAIMER: THESE PRICES ARE IN ETHER CURRENCY AND NOT
+            FIAT(USD/CAD/EUD....)
+          </p>
+          <div className="flex flex-col md:mx-auto h-32 w-80 md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-lg">
+              <img
+                src="/ljcrypto.webp"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3 ml-1"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                LjcryptoToken:{" "}
+                <span className="md:text-lg">{ljcryptoPrice} ETH</span>
+              </p>
+            </div>
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+              <img
+                src="/ljstable.png"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                Ljstablecoin: <span>0.0004 ETH</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-start w-32 md:mx-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+            Your Balances:
+          </div>
+          <div className="flex flex-col h-32 w-80 md:mx-auto md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
+            <div className="flex mt-5 ml-3 md:text-xl md:mx-auto">
+              <img
+                src="/ljcrypto.webp"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                LjcryptoToken: <span>{ljcryptoBalance} Tokens</span>
+              </p>
+            </div>
+            <div className="flex mt-5 ml-3 md:text-xl md:mx-auto">
+              <img
+                src="/ljstable.png"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                Ljstablecoin: <span>{ljstablecoinBalance} Tokens</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+            Balance Amounts:
+          </div>
+          <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+              <img
+                src="/ljcrypto.webp"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                LjcryptoToken: <span>{ljcryptoEtherBalance} ETH</span>
+              </p>
+            </div>
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+              <img
+                src="/ljstable.png"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                Ljstablecoin: <span>{ljstablecoinEtherBalance} ETH</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+            Staking Balances:
+          </div>
+          <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+              <img
+                src="/ljcrypto.webp"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                LjcryptoToken: <span>{ljcryptoStakingBalance}</span>
+              </p>
+            </div>
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+              <img
+                src="/ljstable.png"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                Ljstablecoin: <span>{ljstablecoinStakingBalance}</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-start md:mx-auto w-52 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-5 whitespace-nowrap">
+            Update Staking Balances:
+          </div>
+          {ljcryptoStakingBalance === "0" ||
+          ljstablecoinStakingBalance === "0" ? (
+            <>
+              <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
+                You don't have a staking balance to update
+              </p>
+              <div className="md:flex md:justify-center">
+                <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12">
+                  LJCryptoToken
+                </button>
+              </div>
+              <div className="md:flex md:justify-center">
+                <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12">
+                  LJStableCoin
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
+                Recommended To Update Balance Every Day
+              </p>
+              <div className="md:flex md:justify-center">
+                {ljcryptoStakingBalance === "0" ? (
+                  <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white">
+                    LJCryptoToken
+                  </button>
+                ) : (
+                  <button
+                    onClick={updateLJCryptoStakingBalance}
+                    className="rounded-2xl  whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white"
+                  >
+                    LJCryptoToken
+                  </button>
+                )}
+              </div>
+              <div className="md:flex md:justify-center">
+                {ljstablecoinStakingBalance === "0" ? (
+                  <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white">
+                    LJStableCoin
+                  </button>
+                ) : (
+                  <button
+                    onClick={updateLJStableCoinStakingBalance}
+                    className="rounded-2xl whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white"
+                  >
+                    LJStableCoin
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+          <div className="flex justify-start md:mx-auto w-52 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+            Staking Balances In ETH:
+          </div>
+          <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+              <img
+                src="/ljcrypto.webp"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                LjcryptoToken: <span>{ljcryptoStakingInEther} ETH</span>
+              </p>
+            </div>
+            <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
+              <img
+                src="/ljstable.png"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <p className="text-yellow-500 font-semibold capitalize">
+                Ljstablecoin: <span>{ljstableCoinStakingInEther} ETH</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-start md:mx-auto w-28 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mt-15  whitespace-nowrap">
+            Buy And Sell:
+          </div>
+          <div className="flex flex-col md:mx-auto md:text-xl h-32 w-80 bg-black rounded-md ml-4 relative top-10 mb-20">
+            <div className="flex mt-5 ml-3 ">
+              <img
+                src="/ljcrypto.webp"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <div className="flex justify-start items-center">
+                <p className="text-yellow-500 font-semibold capitalize">
+                  LjcryptoToken:
+                </p>
+                <button
+                  onClick={toggleBuyLJCrypto}
+                  className="rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
+                >
+                  Buy
+                </button>
+                {buyljCrypto && (
+                  <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleBuyLJCrypto}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljcryptotokens to buy
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => buyLJCrytptoToken(thisAmount)}
+                      >
+                        Buy Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={toggleSellLJCrypto}
+                  className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 "
+                >
+                  Sell
+                </button>
+                {sellljCrypto && (
+                  <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleSellLJCrypto}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljcryptotokens to sell
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => sellLJCryptoToken(thisAmount)}
+                      >
+                        Sell Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex mt-5 ml-3 ">
+              <img
+                src="/ljstable.png"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <div className="flex items-center">
+                <p className="text-yellow-500 font-semibold capitalize">
+                  Ljstablecoin:
+                </p>
+                <button
+                  onClick={toggleBuyLJStableCoin}
+                  className=" rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
+                >
+                  Buy
+                </button>
+                {buyljStable && (
+                  <div className="fixed top-0 left-0 w-full  h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleBuyLJStableCoin}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljstablecoins to buy
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => buyljStableCoin(thisAmount)}
+                      >
+                        Buy Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={toggleSellLJStableCoin}
+                  className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 "
+                >
+                  Sell
+                </button>
+                {sellljStable && (
+                  <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleSellLJStableCoin}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljstablecoins to sell
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => sellLJStableCoin(thisAmount)}
+                      >
+                        Sell Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-start md:mx-auto w-40 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
+            Stake And Unstake:
+          </div>
+          <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
+            STAKING BALANCE GETS UPDATED WHEN YOU UNSTAKE
+          </p>
+          <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
+            LJCryptoToken APY: 10000%
+          </p>
+          <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
+            LJStableCoin APY: 100%
+          </p>
+          <div className="flex flex-col md:mx-auto md:text-lg h-32 w-80 md:w-350 bg-black rounded-md ml-4 relative top-10 mb-20">
+            <div className="flex mt-5 ml-3 ">
+              <img
+                src="/ljcrypto.webp"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <div className="flex justify-start items-center">
+                <p className="text-yellow-500 font-semibold capitalize">
+                  LjcryptoToken:
+                </p>
+                <button
+                  onClick={toggleStakeLJCrypto}
+                  className="rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
+                >
+                  Stake
+                </button>
+                {stakeLJCrypto && (
+                  <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleStakeLJCrypto}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljcryptotokens to stake
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => stakeLJCryptoTokens(thisAmount)}
+                      >
+                        Stake Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={toggleUnstakeLJCrypto}
+                  className="rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-16 md:w-20 font-bold transition ease-in-out hover:scale-75 "
+                >
+                  Unstake
+                </button>
+                {unStakeLJCrypto && (
+                  <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleUnstakeLJCrypto}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljcryptotokens to unstake
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => unstakeLJCryptoTokens(thisAmount)}
+                      >
+                        UnStake Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex mt-5 ml-3 ">
+              <img
+                src="/ljstable.png"
+                alt=""
+                className="rounded-3xl w-8 h-8 mr-3"
+              />
+              <div className="flex items-center">
+                <p className="text-yellow-500 font-semibold capitalize">
+                  Ljstablecoin:
+                </p>
+                <button
+                  onClick={toggleStakeLJStable}
+                  className=" rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
+                >
+                  Stake
+                </button>
+                {stakeLJStable && (
+                  <div className="fixed top-0 left-0 w-full  h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleStakeLJStable}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljstablecoins to stake
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => stakeLJStableCoins(thisAmount)}
+                      >
+                        Stake Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={toggleUnstakeLJStable}
+                  className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-16 md:w-20 font-bold transition ease-in-out hover:scale-75 "
+                >
+                  Unstake
+                </button>
+                {unStakeLJStable && (
+                  <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
+                    <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
+                      <svg
+                        viewBox="0 0 24 24"
+                        color="#FFFFFF"
+                        width="20px"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="relative left-280 top-4 cursor-pointer hover:scale-125"
+                        onClick={toggleUnstakeLJStable}
+                      >
+                        <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
+                      </svg>
+                      <div className="flex flex-col mt-4">
+                        <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
+                          Put in Amount of ljstablecoins to unstake
+                        </p>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          onChange={handleChange}
+                          className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
+                        />
+                      </div>
+                      <button
+                        className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
+                        onClick={() => unstakeLJStableCoins(thisAmount)}
+                      >
+                        Unstake Tokens
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
+            <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
+              Tokens
+            </a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Lottery Game
+            </a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Liquidity Pools
+            </a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Tokens&NFTs
+            </a>
           </div>
         </>
       )}
-      <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
-        Staking Amounts:
-      </div>
-      <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-          <img
-            src="/ljcrypto.webp"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            LjcryptoToken: <span>{ljcryptoStakingInEther} ETH</span>
-          </p>
-        </div>
-        <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
-          <img
-            src="/ljstable.png"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <p className="text-yellow-500 font-semibold capitalize">
-            Ljstablecoin: <span>{ljstableCoinStakingInEther} ETH</span>
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-start md:mx-auto w-28 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mt-15  whitespace-nowrap">
-        Buy And Sell:
-      </div>
-      <div className="flex flex-col md:mx-auto md:text-xl h-32 w-80 bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 ">
-          <img
-            src="/ljcrypto.webp"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <div className="flex justify-start items-center">
-            <p className="text-yellow-500 font-semibold capitalize">
-              LjcryptoToken:
-            </p>
-            <button
-              onClick={toggleBuyLJCrypto}
-              className="rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
-            >
-              Buy
-            </button>
-            {buyljCrypto && (
-              <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleBuyLJCrypto}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljcryptotokens to buy
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => buyLJCrytptoToken(thisAmount)}
-                  >
-                    Buy Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={toggleSellLJCrypto}
-              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 "
-            >
-              Sell
-            </button>
-            {sellljCrypto && (
-              <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleSellLJCrypto}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljcryptotokens to sell
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => sellLJCryptoToken(thisAmount)}
-                  >
-                    Sell Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex mt-5 ml-3 ">
-          <img
-            src="/ljstable.png"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <div className="flex items-center">
-            <p className="text-yellow-500 font-semibold capitalize">
-              Ljstablecoin:
-            </p>
-            <button
-              onClick={toggleBuyLJStableCoin}
-              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
-            >
-              Buy
-            </button>
-            {buyljStable && (
-              <div className="fixed top-0 left-0 w-full  h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleBuyLJStableCoin}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljstablecoins to buy
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => buyljStableCoin(thisAmount)}
-                  >
-                    Buy Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={toggleSellLJStableCoin}
-              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-12 font-bold transition ease-in-out hover:scale-75 "
-            >
-              Sell
-            </button>
-            {sellljStable && (
-              <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleSellLJStableCoin}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljstablecoins to sell
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => sellLJStableCoin(thisAmount)}
-                  >
-                    Sell Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-start md:mx-auto w-40 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
-        Stake And Unstake:
-      </div>
-      <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
-        STAKING BALANCE GETS UPDATED WHEN YOU UNSTAKE
-      </p>
-      <div className="flex flex-col md:mx-auto md:text-lg h-32 w-80 md:w-350 bg-black rounded-md ml-4 relative top-10 mb-20">
-        <div className="flex mt-5 ml-3 ">
-          <img
-            src="/ljcrypto.webp"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <div className="flex justify-start items-center">
-            <p className="text-yellow-500 font-semibold capitalize">
-              LjcryptoToken:
-            </p>
-            <button
-              onClick={toggleStakeLJCrypto}
-              className="rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
-            >
-              Stake
-            </button>
-            {stakeLJCrypto && (
-              <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleStakeLJCrypto}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljcryptotokens to stake
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => stakeLJCryptoTokens(thisAmount)}
-                  >
-                    Stake Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={toggleUnstakeLJCrypto}
-              className="rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-16 md:w-20 font-bold transition ease-in-out hover:scale-75 "
-            >
-              Unstake
-            </button>
-            {unStakeLJCrypto && (
-              <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleUnstakeLJCrypto}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljcryptotokens to unstake
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => unstakeLJCryptoTokens(thisAmount)}
-                  >
-                    UnStake Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex mt-5 ml-3 ">
-          <img
-            src="/ljstable.png"
-            alt=""
-            className="rounded-3xl w-8 h-8 mr-3"
-          />
-          <div className="flex items-center">
-            <p className="text-yellow-500 font-semibold capitalize">
-              Ljstablecoin:
-            </p>
-            <button
-              onClick={toggleStakeLJStable}
-              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-white h-8 shadow-button w-12 font-semibold transition ease-in-out hover:scale-75"
-            >
-              Stake
-            </button>
-            {stakeLJStable && (
-              <div className="fixed top-0 left-0 w-full  h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleStakeLJStable}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljstablecoins to stake
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => stakeLJStableCoins(thisAmount)}
-                  >
-                    Stake Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={toggleUnstakeLJStable}
-              className=" rounded-md ml-3 mx-auto bg-yellow-500 text-black h-8 shadow-button w-16 md:w-20 font-bold transition ease-in-out hover:scale-75 "
-            >
-              Unstake
-            </button>
-            {unStakeLJStable && (
-              <div className="fixed top-0 left-0 w-full h-full bg-shade grid z-50 place-items-center">
-                <div className="flex flex-col bg-yellow-500 w-80 rounded-xl h-52">
-                  <svg
-                    viewBox="0 0 24 24"
-                    color="#FFFFFF"
-                    width="20px"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="relative left-280 top-4 cursor-pointer hover:scale-125"
-                    onClick={toggleUnstakeLJStable}
-                  >
-                    <path d="M18.3 5.70997C17.91 5.31997 17.28 5.31997 16.89 5.70997L12 10.59L7.10997 5.69997C6.71997 5.30997 6.08997 5.30997 5.69997 5.69997C5.30997 6.08997 5.30997 6.71997 5.69997 7.10997L10.59 12L5.69997 16.89C5.30997 17.28 5.30997 17.91 5.69997 18.3C6.08997 18.69 6.71997 18.69 7.10997 18.3L12 13.41L16.89 18.3C17.28 18.69 17.91 18.69 18.3 18.3C18.69 17.91 18.69 17.28 18.3 16.89L13.41 12L18.3 7.10997C18.68 6.72997 18.68 6.08997 18.3 5.70997Z"></path>
-                  </svg>
-                  <div className="flex flex-col mt-4">
-                    <p className="uppercase text-center font-bold text-xs mt-3 mb-5">
-                      Put in Amount of ljstablecoins to unstake
-                    </p>
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      onChange={handleChange}
-                      className="px-4 w-40 mx-auto rounded-xl mb-5 focus:outline-none border border-solid border-yellow-500 text-yellow-500"
-                    />
-                  </div>
-                  <button
-                    className="rounded-2xl mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                    onClick={() => unstakeLJStableCoins(thisAmount)}
-                  >
-                    Unstake Tokens
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
-        <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-          Tokens
-        </a>
-        <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-          Lottery Game
-        </a>
-        <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
-        <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-          Liquidity Pools
-        </a>
-        <a className="pr-4 hover:text-yellow-500 cursor-pointer">Tokens&NFTs</a>
-      </div>
     </main>
   );
 }

@@ -136,7 +136,7 @@ export const LJCRYPTO_TOKEN_ABI = [
   },
   {
     inputs: [],
-    name: "currentPricePerTokenInEther",
+    name: "currentPricePerToken",
     outputs: [
       {
         internalType: "uint256",
@@ -458,4 +458,4 @@ export const LJCRYPTO_TOKEN_ABI = [
   },
 ];
 
-export const LJCRYPTO_TOKEN_ADDRESS = "0xCE240A694F28A1fc962Ad2FAACeE86bCb08AFf23";
+export const LJCRYPTO_TOKEN_ADDRESS = "0xe3271aD8DEc02000D78e3F58b658496a5563AE55";

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import Web3Modal from "web3modal";
 import { createContext, useContext } from "react";
+import { setInterval } from "timers";
 
 
 type Props = {
@@ -22,6 +23,8 @@ export type useWeb3 = {
   web3ModalRef: any;
   numberIsZero: boolean;
   setNumberIsZero: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
  
 
@@ -31,11 +34,12 @@ const Web3Context = createContext<useWeb3 | null>(null);
 const Web3Provider = ({ children }: Props) => {
   const [account, setAccount] = useState<useWeb3["account"]>(null);
   const [walletConnected, setWalletConnected] = useState<useWeb3["walletConnected"]>(false);
-   const [numberIsZero, setNumberIsZero] =useState<useWeb3["numberIsZero"]>(false);
+  const [numberIsZero, setNumberIsZero] =useState<useWeb3["numberIsZero"]>(false);
+  const [loading, setLoading] = useState<useWeb3["loading"]>(false)
   const web3ModalRef: any = useRef();
   
   const getAddress = async () => {
-    const provider = await web3ModalRef.current.connect();
+    const provider =  window.ethereum;
     const web3Provider = new providers.Web3Provider(provider);
     const thisAccount = await web3Provider.getSigner().getAddress();
     setAccount(await web3Provider.getSigner().getAddress());
@@ -67,17 +71,17 @@ const Web3Provider = ({ children }: Props) => {
     }
   };
 
-  useEffect(() => {
+  useEffect(() => { 
         if (!walletConnected) {
           web3ModalRef.current = new Web3Modal({
             network: "mumbai",
             providerOptions: {},
           });
         }
-         setInterval(async function () {
-           await getAddress()
-         }, 0.5 * 1000);
-  }, [walletConnected])
+        setInterval(async() => {
+         await getAddress()
+        }, 2*1000)
+  }, [walletConnected, account])
 
   let sharedState = {
     walletConnected,
@@ -90,6 +94,8 @@ const Web3Provider = ({ children }: Props) => {
     connectWallet,
     numberIsZero,
     setNumberIsZero,
+    loading,
+    setLoading
   };
 
   return (

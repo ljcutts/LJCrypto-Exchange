@@ -21,6 +21,7 @@ contract LJStableCoin is ERC20 {
 
 
      function buyTokens(uint _amount) external payable isItPaused {
+      require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       uint priceOfAmount = _amount * 0.0004 ether;
       require(msg.value >= priceOfAmount, "INSUFFICIENT_FUNDS");
       _transfer(address(this), msg.sender, (_amount * 10 ** 18));
@@ -28,12 +29,14 @@ contract LJStableCoin is ERC20 {
        
 
      function sellTokens(uint _amount) external payable isItPaused {
+      require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       uint priceOfAmount = _amount * 0.0004 ether;
        _transfer(msg.sender, address(this), (_amount * 10 ** 18));
       payable(msg.sender).transfer(priceOfAmount);
     }
 
      function stakeTokens(uint _amount) external isItPaused {
+      require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       stakingBalance[msg.sender] += _amount;
       _transfer(msg.sender, address(this), (_amount * 10 ** 18));
        if(stakingTimestamps[msg.sender] == 0) {
@@ -42,6 +45,7 @@ contract LJStableCoin is ERC20 {
     }
 
      function unstakeTokens(uint _amount) external isItPaused {
+        require(_amount != 0, "NO_AMOUNT_SPECIFIED");
        stakedBalance();
        require(_amount <= stakingBalance[msg.sender], "INSUFFICIENT_STAKE_BALANCE");
        stakingBalance[msg.sender] -= _amount;
@@ -61,20 +65,6 @@ contract LJStableCoin is ERC20 {
       uint newBalance = balance + mintedTokens;
       stakingBalance[msg.sender] = newBalance;
     }
-
-  //   function balanceOfContract() public view returns(uint) {
-  //      return address(this).balance;
-  //  }
-   
-
-  //  function getMsgSender() public view returns(address) {
-  //      return msg.sender;
-  //  }
-
-  //   function receiveBalance() public view returns(uint) {
-  //     return address(msg.sender).balance;
-  //  }
-
 
     function userBalanceInEther() external view returns(uint) {
        return (balanceOf(msg.sender)/1e18) * 0.0004 ether;

@@ -20,26 +20,34 @@ contract LJCryptoToken is ERC20 {
         _;
     }
 
-     function currentPricePerTokenInEther() public view returns(uint) {
+     function currentPricePerToken() public view returns(uint) {
         return address(this).balance/(totalSupply()/10 ** 18);
     }
 
 
    //The user might not be able to buy one whole of a token
     function buyTokens(uint _amount) external payable isItPaused {
-      uint priceOfAmount = _amount * currentPricePerTokenInEther();
-      require(msg.value > 0 && msg.value >= priceOfAmount, "INSUFFICIENT_FUNDS");
+      uint tokenPrice = (address(this).balance - msg.value)/(totalSupply()/10 ** 18);
+      if(tokenPrice == 0) {
+        require(msg.value > 0 && _amount > 0, "INSUFFICIENT_FUNDS");
+        _transfer(address(this), msg.sender, (_amount * 10 ** 18));
+      } else {
+      uint priceOfAmount = _amount * tokenPrice;
+      require(msg.value >= priceOfAmount && _amount > 0, "INSUFFICIENT_FUNDS");
       _transfer(address(this), msg.sender, (_amount * 10 ** 18));
+      }
     }
        
-
      function sellTokens(uint _amount) external payable isItPaused {
-      uint priceOfAmount = _amount * currentPricePerTokenInEther();
+      require(_amount != 0, "NO_AMOUNT_SPECIFIED");
+      uint tokenPrice = currentPricePerToken();
+      uint priceOfAmount = _amount * tokenPrice;
        _transfer(msg.sender, address(this), (_amount * 10 ** 18));
        payable(msg.sender).transfer(priceOfAmount);
     }
 
      function stakeTokens(uint _amount) external isItPaused {
+      require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       require(totalSupply() < maxTotalSupply, "MAXIUMUM_SUPPLY_REACHED");
        stakingBalance[msg.sender] += _amount;
       _transfer(msg.sender, address(this), (_amount * 10 ** 18));
@@ -49,6 +57,7 @@ contract LJCryptoToken is ERC20 {
     }
 
      function unstakeTokens(uint _amount) external isItPaused {
+       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
        if(totalSupply() >= maxTotalSupply) {
          uint amount = stakingBalance[msg.sender];
          stakingBalance[msg.sender] -= amount;
@@ -76,26 +85,13 @@ contract LJCryptoToken is ERC20 {
       stakingBalance[msg.sender] = newBalance;
     }
 
-  //   function balanceOfContract() public view returns(uint) {
-  //      return address(this).balance;
-  //  }
-   
-
-  //  function getMsgSender() public view returns(address) {
-  //      return msg.sender;
-  //  }
-
-  //   function receiveBalance() public view returns(uint) {
-  //     return address(msg.sender).balance;
-  //  }
-
 
     function userBalanceInEther() external view returns(uint) {
-       return  (balanceOf(msg.sender)/1e18) * currentPricePerTokenInEther();
+       return (balanceOf(msg.sender)/1e18) * currentPricePerToken();
     }
 
     function stakingBalanceInEther() external view returns(uint) {
-        return stakingBalance[msg.sender] * currentPricePerTokenInEther();
+        return stakingBalance[msg.sender] * currentPricePerToken();
     }
 
     function setPauseValue(bool value) external {

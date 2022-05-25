@@ -28,6 +28,7 @@ struct Proposal {
     uint256 yes;
     uint256 no;
     address proposalOwner;
+    bytes cidHash;
     bool executed;
     bool proposalApproved;
     mapping(address => bool) votedYet;
@@ -73,29 +74,27 @@ modifier inactiveProposalOnly(uint256 proposalIndex) {
 }
 
 
-function receivePowerThroughNFT(uint _id) public {
-  require(powerAmountNotEmpty[msg.sender] == false, "You need to use up your proposal power first");
-  require(LJCryptoNFT.balanceOf(msg.sender, _id) > 0, "Your balance for this tokenId is 0");
+function receivePowerThroughNFT(uint _id) external {
+  require(powerAmountNotEmpty[msg.sender] == false, "USE_POWER_FIRST");
+  require(LJCryptoNFT.balanceOf(msg.sender, _id) > 0, "BALANCE_EMPTY");
   if(_id == 0) {
-      powerAmount[msg.sender] += 1;
+      powerAmount[msg.sender]++;
   } else {
     powerAmount[msg.sender] += _id;
   }
   powerAmountNotEmpty[msg.sender] = true;
-  LJCryptoNFT.safeTransferFrom(msg.sender, address(this), _id, 1, ""); //maybe do transfer instead for the DAO contract to be able to hold  NFTS
+  LJCryptoNFT.safeTransferFrom(msg.sender, address(this), _id, 1, "");
 }
 
-function receivePowerThroughToken(uint _amount) public {
-  require(powerAmountNotEmpty[msg.sender] == false, "You need to use up your proposal power first");
-  require(LJCryptoToken.balanceOf(msg.sender) >= _amount, "You don't own this many tokens");
+function receivePowerThroughToken(uint _amount) external {
+  require(powerAmountNotEmpty[msg.sender] == false, "USE_POWER_FIRST");
+  require(LJCryptoToken.balanceOf(msg.sender) >= _amount, "AMOUNT_EXCEEDS_BALANCE");
   powerAmount[msg.sender] += _amount;
   powerAmountNotEmpty[msg.sender] = true;
-  LJCryptoToken.transferFrom(msg.sender, address(this), _amount); //maybe do transfer instead for the DAO contract to be able to hold tokens
+  LJCryptoToken.transferFrom(msg.sender, address(this), _amount); 
 }
 
-//maybe the token can be used to be able to create a proposal
-//The one who created the Propsal cannot vote on it
-function createProposal()
+function createProposal(string memory cid)
     external
     needPower
     returns (uint256)
@@ -107,6 +106,8 @@ function createProposal()
     if(powerAmount[msg.sender] == 0) {
         powerAmountNotEmpty[msg.sender] = false;
     }
+    bytes memory encodedCid = abi.encode(cid);
+    proposal.cidHash = encodedCid;
     return numProposals - 1;
 }
 
@@ -116,10 +117,10 @@ function voteOnProposal(uint256 proposalIndex, uint _vote)
     needPower
     activeProposalOnly(proposalIndex)
 {
-    require(_vote == 1 || _vote == 2, "Type in 1 for Yes or type in 2 for No");
+    require(_vote == 1 || _vote == 2, "1_FOR_YES_2_FOR_NO");
     Proposal storage proposal = proposals[proposalIndex];
-    require(proposal.votedYet[msg.sender] == false, "You cannot vote again");
-    require(msg.sender != proposal.proposalOwner, "You can't vote on your own propsal");
+    require(proposal.votedYet[msg.sender] == false, "ALREADY_VOTED");
+    require(msg.sender != proposal.proposalOwner, "PROPOSAL_OWNER_CANT_VOTE");
     if(_vote == 1) {
         proposal.yes++;
     } else {
@@ -140,24 +141,24 @@ function executeProposal(uint256 proposalIndex)
     inactiveProposalOnly(proposalIndex)
 {
     Proposal storage proposal = proposals[proposalIndex];
-    require(msg.sender == proposal.proposalOwner, "Only the creator of the proposal can execute this proposal");
+    require(msg.sender == proposal.proposalOwner, "NOT_CREATOR");
     if (proposal.yes > proposal.no) {
        proposal.proposalApproved = true;
     } 
      proposal.executed = true;
 }
 
-function powerBalance() public view returns(uint) {
+function powerBalance() external view returns(uint) {
     return powerAmount[msg.sender];
 }
 
 function withdrawTokens(uint _amount) external {
-    require(msg.sender == owner, "You are not the owner");
+    require(msg.sender == owner, "NOT_OWNER");
      LJCryptoToken.transfer(msg.sender, _amount);
 }
 
 function withdrawNFTs(uint _id, uint _amount) external {
-    require(msg.sender == owner, "You are not the owner");
+    require(msg.sender == owner, "NOT_OWNER");
     LJCryptoNFT.safeTransferFrom(address(this), msg.sender, _id, _amount, "");
 }
 

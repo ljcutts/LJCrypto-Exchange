@@ -632,7 +632,7 @@ const Tokens: React.FC = () => {
           <div className="flex justify-start md:mx-auto w-52 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-5 whitespace-nowrap">
             Update Staking Balances:
           </div>
-          {ljcryptoStakingBalance === "0" ||
+          {ljcryptoStakingBalance === "0" &&
           ljstablecoinStakingBalance === "0" ? (
             <>
               <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">

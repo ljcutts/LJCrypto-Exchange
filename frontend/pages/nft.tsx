@@ -205,6 +205,8 @@ function NFT() {
     setStakedNFTEleven(BigNumber.from(balanceEleven).toString());
     const balanceTweleve = await contract.checkStakedNFTs(11);
     setStakedNFTTwelve(BigNumber.from(balanceTweleve).toString());
+    const totalAmount = BigNumber.from(balanceOne).add(balanceTwo).add(balanceThree).add(balanceFour).add(balanceFive).add(balanceSix).add(balanceSeven).add(balanceEight).add(balanceNine).add(balanceTen).add(balanceEleven).add(balanceTweleve)
+    setStakedNFTTotal(BigNumber.from(totalAmount).toString())
   }
 
   const mintToken = async() => {
@@ -263,7 +265,7 @@ function NFT() {
      } else {
        setHowMuch(difference)
      }
-     setStakedNFTTotal(BigNumber.from(stakingBalance).toString())
+     
     return totalAmount
   }
 

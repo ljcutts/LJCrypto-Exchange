@@ -9,7 +9,7 @@ import {
   GUESSING_GAME_ABI,
   GUESSING_GAME_ADDRESS,
 } from "../constants/guessingGame";
-
+//Make a window.alert where the user gets notified whether or not they guessed right and how much they guessed
 
 type IState = {
   account: string | null;

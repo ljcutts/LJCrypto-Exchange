@@ -24,9 +24,13 @@ module.exports = {
         350: "350px",
         700: "700px",
         120: "120px",
+        300: "300px",
       },
       colors: {
         shade: "rgba(0, 0, 0, 0.5)",
+      },
+       width: {
+        '85': '85%',
       },
       borderRadius: {
        1400: "14rem"

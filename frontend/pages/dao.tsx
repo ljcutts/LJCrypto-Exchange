@@ -19,8 +19,9 @@ import {
 type IState = {
   proposals: (
     | {
-        proposalId: number 
-        deadline: Date | string
+        proposalId: number
+        deadline: Date | string 
+        getTime: number
         yesVotes: string;
         noVotes: string;
         owner: any;
@@ -50,7 +51,7 @@ type IState = {
 
 
 const Dao: React.FC = () => {
-const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSigner, getAddress, loading, setLoading} = useContext(Web3Context) as useWeb3;
+const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoading} = useContext(Web3Context) as useWeb3;
  const [tab, setTab] = useState("")
  const [powerBalance, setPowerBalance] = useState("0")
  const [nftPowerTab, setNFTPowerTab] = useState(false)
@@ -97,14 +98,6 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
      providerOrSigner
    );
  };
-
-
- async function fetchIPFSData() {
-    const ipfsUrl = `https://ipfs.io/ipfs/QmRtZjU5pFrx1EwpwMZwQFDhpwxw12PBCWCQhztLzuQFQL`;
-    const response = await fetch(ipfsUrl);
-    const data = await response.json();
-    console.log(data)
- }
 
  const getPowerBalance = async() => {
     const signer = await getProviderOrSigner(true);
@@ -205,16 +198,6 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
   };
 
 
-
-  const fetchProposal = async() => {
-  const signer = await getProviderOrSigner(true);
-  const contract = getLJCryptoDAOInstance(signer);
-   const cid = (await contract.proposals(0)).cidHash;
-  const decodedCid = ethers.utils.defaultAbiCoder.decode(["string"], cid);
-  console.log(`\ndecodedValue: ${decodedCid[0]}\n`);
-  console.log(cid)
-  }
-
   const getNumOfProposals = async() => {
        const provider = await getProviderOrSigner(false);
        const contract = getLJCryptoDAOInstance(provider);
@@ -241,6 +224,7 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
       const parsedProposal = {
         proposalId: id,
         deadline: deadline,
+        getTime: new Date(parseInt(proposal.deadline.toString()) * 1000).getTime(),
         yesVotes: BigNumber.from(proposal.yes).toString(),
         noVotes: BigNumber.from(proposal.no).toString(),
         owner: proposal.proposalOwner,
@@ -248,6 +232,7 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
         executionStatus: proposal.executed,
         proposalApproved: proposal.proposalApproved,
       };
+      console.log(parsedProposal)
       return parsedProposal;
     } catch (error) {
       console.error(error);
@@ -258,7 +243,7 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
     try {
       const proposals = [];
       for (let i = 0; i < numProposals; i++) {
-        const proposal = await fetchProposalById(i);
+         const proposal = await fetchProposalById(i);
         proposals.push(proposal);
       }
       setProposals(proposals);
@@ -298,6 +283,11 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
        const contract = getLJCryptoDAOInstance(signer);
        const tx = await contract.voteOnProposal(proposalId, choice);
        await tx.wait();
+       if(choice === 1) {
+         window.alert(`You Have Successfully Voted Yes On Proposal ${proposalId}`)
+       } else {
+         window.alert(`You Have Successfully Voted No On Proposal ${proposalId}`)
+       }
         setLoading(false)
      } catch (error:any) {
        setLoading(false)
@@ -307,16 +297,32 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
    }
 
 
+   const executeProposal = async (proposalId: number) => {
+     try {
+       setLoading(true);
+       const signer = await getProviderOrSigner(true);
+       const contract = getLJCryptoDAOInstance(signer);
+       const tx = await contract.executeProposal(proposalId);
+       await tx.wait();
+       window.alert(`You Have Successfully Executed Proposal ${proposalId}`);
+       setLoading(false);
+     } catch (error:any) {
+       setLoading(false)
+       console.log(error)
+       window.alert(error.data.message)
+     }
+   };
+
+
   useEffect(() => {
     setInterval(async function() {
        await getPowerBalance()
        await getNumOfProposals()
     }, 2 * 1000)
-  }, [tab])
+  })
 
 
   useEffect(() => {
-    fetchAllProposals();
     if (tab === "Vote On Proposal") {
       fetchAllProposals();
     } 
@@ -474,44 +480,79 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
            Vote On Proposals Before Their Deadlines
          </p>
          <div className="md:flex md:flex-col md:items-center ml-4 md:ml-0">
-           {proposals.map((p, idx) => (
-             <div
-               key={idx}
-               className="bg-black text-yellow-500 w-85 h-auto rounded-2xl p-5 mb-5"
-             >
-               <p className="mb-2">
-                 Proposal Number: <span className="pl-1">{p?.proposalId}</span>
-               </p>
-               <p className="mb-5 break-words">
-                 The Proposal:
-                 <span className="pl-2">{p?.cidHash}</span>
-               </p>
-               <span className="text-red-500 bold italic">
-                 Deadline To Vote: {p?.deadline.toLocaleString()}
-               </span>
-               {account === p?.owner ? (
-                 <div className="pt-5">
-                   <p>The Owner Can't Vote</p>
-                 </div>
-               ) : (
-                 <div className="pt-5">
-                   {/* render the voting buttons based on whether the user has already voted or is the proposalOwner */}
-                   <button
-                     onClick={() => voteOnProposal(p.proposalId, 1)}
-                     className="rounded-2xl whitespace-nowrap bg-yellow-500 px-2 text-black h-8 shadow-button w-auto font-bold transition ease-in-out mr-5 hover:text-white"
-                   >
-                     Vote Yes
-                   </button>
-                   <button
-                     onClick={() => voteOnProposal(p.proposalId, 2)}
-                     className="rounded-2xl whitespace-nowrap bg-yellow-500 px-2 text-black h-8 shadow-button w-auto font-bold transition ease-in-out hover:text-white"
-                   >
-                     Vote No
-                   </button>
-                 </div>
-               )}
-             </div>
-           ))}
+           <>
+             {proposals.every((p) => p?.executionStatus === true) === true && (
+               <div className="bg-black text-yellow-500 w-85 h-auto rounded-2xl p-5 mb-5">
+                 There Are Currently No Active Proposals
+               </div>
+             )}
+             {proposals.map((p, idx) => (
+               <main className="md:w-full md:flex md:justify-center" key={idx}>
+                 {!p?.executionStatus && (
+                   <div className="bg-black text-yellow-500 w-85 h-auto rounded-2xl p-5 mb-5">
+                     <p className="mb-2">
+                       Proposal Number:
+                       <span className="pl-1">{p?.proposalId}</span>
+                     </p>
+                     <p className="mb-5 break-words">
+                       The Proposal:
+                       <span className="pl-2">{p?.cidHash}</span>
+                     </p>
+                     <span className="text-red-500 bold italic">
+                       Deadline To Vote: {p?.deadline.toLocaleString()}
+                     </span>
+                     {account === p?.owner && (
+                       <>
+                         {Date.now() > p.getTime &&
+                         !p.executionStatus &&
+                         p.getTime > 0 ? (
+                           <div className="pt-5">
+                             <button
+                               onClick={() => executeProposal(p.proposalId)}
+                               className="rounded-2xl whitespace-nowrap bg-yellow-500 px-2 text-black h-8 shadow-button w-auto font-bold transition ease-in-out mr-5 hover:text-white"
+                             >
+                               Execute Proposal
+                             </button>
+                           </div>
+                         ) : (
+                           <div className="pt-5">
+                             <p>
+                               Please Wait For Deadline To Pass To Execute
+                               Proposal
+                             </p>
+                           </div>
+                         )}
+                       </>
+                     )}
+                     {account !== p?.owner && (
+                       <>
+                         {Date.now() > p.getTime && p.getTime > 0 ? (
+                           <div className="pt-5 italic font-bold">
+                             <p>Voting Has Expired</p>
+                           </div>
+                         ) : (
+                           <div className="pt-5">
+                             <button
+                               onClick={() => voteOnProposal(p.proposalId, 1)}
+                               className="rounded-2xl whitespace-nowrap bg-yellow-500 px-2 text-black h-8 shadow-button w-auto font-bold transition ease-in-out mr-5 hover:text-white"
+                             >
+                               Vote Yes
+                             </button>
+                             <button
+                               onClick={() => voteOnProposal(p.proposalId, 2)}
+                               className="rounded-2xl whitespace-nowrap bg-yellow-500 px-2 text-black h-8 shadow-button w-auto font-bold transition ease-in-out hover:text-white"
+                             >
+                               Vote No
+                             </button>
+                           </div>
+                         )}
+                       </>
+                     )}
+                   </div>
+                 )}
+               </main>
+             ))}
+           </>
          </div>
        </div>
      );
@@ -594,7 +635,7 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
               onClick={() => setTab("View Proposals")}
               className="rounded-2xl  whitespace-nowrap ml-4 bg-black text-yellow-500 h-8 shadow-button w-auto font-bold transition ease-in-out mb-12 delay-75 hover:scale-75"
             >
-              View Proposals
+              View Past Proposals
             </button>
           )}
         </div>
@@ -604,19 +645,7 @@ const { account, connectWallet, numberIsZero, setNumberIsZero, getProviderOrSign
   );
 };
 
-// export async function getServerSideProps() {
-//   //  const provider = await getProviderOrSigner(false);
-//    const contract = new Contract(
-//      LJCRYPTO_DAO_ADDRESS,
-//      LJCRYPTO_DAO_ABI,
-//      window.ethereum
-//    );;
-//   const data = await contract.fetchAllProposals();;
-//   return {
-//     props: {
-//       proposals: JSON.parse(JSON.stringify(data)),
-//     },
-//   };
-// }
-
 export default Dao;
+
+
+

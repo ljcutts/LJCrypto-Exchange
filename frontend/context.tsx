@@ -39,7 +39,7 @@ const Web3Provider = ({ children }: Props) => {
   const web3ModalRef: any = useRef();
   
   const getAddress = async () => {
-    const provider =  window.ethereum;
+    const provider = window.ethereum;
     const web3Provider = new providers.Web3Provider(provider);
     const thisAccount = await web3Provider.getSigner().getAddress();
     setAccount(await web3Provider.getSigner().getAddress());
@@ -78,9 +78,10 @@ const Web3Provider = ({ children }: Props) => {
             providerOptions: {},
           });
         }
-        setInterval(async() => {
-         await getAddress()
-        }, 2*1000)
+        
+      setInterval(async() => {
+        await getAddress()
+      }, 1 * 1000)
   }, [walletConnected, account])
 
   let sharedState = {

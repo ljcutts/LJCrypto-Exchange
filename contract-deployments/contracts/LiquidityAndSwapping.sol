@@ -4,10 +4,10 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 interface ILJCrypto {
-    function currentPricePerTokenInEther() external view returns(uint);
+    function currentPricePerToken() external view returns(uint);
 }
 
-
+//LJCryptoAndStablePair
 contract LiquidityAndSwapping is ERC20 {
     address public LJCryptoTokenAddress;
     address public LJStableCoinAddress;
@@ -27,7 +27,7 @@ function getLJStableReserve() public view returns(uint) {
 }
 
 function currentPriceOfLJCryptoToken() public view returns(uint) {
-    return ILJCrypto(LJCryptoTokenAddress).currentPricePerTokenInEther();
+    return ILJCrypto(LJCryptoTokenAddress).currentPricePerToken();
 }
 
 

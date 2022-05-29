@@ -3,70 +3,16 @@ import Link from "next/link";
 import { Web3Context, useWeb3 } from "../context";
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import styles from "../styles/Home.module.css";
-import Web3Modal from "web3modal";
 
 
 const LiquidityPools: React.FC = () => {
-  const [account, setAccount] = useState<useWeb3["account"]>(null);
-  const [walletConnected, setWalletConnected] = useState(false);
+const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoading} = useContext(Web3Context) as useWeb3;
+const [pairModal, setPairModal] = useState(false)
+const [changeLiquidityPair, setChangeLiquidityPair] = useState("")
 
-  const web3ModalRef: any = useRef();
-
-  const getProviderOrSigner = async (needSigner = false) => {
-    // Connect to Metamask
-    // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
-    const provider = await web3ModalRef.current.connect();
-    const web3Provider = new providers.Web3Provider(provider);
-
-    // If user is not connected to the Rinkeby network, let them know and throw an error
-    const { chainId } = await web3Provider.getNetwork();
-    if (chainId !== 4) {
-      alert("Change the network to Rinkeby");
-      throw new Error("Change network to Rinkeby");
-    }
-
-    if (needSigner) {
-      const signer = web3Provider.getSigner();
-      return signer;
-    }
-    return web3Provider;
-  };
-
-  const getAddress = async () => {
-    const provider = window.ethereum;
-    const web3Provider = new providers.Web3Provider(provider);
-    const thisAccount =  await web3Provider.getSigner().getAddress();
-   setAccount(thisAccount)
-    return thisAccount;
-  };
-
-   const connectWallet = async () => {
-     try {
-       await getProviderOrSigner();
-       setWalletConnected(true);
-     } catch (err) {
-       console.error(err);
-     }
-   };
-
-
-   useEffect(() => {
-     // if wallet is not connected, create a new instance of Web3Modal and connect the MetaMask wallet
-     if (!walletConnected) {
-       // Assign the Web3Modal class to the reference object by setting it's `current` value
-       // The `current` value is persisted throughout as long as this page is open
-       web3ModalRef.current = new Web3Modal({
-         network: "rinkeby",
-         providerOptions: {},
-         //  disableInjectedProvider: false,
-       });
-     }
-     setInterval(async() => {
-       await getAddress()
-     })
-     
-   }, [walletConnected, account]);
-
+const pairToggle = () => {
+  setPairModal(!pairModal)
+}
 
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
@@ -93,6 +39,119 @@ const LiquidityPools: React.FC = () => {
           </div>
         </button>
       </nav>
+      <div className="flex items-center h-32 w-auto bg-black rounded-2xl relative top-10 mb-20">
+        <div className="flex items-center text-yellow-500 mx-auto sm:text-lg text-xl font-bold uppercase px-4">
+          <p>
+            LiquidityPools: Become An Automatic Market Maker And Add/Remove
+            Liquidity
+          </p>
+        </div>
+      </div>
+      <div className="flex mx-auto justify-between h-12 w-full  md:w-900 bg-yellow-500 rounded-3xl">
+        <button className="md:w-107 w-1/3 rounded-3xl font-bold h-12 bg-black text-yellow-500">
+          Add Liquidity
+        </button>
+        <button className="md:w-107 w-1/3 whitespace-nowrap font-bold rounded-3xl h-12 text-black">
+          Remove Liquidity
+        </button>
+        <button className="md:w-107 w-1/3 rounded-3xl h-12 font-bold text-black">
+          Stats
+        </button>
+      </div>
+      <p className="text-xl md:text-center md:text-xl uppercase font-bold ml-4 mt-10 mb-3 text-white">
+        Select Liquidity Pair:
+      </p>
+      <section className="flex items-center md:mx-auto whitespace-nowrap ml-4 h-10 w-64 rounded-2xl bg-black text-yellow-500">
+        {(changeLiquidityPair === "LJCrypto/LJStable" ||
+          changeLiquidityPair === "") && (
+          <div className="flex font-semibold items-center pl-2 pr-2 hover:bg-shade2 rounded-2xl">
+            <img src="/ljcrypto.webp" alt="" className=" rounded-3xl w-7 h-7" />
+            <img
+              src="/ljstable.png"
+              alt=""
+              className=" rounded-3xl w-7 h-7 relative right-2"
+            />
+            LJCrypto/LJStable
+          </div>
+        )}
+        {changeLiquidityPair === "LJCrypto/Polygon" && (
+          <div className="flex font-semibold items-center pl-2 pr-2 hover:bg-shade2 rounded-2xl">
+            <img src="/ljcrypto.webp" alt="" className=" rounded-3xl w-7 h-7" />
+            <img
+              src="/polygon-logo.png"
+              alt=""
+              className=" rounded-3xl w-7 h-7 relative right-2"
+            />
+            LJCrypto/Polygon
+          </div>
+        )}
+        {changeLiquidityPair === "LJStable/Polygon" && (
+          <div className="flex font-semibold items-center pl-2 pr-2 hover:bg-shade2 rounded-2xl">
+            <img src="/ljstable.png" alt="" className=" rounded-3xl w-7 h-7" />
+            <img
+              src="/polygon-logo.png"
+              alt=""
+              className=" rounded-3xl w-7 h-7 relative right-2"
+            />
+            LJStable/Polygon
+          </div>
+        )}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          onClick={pairToggle}
+          className="cursor-pointer"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </section>
+      {pairModal && (
+        <section className="w-64 h-auto md:mx-auto bg-yellow-500 ml-4 mt-3 p-3 whitespace-nowrap text-base rounded-2xl">
+          <div
+            onClick={() => setChangeLiquidityPair("LJCrypto/LJStable")}
+            className="flex font-semibold items-center mb-2 hover:bg-shade2 cursor-pointer rounded-2xl"
+          >
+            <img src="/ljcrypto.webp" alt="" className=" rounded-3xl w-7 h-7" />
+            <img
+              src="/ljstable.png"
+              alt=""
+              className=" rounded-3xl w-7 h-7 relative right-2"
+            />
+            LJCrypto/LJStable Pair
+          </div>
+          <div
+            onClick={() => setChangeLiquidityPair("LJCrypto/Polygon")}
+            className="flex font-semibold items-center hover:bg-shade2 cursor-pointer mb-2 rounded-2xl"
+          >
+            <img src="/ljcrypto.webp" alt="" className=" rounded-3xl w-7 h-7" />
+            <img
+              src="/polygon-logo.png"
+              alt=""
+              className=" rounded-3xl w-7 h-7 relative right-2"
+            />
+            LJCrypto/Polygon Pair
+          </div>
+          <div
+            onClick={() => setChangeLiquidityPair("LJStable/Polygon")}
+            className="flex font-semibold items-center hover:bg-shade2 cursor-pointer rounded-2xl"
+          >
+            <img src="/ljstable.png" alt="" className=" rounded-3xl w-7 h-7" />
+            <img
+              src="/polygon-logo.png"
+              alt=""
+              className=" rounded-3xl w-7 h-7 relative right-2"
+            />
+            LJStable/Polygon Pair
+          </div>
+        </section>
+      )}
     </main>
   );
 };

@@ -78,7 +78,6 @@ const Web3Provider = ({ children }: Props) => {
             providerOptions: {},
           });
         }
-        
       setInterval(async() => {
         await getAddress()
       }, 1 * 1000)

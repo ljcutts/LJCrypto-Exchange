@@ -25,15 +25,18 @@ module.exports = {
         700: "700px",
         120: "120px",
         300: "300px",
+        107: "200px",
+        900: "600px",
       },
       colors: {
         shade: "rgba(0, 0, 0, 0.5)",
+        shade2: "rgba(0, 0, 0, 0.2)",
       },
-       width: {
-        '85': '85%',
+      width: {
+        85: "85%",
       },
       borderRadius: {
-       1400: "14rem"
+        1400: "14rem",
       },
     },
   },

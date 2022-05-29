@@ -582,6 +582,10 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
              <p className="text-xl md:text-center md:text-xl uppercase font-bold ml-4 mb-16 relative top-2 text-white">
                View All Executed Proposals
              </p>
+             <p className="text-xl md:text-center md:text-xl uppercase font-bold ml-4 mb-16 relative top-2 text-white">
+               Total Number Of Proposals(Past And Present):
+               <span className="pl-2 italic text-yellow-500 font-bold">{numProposals}</span>
+             </p>
              <div className="md:flex md:flex-col md:items-center ml-4 md:ml-0">
                <>
                  {proposals.every((p) => p?.executionStatus === false) ===

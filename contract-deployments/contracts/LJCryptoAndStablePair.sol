@@ -7,7 +7,7 @@ interface ILJCrypto {
     function currentPricePerToken() external view returns(uint);
 }
 
-
+//need to update token contracts espcially the staking
 contract LJCryptoAndStablePair is ERC20 {
     address public LJCryptoTokenAddress;
     address public LJStableCoinAddress;

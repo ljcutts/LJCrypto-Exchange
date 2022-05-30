@@ -16,121 +16,202 @@ import {
 
 import {LJC_LJS_ABI, LJC_LJS_ADDRESS} from  "../constants/ljcryptoandstablepair"
 
-
+type IState = {
+  howMuchLJCrypto: string | undefined;
+  setHowMuchLJCrypto: React.Dispatch<React.SetStateAction<string | undefined>>;
+  howMuchLJStable: string | undefined;
+  setHowMuchLJStable: React.Dispatch<React.SetStateAction<string | undefined>>;
+  ljcryptoBalance: string | undefined;
+  setLJCryptoBalance: React.Dispatch<React.SetStateAction<string | undefined>>;
+  maticBalance: string | undefined;
+  setMaticBalance: React.Dispatch<React.SetStateAction<string | undefined>>;
+  ljstablecoinBalance: string | undefined;
+  setLJStableCoinBalance: string | undefined
+};
 
 const LiquidityPools: React.FC = () => {
-const {account, connectWallet, getProviderOrSigner, getAddress, loading, setLoading} = useContext(Web3Context) as useWeb3;
-const [pairModal, setPairModal] = useState(false)
-const [changeLiquidityPair, setChangeLiquidityPair] = useState("")
-const [tab, setTab] = useState("")
-const [ljcryptoBalance, setLJCryptoBalance] = useState("0");
-const [ljstablecoinBalance, setLJStableCoinBalance] = useState("0");
-const [maticBalance, setMaticBalance] = useState("0");
-const [amountOne, setAmountOne] = useState("0")
-const [amountTwo, setAmountTwo] = useState("0");
-const [howMuchLJCrypto, setHowMuchLJCrypto] = useState("0")
-const [howMuchLJStable, setHowMuchLJStable] = useState("0");
+  const {
+    account,
+    connectWallet,
+    getProviderOrSigner,
+    getAddress,
+    loading,
+    setLoading,
+  } = useContext(Web3Context) as useWeb3;
+  const [pairModal, setPairModal] = useState(false);
+  const [changeLiquidityPair, setChangeLiquidityPair] = useState("");
+  const [tab, setTab] = useState("");
+  const [ljcryptoBalance, setLJCryptoBalance] =
+    useState<IState["ljcryptoBalance"]>("0");
+  const [ljstablecoinBalance, setLJStableCoinBalance] =
+    useState<IState["ljstablecoinBalance"]>("0");
+  const [maticBalance, setMaticBalance] = useState<IState["maticBalance"]>("0");
+  const [amountOne, setAmountOne] = useState("0");
+  const [amountTwo, setAmountTwo] = useState("0");
+  const [howMuchLJCrypto, setHowMuchLJCrypto] =
+    useState<IState["howMuchLJCrypto"]>("0");
+  const [howMuchLJStable, setHowMuchLJStable] =
+    useState<IState["howMuchLJStable"]>("0");
 
+  const pairToggle = () => {
+    setPairModal(!pairModal);
+  };
 
+  const toggleOutside = () => {
+    if (pairModal === true) {
+      setPairModal(false);
+    }
+  };
 
-const pairToggle = () => {
-  setPairModal(!pairModal)
-}
+  const getLJCryptoTokenInstance = (
+    providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
+  ) => {
+    return new Contract(
+      LJCRYPTO_TOKEN_ADDRESS,
+      LJCRYPTO_TOKEN_ABI,
+      providerOrSigner
+    );
+  };
 
-const toggleOutside = () => {
-  if(pairModal === true) {
-    setPairModal(false)
-  }
-}
+  const getLJStableCoinInstance = (
+    providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
+  ) => {
+    return new Contract(
+      LJSTABLE_COIN_ADDRESS,
+      LJSTABLE_COIN_ABI,
+      providerOrSigner
+    );
+  };
 
-const getLJCryptoTokenInstance = (
-  providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
-) => {
-  return new Contract(
-    LJCRYPTO_TOKEN_ADDRESS,
-    LJCRYPTO_TOKEN_ABI,
-    providerOrSigner
-  );
-};
+  const getLJCJStablePairInstance = (
+    providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
+  ) => {
+    return new Contract(LJC_LJS_ADDRESS, LJC_LJS_ABI, providerOrSigner);
+  };
 
-const getLJStableCoinInstance = (
-  providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
-) => {
-  return new Contract(
-    LJSTABLE_COIN_ADDRESS,
-    LJSTABLE_COIN_ABI,
-    providerOrSigner
-  );
-};
+  const getBalances = async () => {
+    const re = new RegExp("^-?\\d+(?:.\\d{0," + (2 || -1) + "})?");
+    const provider = window.ethereum;
+    const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const maticBalance = await web3Provider.getBalance();
+    const ljcryptocontract = getLJCryptoTokenInstance(web3Provider);
+    const ljstablecontract = getLJStableCoinInstance(web3Provider);
+    const currentAccount = await getAddress();
+    const valueOne = await ljcryptocontract.balanceOf(currentAccount);
+    const valueTwo = await ljstablecontract.balanceOf(currentAccount);
+    setLJCryptoBalance(
+      ethers.utils.formatEther(valueOne).toString().match(re)?.[0]
+    );
+    setLJStableCoinBalance(
+      ethers.utils.formatEther(valueTwo).toString().match(re)?.[0]
+    );
+    setMaticBalance(
+      ethers.utils.formatEther(maticBalance).toString().match(re)?.[0]
+    );
+  };
 
-const getLJCJStablePairInstance = (
-  providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
-) => {
-  return new Contract(
-    LJC_LJS_ADDRESS,
-    LJC_LJS_ABI,
-    providerOrSigner
-  );
-};
+  const calculateLJCLJSAmount = async () => {
+    let amountNeeded;
+    const re = new RegExp("^-?\\d+(?:.\\d{0," + (4 || -1) + "})?");
+    const provider = window.ethereum;
+    const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const liquiditycontract = getLJCJStablePairInstance(web3Provider);
+    const ljcryptoReserve = await liquiditycontract.getLJCrytpoReserve();
+    const ljstableReserve = await liquiditycontract.getLJStableReserve();
+    const contract = getLJCryptoTokenInstance(web3Provider);
+    const ljcryptoPrice = await contract.currentPricePerToken();
+    const ljstablePrice = 0.0004;
+    if (amountTwo !== "0") {
+      const amountB = ethers.utils.parseEther(
+        `${amountTwo === "" ? "0" : amountTwo}`
+      );
+      const ljcryptoAmount = ethers.utils.formatEther(
+        amountB.mul(ljcryptoReserve).div(ljstableReserve)
+      );
+      const ljstableAmount = ljstablePrice * 1e18 * parseInt(amountTwo);
+      amountNeeded = ljstableAmount / BigNumber.from(ljcryptoPrice).toNumber();
+      if (
+        ljcryptoReserve === BigNumber.from(0) &&
+        ljstableReserve === BigNumber.from(0)
+      ) {
+        setHowMuchLJCrypto(amountNeeded.toString().match(re)?.[0]);
+      } else {
+        setHowMuchLJCrypto(ljcryptoAmount.match(re)?.[0]);
+      }
+    }
+    if (amountOne !== "0") {
+      const amountA = ethers.utils.parseEther(
+        `${amountOne === "" ? "0" : amountOne}`
+      );
+      const ljstableAmount = ethers.utils.formatEther(
+        amountA.mul(ljstableReserve).div(ljcryptoReserve)
+      );
+      const ljcryptoAmount =
+        BigNumber.from(ljcryptoPrice).toNumber() * parseInt(amountOne);
+      amountNeeded = ljcryptoAmount / (ljstablePrice * 1e18);
+      if (
+        ljcryptoReserve === BigNumber.from(0) &&
+        ljstableReserve === BigNumber.from(0)
+      ) {
+        setHowMuchLJCrypto(amountNeeded.toString().match(re)?.[0]);
+      } else {
+        setHowMuchLJStable(ljstableAmount.match(re)?.[0]);
+      }
+    }
+  };
 
-const getBalances = async() => {
-   const provider = window.ethereum;
-   const web3Provider = new providers.Web3Provider(provider).getSigner();
-   const maticBalance = await web3Provider.getBalance()
-   const ljcryptocontract = getLJCryptoTokenInstance(web3Provider);
-  const ljstablecontract = getLJStableCoinInstance(web3Provider);
-  const currentAccount = await getAddress();
-  const valueOne = await ljcryptocontract.balanceOf(currentAccount);
-  const valueTwo = await ljstablecontract.balanceOf(currentAccount);
-   setLJCryptoBalance(parseInt(ethers.utils.formatEther(valueOne).toString()).toFixed(2));
-   setLJStableCoinBalance(ethers.utils.formatEther(valueTwo))
-   setMaticBalance(parseInt(ethers.utils.formatEther(maticBalance).toString()).toFixed(2));
-}
+  const approveTokens = async (amountOne: BigNumber, amountTwo: BigNumber) => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const ljcryptoContract = getLJCryptoTokenInstance(signer);
+      const ljstablecontract = getLJStableCoinInstance(signer);
+      setLoading(true);
+      const txOne = await ljcryptoContract.approve(LJC_LJS_ADDRESS, amountOne);
+      await txOne.wait();
+      window.alert(
+        `You Have Successfully Approved ${ethers.utils.formatEther(
+          amountOne
+        )} LJCrypto Tokens`
+      );
+      const txTwo = await ljstablecontract.approve(LJC_LJS_ADDRESS, amountTwo);
+      await txTwo.wait();
+      window.alert(
+        `You Have Successfully Approved ${ethers.utils.formatEther(
+          amountTwo
+        )} LJStable Tokens`
+      );
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
 
-
-const calculateAmount = async() => {
-  let amountNeeded
-  var re = new RegExp("^-?\\d+(?:.\\d{0," + (10 || -1) + "})?");
-   const provider = window.ethereum;
-   const web3Provider = new providers.Web3Provider(provider).getSigner();
-   const contract = getLJCryptoTokenInstance(web3Provider);
-   const value = await contract.currentPricePerToken();
-  const ljstablePrice = 0.0004;
-  //maybe use the wei units instead
-  const ljcryptoPrice = ethers.utils.formatEther(value)
-  if(amountTwo !== "0" && amountOne === "0") {
-     const ljstableAmount = ljstablePrice * parseInt(amountTwo)
-     amountNeeded = ljstableAmount / parseInt(ljcryptoPrice);
-     setHowMuchLJCrypto(parseInt(amountNeeded.toString()).toFixed(2))
-    console.log("amount", amountNeeded)
-    console.log("ljcryptoPrice", parseInt(ljcryptoPrice) * 4)
-    console.log(BigNumber.from(ethers.utils.parseEther(`0.0004`)).toString())
-  } else if(amountOne !== "0" && amountTwo === "0") {
-    const ljcryptoAmount = parseInt(ljcryptoPrice) * parseInt(amountOne)
-    const amountNeeded2 = ljcryptoAmount/ljstablePrice
-  } 
-  
-}
-
-const addLJSLJCLiquidity = async(amountOne:string, amountTwo:string) => {
-  try {
+  const addLJSLJCLiquidity = async (amountOne: string, amountTwo: string) => {
+    const weiAmountOne = ethers.utils.parseEther(amountOne.toString());
+    const weiAmountTwo = ethers.utils.parseEther(amountTwo.toString());
+    await approveTokens(weiAmountOne, weiAmountTwo);
+    try {
       setLoading(true);
       const signer = await getProviderOrSigner(true);
       const contract = getLJCJStablePairInstance(signer);
-      const tx = await contract.addLiquidity(amountOne, amountTwo);
+      const tx = await contract.addLiquidity(weiAmountOne, weiAmountTwo);
       await tx.wait();
       window.alert(`You Have Added Liquidity To The LJC/LJS Pair`);
       setLoading(false);
-  } catch (error:any) {
-     setLoading(false);
-     console.log(error);
-     window.alert(error.data.message);
-  }
-}
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error);
+      window.alert(error.data.message);
+    }
+  };
 
-const renderTabs = () => {
-  if(tab === "" || tab === "Add Liquidity") {
-      if (changeLiquidityPair === "LJCrypto/LJStable" || changeLiquidityPair === "") {
+  const renderTabs = () => {
+    if (tab === "" || tab === "Add Liquidity") {
+      if (
+        changeLiquidityPair === "LJCrypto/LJStable" ||
+        changeLiquidityPair === ""
+      ) {
         return (
           <>
             <div className="h-28 w-80 flex bg-yellow-500 rounded-2xl mb-2">
@@ -140,7 +221,11 @@ const renderTabs = () => {
                 }
                 className="pt-4 placeholder:text-black placeholder:opacity-60 font-semibold pl-4 bg-transparent mb-2 relative top-3 w-40 h-20 text-3xl outline-none pb-16 "
                 type="number"
-                placeholder={howMuchLJCrypto}
+                placeholder={
+                  howMuchLJCrypto === "NaN" || howMuchLJCrypto === undefined
+                    ? "0"
+                    : howMuchLJCrypto
+                }
               />
               <div className="flex flex-col item-center pl-2 pt-3 w-40">
                 <div className="flex items-center pr-3 pb-3 justify-end text-black font-semibold">
@@ -166,7 +251,11 @@ const renderTabs = () => {
                 }
                 className="pt-4 placeholder:text-black placeholder:opacity-60 font-semibold pl-4 bg-transparent mb-2 relative top-3 w-40 h-20 text-3xl outline-none pb-16 "
                 type="number"
-                placeholder="0"
+                placeholder={
+                  howMuchLJStable === "NaN" || howMuchLJStable === undefined
+                    ? "0"
+                    : howMuchLJStable
+                }
               />
               <div className="flex flex-col item-center pl-2 pt-3 w-40">
                 <div className="flex items-center pr-3 pb-3 justify-end text-black font-semibold">
@@ -208,7 +297,9 @@ const renderTabs = () => {
                 </div>
                 <div className="flex items-center font-semibold text-base pr-3 justify-end text-black">
                   Balance:
-                  <span className="pl-1 font-bold text-red-600">{ljcryptoBalance}</span>
+                  <span className="pl-1 font-bold text-red-600">
+                    {ljcryptoBalance}
+                  </span>
                 </div>
               </div>
             </div>
@@ -229,14 +320,16 @@ const renderTabs = () => {
                 </div>
                 <div className="flex items-center font-semibold text-base pr-3 justify-end text-black">
                   Balance:
-                  <span className="pl-1 font-bold text-red-600">{maticBalance}</span>
+                  <span className="pl-1 font-bold text-red-600">
+                    {maticBalance}
+                  </span>
                 </div>
               </div>
             </div>
           </>
         );
       }
-      if(changeLiquidityPair === "LJStable/Polygon") {
+      if (changeLiquidityPair === "LJStable/Polygon") {
         return (
           <>
             <div className="h-28 w-80 flex bg-yellow-500 rounded-2xl mb-2">
@@ -256,7 +349,9 @@ const renderTabs = () => {
                 </div>
                 <div className="flex items-center font-semibold text-base pr-3 justify-end text-black">
                   Balance:
-                  <span className="pl-1 font-bold text-red-600">{ljstablecoinBalance}</span>
+                  <span className="pl-1 font-bold text-red-600">
+                    {ljstablecoinBalance}
+                  </span>
                 </div>
               </div>
             </div>
@@ -277,23 +372,26 @@ const renderTabs = () => {
                 </div>
                 <div className="flex items-center font-semibold text-base pr-3 justify-end text-black">
                   Balance:
-                  <span className="pl-1 font-bold text-red-600">{maticBalance}</span>
+                  <span className="pl-1 font-bold text-red-600">
+                    {maticBalance}
+                  </span>
                 </div>
               </div>
             </div>
           </>
         );
       }
-  }
-}
+    }
+  };
 
-useEffect(() => {
-  getBalances()
-})
+  useEffect(() => {
+    getBalances();
+    // getReserves()
+  });
 
-useEffect(() => {
- calculateAmount()
-}, [amountOne, amountTwo])
+  useEffect(() => {
+    calculateLJCLJSAmount();
+  }, [amountOne, amountTwo]);
 
   return (
     <main
@@ -480,7 +578,10 @@ useEffect(() => {
           </div>
           <div className="ml-4 md:flex md:justify-center md:ml-0">
             {tab === "" || tab === "Add Liquidity" ? (
-              <button className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500">
+              <button
+                onClick={() => addLJSLJCLiquidity(amountOne, amountTwo)}
+                className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+              >
                 Add Liquidity
               </button>
             ) : (
@@ -496,3 +597,15 @@ useEffect(() => {
 };
 
 export default LiquidityPools
+
+
+// const getReserves = async() => {
+  //    const signer = await getProviderOrSigner(true);
+  //    const contract = getLJCJStablePairInstance(signer)
+  //    const ljcryptoReserve = await contract.getLJCrytpoReserve();
+  //    const ljstableReserve = await contract.getLJStableReserve();
+  //    const amountB = ethers.utils.parseEther(`3`)
+  //    const amountA = ethers.utils.parseEther(`2000`)
+  //    console.log("LJCryptoTokenAmount", ethers.utils.formatEther((amountB.mul(ljcryptoReserve)).div(ljstableReserve)))
+  //    console.log("LJStableAmount", ethers.utils.formatEther(amountA.mul(ljstableReserve).div(ljcryptoReserve)))
+  // }

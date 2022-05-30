@@ -7,15 +7,17 @@ interface ILJCrypto {
     function currentPricePerToken() external view returns(uint);
 }
 
-//LJCryptoAndStablePair
-contract LiquidityAndSwapping is ERC20 {
+
+contract LJCryptoAndStablePair is ERC20 {
     address public LJCryptoTokenAddress;
     address public LJStableCoinAddress;
-   constructor(address _LJCryptoTokenAddress, address _LJStableCoinAddress) ERC20("LJCrypto LP Token", "LJLP") {
-    require(_LJCryptoTokenAddress != address(0) && _LJStableCoinAddress != address(0), "Token address passed is a null address");
+   constructor(address _LJCryptoTokenAddress, address _LJStableCoinAddress) ERC20("LJC/LJS LP Token", "LJLP") {
+    require(_LJCryptoTokenAddress != address(0) && _LJStableCoinAddress != address(0), "NOT_AN_ADDRESS");
        LJCryptoTokenAddress = _LJCryptoTokenAddress;
        LJStableCoinAddress = _LJStableCoinAddress;
     }
+    mapping(address => uint) ljcryptoBalance;
+    mapping(address => uint) ljstableBalance;
 
 
 function getLJCrytpoReserve() public view returns(uint) {
@@ -31,25 +33,29 @@ function currentPriceOfLJCryptoToken() public view returns(uint) {
 }
 
 
-  function addLiquidityForERC20Pair(uint _amountA, uint _amountB) public returns(uint) {
+  function addLiquidity(uint _amountA, uint _amountB) external returns(uint) {
     uint LJCryptoAmount = _amountA * currentPriceOfLJCryptoToken();
     uint LJStableCoinAmount = _amountB * 0.0004 ether;
-    require(LJCryptoAmount >= LJStableCoinAmount || LJStableCoinAmount >= LJCryptoAmount, "The amounts you added aren't balanced");
+    require(LJCryptoAmount >= LJStableCoinAmount || LJStableCoinAmount >= LJCryptoAmount, "AMOUNTS_NOT_BALANCED");
     uint liquidity;
     uint LJCryptoTokenReserve = getLJCrytpoReserve();
     uint LJCryptoStableReserve = getLJStableReserve();
     IERC20 LJCryptoToken = IERC20(LJCryptoTokenAddress);
     IERC20 LJStableCoin = IERC20(LJStableCoinAddress);
     if(LJCryptoTokenReserve == 0 && LJCryptoStableReserve == 0) {
+      ljcryptoBalance[msg.sender] += _amountA;
+       ljstableBalance[msg.sender] += _amountB;
        LJCryptoToken.transferFrom(msg.sender, address(this), _amountA);
        LJStableCoin.transferFrom(msg.sender, address(this), _amountB);
        liquidity = _amountA + _amountB;
        _mint(msg.sender, liquidity);
     } else {
+        ljcryptoBalance[msg.sender] += _amountA;
+        ljstableBalance[msg.sender] += _amountB;
         uint LJCryptoTokenAmount = (_amountB * LJCryptoTokenReserve)/(LJCryptoStableReserve);
         uint LJStableAmount = (_amountA * LJCryptoStableReserve)/(LJCryptoTokenReserve);
-        require(_amountA >= LJCryptoTokenAmount, "Amount of tokens sent is less than the minimum tokens required");
-        require(_amountB >= LJStableAmount, "Amount of tokens sent is less than the minimum tokens required");
+        require(_amountA >= LJCryptoTokenAmount, "INSUFFICIENT_AMOUNT");
+        require(_amountB >= LJStableAmount, "INSUFFICIENT_AMOUNT");
         LJCryptoToken.transferFrom(msg.sender, address(this), LJCryptoTokenAmount);
         LJStableCoin.transferFrom(msg.sender, address(this), LJStableAmount);
         liquidity = (totalSupply() * (_amountA + _amountB))/ (LJCryptoStableReserve + LJCryptoTokenReserve);
@@ -59,11 +65,11 @@ function currentPriceOfLJCryptoToken() public view returns(uint) {
 }
 
 
-function removeLiquidityForERC20Pair(uint _amountA, uint _amountB) public returns(uint, uint) {
-    require(_amountA > 0 && _amountB > 0, '_amountA and B should be greater than zero');
+function removeLiquidity(uint _amountA, uint _amountB) external returns(uint, uint) {
+    require(_amountA > 0 && _amountB > 0, 'CANT_BE_ZERO');
     uint LJCryptoAmount = _amountA * currentPriceOfLJCryptoToken();
     uint LJStableCoinAmount = _amountB * 0.0004 ether;
-    require(LJCryptoAmount >= LJStableCoinAmount || LJStableCoinAmount >= LJCryptoAmount, "The amounts you added aren't balanced");
+    require(LJCryptoAmount >= LJStableCoinAmount || LJStableCoinAmount >= LJCryptoAmount, "NOT_BALANCED");
     uint LJCryptoTokenReserve = getLJCrytpoReserve();
     uint LJCryptoStableReserve = getLJStableReserve();
     uint _totalSupply = totalSupply();
@@ -72,6 +78,8 @@ function removeLiquidityForERC20Pair(uint _amountA, uint _amountB) public return
     IERC20 LJCryptoToken = IERC20(LJCryptoTokenAddress);
     IERC20 LJStableCoin = IERC20(LJStableCoinAddress);
     _burn(msg.sender, (_amountA + _amountB));
+    ljcryptoBalance[msg.sender] -= _amountA;
+    ljstableBalance[msg.sender] -= _amountB;
     LJCryptoToken.transfer(msg.sender, LJCryptoTokenAmount);
     LJStableCoin.transfer(msg.sender, LJStableAmount);
     return (LJCryptoTokenAmount,  LJStableAmount);
@@ -82,7 +90,7 @@ function getAmountOfTokens(
         uint256 inputReserve,
         uint256 outputReserve
     ) public pure returns (uint256) {
-        require(inputReserve > 0 && outputReserve > 0, "invalid reserves");
+        require(inputReserve > 0 && outputReserve > 0, "INVALID_RESERVES");
         uint256 inputAmountWithFee = inputAmount * 99;
         uint256 numerator = inputAmountWithFee * outputReserve;
         uint256 denominator = (inputReserve * 100) + inputAmountWithFee;
@@ -92,7 +100,7 @@ function getAmountOfTokens(
       /**
      @dev Swaps LJCrypto for LJStable
     */
-    function ljcryptoTokenToLJStableToken(uint _tokensSold, uint _minljStable) public {
+    function ljcryptoTokenToLJStableToken(uint _tokensSold, uint _minljStable) external {
     uint256 ljstableTokenReserve = getLJStableReserve();
     uint256 ljcryptoTokenReserve = getLJCrytpoReserve();
     uint256 tokensBought = getAmountOfTokens(
@@ -101,14 +109,14 @@ function getAmountOfTokens(
         ljstableTokenReserve
     );
 
-    require(tokensBought >= _minljStable, "insufficient output amount");
+    require(tokensBought >= _minljStable, "INSUFFICIENT_AMOUNT");
     IERC20(LJCryptoTokenAddress).transferFrom(msg.sender, address(this), _tokensSold);
     IERC20(LJStableCoinAddress).transfer(msg.sender, tokensBought);
     }
      /**
     @dev Swaps LJStable for LJCrypto
     */
-    function ljstableTokenToLJCryptoToken(uint _tokensSold, uint _minljCrypto) public {
+    function ljstableTokenToLJCryptoToken(uint _tokensSold, uint _minljCrypto) external {
         uint256 ljstableTokenReserve = getLJStableReserve();
         uint256 ljcryptoTokenReserve = getLJCrytpoReserve();
         uint256 tokensBought = getAmountOfTokens(
@@ -116,8 +124,16 @@ function getAmountOfTokens(
             ljstableTokenReserve,
             ljcryptoTokenReserve
         );
-        require(tokensBought >= _minljCrypto, "insufficient output amount");
+        require(tokensBought >= _minljCrypto, "INSUFFICIENT_AMOUNT");
         IERC20(LJStableCoinAddress).transferFrom(msg.sender, address(this), _tokensSold);
         IERC20(LJCryptoTokenAddress).transfer(msg.sender, tokensBought);
+    }
+
+    function getLJCryptoBalance() external view returns(uint) {
+        return ljcryptoBalance[msg.sender];
+    }
+
+     function getLJStable4Balance() external view returns(uint) {
+        return ljstableBalance[msg.sender];
     }
 }

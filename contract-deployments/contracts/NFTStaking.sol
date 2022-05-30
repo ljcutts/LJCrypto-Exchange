@@ -10,7 +10,6 @@ interface ILJCryptoNFT {
 
 contract NFTStaking is ERC1155Holder {
   ILJCryptoNFT LJCryptoNFT;
-
    address immutable owner;
    bool public _paused;
    mapping(address => uint) stakingBalance;

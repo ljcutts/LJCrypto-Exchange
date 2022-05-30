@@ -31,6 +31,7 @@ module.exports = {
       colors: {
         shade: "rgba(0, 0, 0, 0.5)",
         shade2: "rgba(0, 0, 0, 0.2)",
+        shade3: "rgb(143, 150, 172)",
       },
       width: {
         85: "85%",

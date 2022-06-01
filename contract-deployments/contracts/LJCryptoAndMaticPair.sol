@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+
  interface ILJCrypto {
     function currentPricePerToken() external view returns(uint);
 }
@@ -13,48 +14,60 @@ contract LJCryptoAndMaticPair is ERC20 {
     require(_LJCryptoTokenAddress != address(0), "NOT_AN_ADDRESS");
        LJCryptoTokenAddress = _LJCryptoTokenAddress;
     }
+
     
 function getLJCryptoReserve() public view returns(uint) {
     return IERC20(LJCryptoTokenAddress).balanceOf(address(this));
 }
 
-function addLiquidity(uint _amount) external payable returns(uint) {
+function currentPriceOfLJCryptoToken() public view returns(uint) {
+    return ILJCrypto(LJCryptoTokenAddress).currentPricePerToken();
+}
+
+function addLiquidity(uint _amountA) external payable returns(uint) {
+    require(_amountA > 0 && msg.value > 0, 'CANT_BE_ZERO');
+    uint LJCryptoPrice = currentPriceOfLJCryptoToken();
+    uint LJCryptoAmount = _amountA * LJCryptoPrice;
+    uint MaticAmount = msg.value;
+    require(LJCryptoAmount >= MaticAmount || MaticAmount >= LJCryptoAmount, "NOT_BALANCED");
     uint liquidity;
-    uint ethBalance = address(this).balance;
+    uint maticBalance = address(this).balance;
      uint LJCryptoTokenReserve = getLJCryptoReserve();
      IERC20 LJCryptoToken = IERC20(LJCryptoTokenAddress);
-
     if(LJCryptoTokenReserve == 0) {
-       LJCryptoToken.transferFrom(msg.sender, address(this), _amount);
-        liquidity = ethBalance;
-        _mint(msg.sender, liquidity);
+       LJCryptoToken.transferFrom(msg.sender, address(this), _amountA);
+       liquidity = maticBalance;
+       _mint(msg.sender, liquidity);
     } else {
-        uint ethReserve = ethBalance - msg.value;
-        uint ljcryptoTokenAmount = (msg.value * LJCryptoTokenReserve)/(ethReserve);
-         require(_amount >= ljcryptoTokenAmount, "INSUFFICIENT_AMOUNT");
+        uint maticReserve = maticBalance - msg.value;
+        uint ljcryptoTokenAmount = (msg.value * LJCryptoTokenReserve)/(maticReserve);
+        uint maticAmount = (_amountA * maticReserve)/(LJCryptoTokenReserve);
+         require(_amountA >= ljcryptoTokenAmount, "INSUFFICIENT_AMOUNT");
+         require(msg.value >= maticAmount, "INSUFFICIENT_AMOUNT");
          LJCryptoToken.transferFrom(msg.sender, address(this), ljcryptoTokenAmount);
-        liquidity = (totalSupply() * msg.value)/ ethReserve;
+        liquidity = (totalSupply() * msg.value)/ maticReserve;
         _mint(msg.sender, liquidity);
     }
     return liquidity;
 }
 
-function removeLiquidity(uint _amount) external returns(uint, uint) {
-    require(_amount > 0, 'CANT_BE_ZERO');
-    uint ethReserve = address(this).balance;
+function removeLiquidity(uint _amountA, uint _amountB) external returns(uint, uint) {
+    require(_amountA > 0, 'CANT_BE_ZERO');
+    uint LJCryptoPrice = currentPriceOfLJCryptoToken();
+    uint LJCryptoAmount = _amountA * LJCryptoPrice;
+    uint MaticAmount = _amountB;
+    require(LJCryptoAmount >= MaticAmount || MaticAmount >= LJCryptoAmount, "NOT_BALANCED");
+    uint maticReserve = address(this).balance;
     uint _totalSupply = totalSupply();
-    uint ethAmount = (ethReserve * _amount)/ _totalSupply;
-    uint ljcryptoTokenAmount = (getLJCryptoReserve() * _amount)/ _totalSupply;
-    _burn(msg.sender, _amount);
-    payable(msg.sender).transfer(ethAmount);
+    uint maticAmount = (maticReserve * _amountB)/ _totalSupply;
+    uint ljcryptoTokenAmount = (getLJCryptoReserve() * _amountA)/ _totalSupply;
+    _burn(msg.sender, _amountA);
+    payable(msg.sender).transfer(maticAmount);
     IERC20(LJCryptoTokenAddress).transfer(msg.sender, ljcryptoTokenAmount);
-    return (ethAmount, ljcryptoTokenAmount);
+    return (maticAmount, ljcryptoTokenAmount);
 }
 
-  /**
-    @dev Returns the amount Eth/Crypto Dev tokens that would be returned to the user
-    * in the swap
-    */
+
     function getAmountOfTokens(
         uint256 inputAmount,
         uint256 inputReserve,
@@ -68,7 +81,7 @@ function removeLiquidity(uint _amount) external returns(uint, uint) {
     }
 
       /**
-     @dev Swaps Ether for CryptoDev Tokens
+     @dev Swaps Matic for LJCrypto Tokens
     */
     function ethToCryptoDevToken(uint _minTokens) external payable {
    uint256 ljcryptoTokenReserve = getLJCryptoReserve();
@@ -82,7 +95,7 @@ function removeLiquidity(uint _amount) external returns(uint, uint) {
     IERC20(LJCryptoTokenAddress).transfer(msg.sender, tokensBought);
     }
      /**
-    @dev Swaps CryptoDev Tokens for Ether
+    @dev Swaps LJCrypto Tokens for Matic
     */
     function cryptoDevTokenToEth(uint _tokensSold, uint _minEth) external {
    uint256 ljcryptoTokenReserve = getLJCryptoReserve();

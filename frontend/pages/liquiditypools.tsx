@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Link from "next/link";
 import { Web3Context, useWeb3 } from "../context";
 import { providers, Contract, BigNumber, ethers } from "ethers";
@@ -15,10 +15,13 @@ import {
 } from "../constants/ljstablecoin";
 
 import {LJC_LJS_ABI, LJC_LJS_ADDRESS} from  "../constants/ljcryptoandstablepair"
+import {LJC_MATIC_ABI, LJC_MATIC_ADDRESS} from "../constants/ljcryptoandmaticpair"
 
 type IState = {
   howMuchLJCrypto: string | undefined;
   setHowMuchLJCrypto: React.Dispatch<React.SetStateAction<string | undefined>>;
+  howMuchLJCrypto2: string | undefined;
+  setHowMuchLJCrypto2: React.Dispatch<React.SetStateAction<string | undefined>>;
   howMuchLJStable: string | undefined;
   setHowMuchLJStable: React.Dispatch<React.SetStateAction<string | undefined>>;
   ljcryptoBalance: string | undefined;
@@ -26,7 +29,9 @@ type IState = {
   maticBalance: string | undefined;
   setMaticBalance: React.Dispatch<React.SetStateAction<string | undefined>>;
   ljstablecoinBalance: string | undefined;
-  setLJStableCoinBalance: string | undefined
+  setLJStableCoinBalance: string | undefined;
+  howMuchPolygon: string | undefined;
+  setHowMuchPolygon: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
 const LiquidityPools: React.FC = () => {
@@ -48,10 +53,16 @@ const LiquidityPools: React.FC = () => {
   const [maticBalance, setMaticBalance] = useState<IState["maticBalance"]>("0");
   const [amountOne, setAmountOne] = useState("0");
   const [amountTwo, setAmountTwo] = useState("0");
+  const [secondAmountOne, setSecondAmountOne] = useState("0.0")
+  const [secondAmountTwo, setSecondAmountTwo] = useState("0.0")
   const [howMuchLJCrypto, setHowMuchLJCrypto] =
-    useState<IState["howMuchLJCrypto"]>("0");
+    useState<IState["howMuchLJCrypto"]>("0.0");
+    const [howMuchLJCrypto2, setHowMuchLJCrypto2] =
+      useState<IState["howMuchLJCrypto2"]>("0.0");
   const [howMuchLJStable, setHowMuchLJStable] =
-    useState<IState["howMuchLJStable"]>("0");
+    useState<IState["howMuchLJStable"]>("0.0");
+    const [howMuchPolygon, setHowMuchPolygon] =
+      useState<IState["howMuchPolygon"]>("0.0");
 
   const pairToggle = () => {
     setPairModal(!pairModal);
@@ -89,6 +100,12 @@ const LiquidityPools: React.FC = () => {
     return new Contract(LJC_LJS_ADDRESS, LJC_LJS_ABI, providerOrSigner);
   };
 
+  const getLJCMaticPairInstance = (
+    providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
+  ) => {
+    return new Contract(LJC_MATIC_ADDRESS, LJC_MATIC_ABI, providerOrSigner);
+  };
+
   const getBalances = async () => {
     const re = new RegExp("^-?\\d+(?:.\\d{0," + (2 || -1) + "})?");
     const provider = window.ethereum;
@@ -121,63 +138,109 @@ const LiquidityPools: React.FC = () => {
     const contract = getLJCryptoTokenInstance(web3Provider);
     const ljcryptoPrice = await contract.currentPricePerToken();
     const ljstablePrice = 0.0004;
-    if (amountTwo !== "0") {
-      const amountB = ethers.utils.parseEther(
-        `${amountTwo === "" ? "0" : amountTwo}`
-      );
-      const ljcryptoAmount = ethers.utils.formatEther(
-        amountB.mul(ljcryptoReserve).div(ljstableReserve)
-      );
-      const ljstableAmount = ljstablePrice * 1e18 * parseInt(amountTwo);
-      amountNeeded = ljstableAmount / BigNumber.from(ljcryptoPrice).toNumber();
-      if (
-        ljcryptoReserve === BigNumber.from(0) &&
-        ljstableReserve === BigNumber.from(0)
-      ) {
-        setHowMuchLJCrypto(amountNeeded.toString().match(re)?.[0]);
-      } else {
-        setHowMuchLJCrypto(ljcryptoAmount.match(re)?.[0]);
+    if (
+      changeLiquidityPair === "LJCrypto/LJStable" ||
+      changeLiquidityPair === ""
+    ) {
+      if (amountTwo !== "0.0") {
+        const amountB = ethers.utils.parseEther(
+          `${amountTwo === "" ? "0" : amountTwo}`
+        );
+        const ljcryptoAmount = ethers.utils.formatEther(
+          amountB.mul(ljcryptoReserve).div(ljstableReserve)
+        );
+        const ljstableAmount = ljstablePrice * 1e18 * parseFloat(amountTwo);
+        amountNeeded =
+          ljstableAmount / BigNumber.from(ljcryptoPrice).toNumber();
+        if (
+          BigNumber.from(ljcryptoReserve).toString() === "0" &&
+          BigNumber.from(ljstableReserve).toString() === "0"
+        ) {
+          setHowMuchLJCrypto(amountNeeded.toString().match(re)?.[0]);
+        } else {
+          setHowMuchLJCrypto(ljcryptoAmount.match(re)?.[0]);
+        }
       }
-    }
-    if (amountOne !== "0") {
-      const amountA = ethers.utils.parseEther(
-        `${amountOne === "" ? "0" : amountOne}`
-      );
-      const ljstableAmount = ethers.utils.formatEther(
-        amountA.mul(ljstableReserve).div(ljcryptoReserve)
-      );
-      const ljcryptoAmount =
-        BigNumber.from(ljcryptoPrice).toNumber() * parseInt(amountOne);
-      amountNeeded = ljcryptoAmount / (ljstablePrice * 1e18);
-      if (
-        ljcryptoReserve === BigNumber.from(0) &&
-        ljstableReserve === BigNumber.from(0)
-      ) {
-        setHowMuchLJCrypto(amountNeeded.toString().match(re)?.[0]);
-      } else {
-        setHowMuchLJStable(ljstableAmount.match(re)?.[0]);
+      if (amountOne !== "0.0") {
+        const amountA = ethers.utils.parseEther(
+          `${amountOne === "" ? "0" : amountOne}`
+        );
+        const ljstableAmount = ethers.utils.formatEther(
+          amountA.mul(ljstableReserve).div(ljcryptoReserve)
+        );
+        const ljcryptoAmount =
+          BigNumber.from(ljcryptoPrice).toNumber() * parseFloat(amountOne);
+        amountNeeded = ljcryptoAmount / (ljstablePrice * 1e18);
+        if (
+          BigNumber.from(ljcryptoReserve).toString() === "0" &&
+          BigNumber.from(ljstableReserve).toString() === "0"
+        ) {
+          setHowMuchLJCrypto(amountNeeded.toString().match(re)?.[0]);
+        } else {
+          setHowMuchLJStable(ljstableAmount.match(re)?.[0]);
+        }
       }
     }
   };
 
-  const approveTokens = async (amountOne: BigNumber, amountTwo: BigNumber) => {
-    try {
+  const calculateLJCMAticAmount = async() => {
+    let amountNeeded;
+    const re = new RegExp("^-?\\d+(?:.\\d{0," + (4 || -1) + "})?");
+    const provider = window.ethereum;
+    const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const liquiditycontract = getLJCMaticPairInstance(web3Provider);
+    const ljcryptoReserve = await liquiditycontract.getLJCryptoReserve();
+    const maticReserve = await new providers.Web3Provider(provider).getBalance(LJC_MATIC_ADDRESS);
+    const contract = getLJCryptoTokenInstance(web3Provider);
+     const ljcryptoPrice = await contract.currentPricePerToken();
+     const theLJCryptoReserve = BigNumber.from(ljcryptoReserve).toString();
+     console.log(maticReserve.toNumber())
+     if (changeLiquidityPair === "LJCrypto/Polygon") {
+       if (secondAmountTwo !== "0.0") {
+         if (theLJCryptoReserve === "0") {
+             amountNeeded = parseFloat(secondAmountTwo) / (BigNumber.from(ljcryptoPrice).toNumber() / 1e18);
+             setHowMuchLJCrypto2(amountNeeded.toString());
+         } else {
+            amountNeeded = (ljcryptoReserve * (parseFloat(secondAmountTwo)))/(maticReserve.toNumber())
+            setHowMuchLJCrypto2(amountNeeded.toString());
+         }
+       }
+          if (secondAmountOne !== "0.0") {
+            if(theLJCryptoReserve === "0") {
+               amountNeeded = parseFloat(secondAmountOne) * (parseFloat(ljcryptoPrice) / 1e18)
+               setHowMuchPolygon(amountNeeded.toString());
+            } else {
+               amountNeeded = (parseFloat(secondAmountOne) * maticReserve.toNumber())/ljcryptoReserve;
+               setHowMuchPolygon(amountNeeded.toString());
+            }
+          }  
+     }
+  }
+  const approveLJCryptoTokens = async (address:string, amountOne: BigNumber) => {
+   try {
+     setLoading(true)
       const signer = await getProviderOrSigner(true);
       const ljcryptoContract = getLJCryptoTokenInstance(signer);
-      const ljstablecontract = getLJStableCoinInstance(signer);
+      const tx = await ljcryptoContract.approve(address, amountOne);
+      await tx.wait()
+      window.alert(`You Have Successfully Approved ${ethers.utils.formatEther(amountOne)} LJCrypto Tokens`);
+     setLoading(false)
+   } catch (error:any) {
+     setLoading(false)
+     console.log(error)
+   }
+  }
+
+  const approveLJStableTokens = async (address:string, amountOne: BigNumber) => {
+    try {
       setLoading(true);
-      const txOne = await ljcryptoContract.approve(LJC_LJS_ADDRESS, amountOne);
-      await txOne.wait();
+      const signer = await getProviderOrSigner(true);
+      const ljstableContract = getLJStableCoinInstance(signer);
+      const tx = await ljstableContract.approve(address, amountOne);
+      await tx.wait();
       window.alert(
         `You Have Successfully Approved ${ethers.utils.formatEther(
           amountOne
-        )} LJCrypto Tokens`
-      );
-      const txTwo = await ljstablecontract.approve(LJC_LJS_ADDRESS, amountTwo);
-      await txTwo.wait();
-      window.alert(
-        `You Have Successfully Approved ${ethers.utils.formatEther(
-          amountTwo
         )} LJStable Tokens`
       );
       setLoading(false);
@@ -190,7 +253,8 @@ const LiquidityPools: React.FC = () => {
   const addLJSLJCLiquidity = async (amountOne: string, amountTwo: string) => {
     const weiAmountOne = ethers.utils.parseEther(amountOne.toString());
     const weiAmountTwo = ethers.utils.parseEther(amountTwo.toString());
-    await approveTokens(weiAmountOne, weiAmountTwo);
+    await approveLJCryptoTokens(LJC_LJS_ADDRESS,weiAmountOne)
+    await approveLJStableTokens(LJC_LJS_ADDRESS,weiAmountTwo)
     try {
       setLoading(true);
       const signer = await getProviderOrSigner(true);
@@ -205,6 +269,27 @@ const LiquidityPools: React.FC = () => {
       window.alert(error.data.message);
     }
   };
+
+  const addLJCMaticLiquidity = async (amountOne: string, amountTwo: string) => {
+    const weiAmountOne = ethers.utils.parseEther(amountOne.toString());
+    const weiAmountTwo = ethers.utils.parseEther(amountTwo.toString());
+    await approveLJCryptoTokens(LJC_MATIC_ADDRESS,weiAmountOne);
+    try {
+      setLoading(true);
+      const signer = await getProviderOrSigner(true);
+      const contract = getLJCMaticPairInstance(signer);
+      const tx = await contract.addLiquidity(weiAmountOne, {value: weiAmountTwo});
+      await tx.wait();
+      window.alert(`You Have Added Liquidity To The LJC/Matic Pair`);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error);
+      window.alert(error.data.message);
+    }
+  };
+
+
 
   const renderTabs = () => {
     if (tab === "" || tab === "Add Liquidity") {
@@ -223,7 +308,7 @@ const LiquidityPools: React.FC = () => {
                 type="number"
                 placeholder={
                   howMuchLJCrypto === "NaN" || howMuchLJCrypto === undefined
-                    ? "0"
+                    ? "0.0"
                     : howMuchLJCrypto
                 }
               />
@@ -253,7 +338,7 @@ const LiquidityPools: React.FC = () => {
                 type="number"
                 placeholder={
                   howMuchLJStable === "NaN" || howMuchLJStable === undefined
-                    ? "0"
+                    ? "0.0"
                     : howMuchLJStable
                 }
               />
@@ -284,7 +369,14 @@ const LiquidityPools: React.FC = () => {
               <input
                 className="pt-4 placeholder:text-black placeholder:opacity-60 font-semibold pl-4 bg-transparent mb-2 relative top-3 w-40 h-20 text-3xl outline-none pb-16 "
                 type="number"
-                placeholder="0"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSecondAmountOne(e.target.value)
+                }
+                placeholder={
+                  howMuchLJCrypto2 === "NaN" || howMuchLJCrypto2 === undefined
+                    ? "0.0"
+                    : howMuchLJCrypto2
+                }
               />
               <div className="flex flex-col item-center pl-2 pt-3 w-40">
                 <div className="flex items-center pr-3 pb-3 justify-end text-black font-semibold">
@@ -307,7 +399,14 @@ const LiquidityPools: React.FC = () => {
               <input
                 className="pt-4 placeholder:text-black placeholder:opacity-60 font-semibold pl-4 bg-transparent mb-2 relative top-3 w-40 h-20 text-3xl outline-none pb-16 "
                 type="number"
-                placeholder="0"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSecondAmountTwo(e.target.value)
+                }
+                placeholder={
+                  howMuchPolygon === "NaN" || howMuchPolygon === undefined
+                    ? "0.0"
+                    : howMuchPolygon
+                }
               />
               <div className="flex flex-col item-center pl-2 pt-3 w-40">
                 <div className="flex items-center pr-3 pb-3 justify-end text-black font-semibold">
@@ -384,14 +483,39 @@ const LiquidityPools: React.FC = () => {
     }
   };
 
+  const renderAddLiquidity = () => {
+    if (
+      changeLiquidityPair === "LJCrypto/LJStable" ||
+      changeLiquidityPair === ""
+    ) {
+      return (
+        <button
+        onClick={() => addLJSLJCLiquidity(amountOne, amountTwo)}
+        className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+      >
+        Add Liquidity
+      </button>
+      )
+    }
+    if(changeLiquidityPair === "LJCrypto/Polygon") {
+      return (
+        <button
+          onClick={() => addLJCMaticLiquidity(secondAmountOne, secondAmountTwo)}
+          className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+        >
+          Add Liquidity
+        </button>
+      )
+    }
+  }
   useEffect(() => {
     getBalances();
-    // getReserves()
   });
 
   useEffect(() => {
     calculateLJCLJSAmount();
-  }, [amountOne, amountTwo]);
+    calculateLJCMAticAmount();
+  }, [amountOne, amountTwo, secondAmountTwo, secondAmountOne]);
 
   return (
     <main
@@ -578,12 +702,7 @@ const LiquidityPools: React.FC = () => {
           </div>
           <div className="ml-4 md:flex md:justify-center md:ml-0">
             {tab === "" || tab === "Add Liquidity" ? (
-              <button
-                onClick={() => addLJSLJCLiquidity(amountOne, amountTwo)}
-                className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
-              >
-                Add Liquidity
-              </button>
+              <>{renderAddLiquidity()}</>
             ) : (
               <button className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500">
                 Remove Liquidity

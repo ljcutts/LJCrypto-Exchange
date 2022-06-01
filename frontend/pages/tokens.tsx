@@ -528,7 +528,7 @@ const Tokens: React.FC = () => {
             Token Prices:
           </div>
           <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
-            DISCLAIMER: THESE PRICES ARE IN ETHER CURRENCY AND NOT
+            DISCLAIMER: THESE PRICES ARE IN MATIC CURRENCY AND NOT
             FIAT(USD/CAD/EUD....)
           </p>
           <div className="flex flex-col md:mx-auto h-32 w-80 md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
@@ -540,7 +540,7 @@ const Tokens: React.FC = () => {
               />
               <p className="text-yellow-500 font-semibold capitalize">
                 LjcryptoToken:{" "}
-                <span className="md:text-lg">{ljcryptoPrice} ETH</span>
+                <span className="md:text-lg">{ljcryptoPrice} MATIC</span>
               </p>
             </div>
             <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
@@ -550,7 +550,7 @@ const Tokens: React.FC = () => {
                 className="rounded-3xl w-8 h-8 mr-3"
               />
               <p className="text-yellow-500 font-semibold capitalize">
-                Ljstablecoin: <span>0.0004 ETH</span>
+                Ljstablecoin: <span>0.0004 MATIC</span>
               </p>
             </div>
           </div>
@@ -590,7 +590,7 @@ const Tokens: React.FC = () => {
                 className="rounded-3xl w-8 h-8 mr-3"
               />
               <p className="text-yellow-500 font-semibold capitalize">
-                LjcryptoToken: <span>{ljcryptoEtherBalance} ETH</span>
+                LjcryptoToken: <span>{ljcryptoEtherBalance} MATIC</span>
               </p>
             </div>
             <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
@@ -600,7 +600,7 @@ const Tokens: React.FC = () => {
                 className="rounded-3xl w-8 h-8 mr-3"
               />
               <p className="text-yellow-500 font-semibold capitalize">
-                Ljstablecoin: <span>{ljstablecoinEtherBalance} ETH</span>
+                Ljstablecoin: <span>{ljstablecoinEtherBalance} MATIC</span>
               </p>
             </div>
           </div>
@@ -685,7 +685,7 @@ const Tokens: React.FC = () => {
             </>
           )}
           <div className="flex justify-start md:mx-auto w-52 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
-            Staking Balances In ETH:
+            Staking Balances In MATIC:
           </div>
           <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
             <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
@@ -695,7 +695,7 @@ const Tokens: React.FC = () => {
                 className="rounded-3xl w-8 h-8 mr-3"
               />
               <p className="text-yellow-500 font-semibold capitalize">
-                LjcryptoToken: <span>{ljcryptoStakingInEther} ETH</span>
+                LjcryptoToken: <span>{ljcryptoStakingInEther} MATIC</span>
               </p>
             </div>
             <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
@@ -705,7 +705,7 @@ const Tokens: React.FC = () => {
                 className="rounded-3xl w-8 h-8 mr-3"
               />
               <p className="text-yellow-500 font-semibold capitalize">
-                Ljstablecoin: <span>{ljstableCoinStakingInEther} ETH</span>
+                Ljstablecoin: <span>{ljstableCoinStakingInEther} MATIC</span>
               </p>
             </div>
           </div>

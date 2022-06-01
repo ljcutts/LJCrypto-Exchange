@@ -30,11 +30,11 @@ contract LJCryptoToken is ERC20 {
       uint tokenPrice = (address(this).balance - msg.value)/(totalSupply()/10 ** 18);
       if(tokenPrice == 0) {
         require(msg.value > 0 && _amount > 0, "INSUFFICIENT_FUNDS");
-        _transfer(address(this), msg.sender, (_amount * 10 ** 18));
+        _transfer(address(this), msg.sender, (_amount));
       } else {
       uint priceOfAmount = _amount * tokenPrice;
       require(msg.value >= priceOfAmount && _amount > 0, "INSUFFICIENT_FUNDS");
-      _transfer(address(this), msg.sender, (_amount * 10 ** 18));
+      _transfer(address(this), msg.sender, (_amount));
       }
     }
        
@@ -42,7 +42,7 @@ contract LJCryptoToken is ERC20 {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       uint tokenPrice = currentPricePerToken();
       uint priceOfAmount = _amount * tokenPrice;
-       _transfer(msg.sender, address(this), (_amount * 10 ** 18));
+       _transfer(msg.sender, address(this), (_amount));
        payable(msg.sender).transfer(priceOfAmount);
     }
 
@@ -50,7 +50,7 @@ contract LJCryptoToken is ERC20 {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       require(totalSupply() < maxTotalSupply, "MAXIUMUM_SUPPLY_REACHED");
        stakingBalance[msg.sender] += _amount;
-      _transfer(msg.sender, address(this), (_amount * 10 ** 18));
+      _transfer(msg.sender, address(this), (_amount));
       if(stakingTimestamps[msg.sender] == 0) {
         stakingTimestamps[msg.sender] = block.timestamp;
       }
@@ -61,12 +61,12 @@ contract LJCryptoToken is ERC20 {
        if(totalSupply() >= maxTotalSupply) {
          uint amount = stakingBalance[msg.sender];
          stakingBalance[msg.sender] -= amount;
-        _transfer(address(this), msg.sender, (amount * 10 ** 18));
+        _transfer(address(this), msg.sender, (amount));
        } else {
        stakedBalance();
        require(_amount <= stakingBalance[msg.sender], "INSUFFICIENT_STAKE_BALANCE");
        stakingBalance[msg.sender] -= _amount;
-      _transfer(address(this), msg.sender, (_amount * 10 ** 18));
+      _transfer(address(this), msg.sender, (_amount));
        if(stakingBalance[msg.sender] == 0) {
            stakingTimestamps[msg.sender] = 0;
         }
@@ -80,7 +80,7 @@ contract LJCryptoToken is ERC20 {
       uint time = block.timestamp;
       uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
       uint mintedTokens = uint(balance * 100000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //10000% interest per year
-      _mint(address(this), (mintedTokens * 10 ** 18));
+      _mint(address(this), (mintedTokens));
       uint newBalance = balance + mintedTokens;
       stakingBalance[msg.sender] = newBalance;
     }

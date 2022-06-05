@@ -10,11 +10,12 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract LJCryptoAndMaticPair is ERC20 {
    address public LJCryptoTokenAddress;
+   mapping(address => uint) ljcryptoBalance;
+   mapping(address => uint) userMaticBalance;
     constructor(address _LJCryptoTokenAddress) ERC20("LJC/Matic LP Token", "LJLP") {
     require(_LJCryptoTokenAddress != address(0), "NOT_AN_ADDRESS");
        LJCryptoTokenAddress = _LJCryptoTokenAddress;
     }
-
     
 function getLJCryptoReserve() public view returns(uint) {
     return IERC20(LJCryptoTokenAddress).balanceOf(address(this));
@@ -32,9 +33,11 @@ function addLiquidity(uint _amountA) external payable returns(uint) {
     require(LJCryptoAmount >= MaticAmount || MaticAmount >= LJCryptoAmount, "NOT_BALANCED");
     uint liquidity;
     uint maticBalance = address(this).balance;
-     uint LJCryptoTokenReserve = getLJCryptoReserve();
-     IERC20 LJCryptoToken = IERC20(LJCryptoTokenAddress);
+    uint LJCryptoTokenReserve = getLJCryptoReserve();
+    IERC20 LJCryptoToken = IERC20(LJCryptoTokenAddress);
     if(LJCryptoTokenReserve == 0) {
+       userMaticBalance[msg.sender] += msg.value;
+       ljcryptoBalance[msg.sender] += _amountA;
        LJCryptoToken.transferFrom(msg.sender, address(this), _amountA);
        liquidity = maticBalance;
        _mint(msg.sender, liquidity);
@@ -44,6 +47,8 @@ function addLiquidity(uint _amountA) external payable returns(uint) {
         uint maticAmount = (_amountA * maticReserve)/(LJCryptoTokenReserve);
          require(_amountA >= ljcryptoTokenAmount, "INSUFFICIENT_AMOUNT");
          require(msg.value >= maticAmount, "INSUFFICIENT_AMOUNT");
+         userMaticBalance[msg.sender] += msg.value;
+         ljcryptoBalance[msg.sender] += _amountA;
          LJCryptoToken.transferFrom(msg.sender, address(this), ljcryptoTokenAmount);
         liquidity = (totalSupply() * msg.value)/ maticReserve;
         _mint(msg.sender, liquidity);
@@ -61,6 +66,8 @@ function removeLiquidity(uint _amountA, uint _amountB) external returns(uint, ui
     uint _totalSupply = totalSupply();
     uint maticAmount = (maticReserve * _amountB)/ _totalSupply;
     uint ljcryptoTokenAmount = (getLJCryptoReserve() * _amountA)/ _totalSupply;
+    userMaticBalance[msg.sender] -=  maticAmount;
+    ljcryptoBalance[msg.sender] -= ljcryptoTokenAmount;
     _burn(msg.sender, _amountA);
     payable(msg.sender).transfer(maticAmount);
     IERC20(LJCryptoTokenAddress).transfer(msg.sender, ljcryptoTokenAmount);
@@ -83,7 +90,7 @@ function removeLiquidity(uint _amountA, uint _amountB) external returns(uint, ui
       /**
      @dev Swaps Matic for LJCrypto Tokens
     */
-    function ethToCryptoDevToken(uint _minTokens) external payable {
+    function maticToLJCryptoToken(uint _minTokens) external payable {
    uint256 ljcryptoTokenReserve = getLJCryptoReserve();
     uint256 tokensBought = getAmountOfTokens(
         msg.value,
@@ -97,19 +104,27 @@ function removeLiquidity(uint _amountA, uint _amountB) external returns(uint, ui
      /**
     @dev Swaps LJCrypto Tokens for Matic
     */
-    function cryptoDevTokenToEth(uint _tokensSold, uint _minEth) external {
+    function ljcryptoTokenToMatic(uint _tokensSold, uint _minMatic) external {
    uint256 ljcryptoTokenReserve = getLJCryptoReserve();
-        uint256 ethBought = getAmountOfTokens(
+        uint256 maticBought = getAmountOfTokens(
             _tokensSold,
             ljcryptoTokenReserve,
             address(this).balance
         );
-        require(ethBought >= _minEth, "INSUFFICIENT_AMOUNT");
+        require(maticBought >= _minMatic, "INSUFFICIENT_AMOUNT");
         IERC20(LJCryptoTokenAddress).transferFrom(
             msg.sender,
             address(this),
             _tokensSold
         );
-        payable(msg.sender).transfer(ethBought);
+        payable(msg.sender).transfer(maticBought);
+    }
+
+     function getMaticBalance() external view returns(uint) {
+        return userMaticBalance[msg.sender];
+    }
+
+     function getLJCryptoBalance() external view returns(uint) {
+        return ljcryptoBalance[msg.sender];
     }
 }

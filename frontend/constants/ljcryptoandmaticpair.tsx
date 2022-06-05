@@ -45,18 +45,48 @@ export const LJC_MATIC_ABI = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "_tokensSold",
-        type: "uint256",
+        internalType: "address",
+        name: "spender",
+        type: "address",
       },
       {
         internalType: "uint256",
-        name: "_minEth",
+        name: "subtractedValue",
         type: "uint256",
       },
     ],
-    name: "cryptoDevTokenToEth",
-    outputs: [],
+    name: "decreaseAllowance",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "addedValue",
+        type: "uint256",
+      },
+    ],
+    name: "increaseAllowance",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -64,41 +94,17 @@ export const LJC_MATIC_ABI = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_minTokens",
+        name: "_tokensSold",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_minMatic",
         type: "uint256",
       },
     ],
-    name: "ethToCryptoDevToken",
+    name: "ljcryptoTokenToMatic",
     outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_amountA",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_amountB",
-        type: "uint256",
-      },
-    ],
-    name: "removeLiquidity",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -165,46 +171,40 @@ export const LJC_MATIC_ABI = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
         internalType: "uint256",
-        name: "subtractedValue",
+        name: "_minTokens",
         type: "uint256",
       },
     ],
-    name: "decreaseAllowance",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
+    name: "maticToLJCryptoToken",
+    outputs: [],
+    stateMutability: "payable",
     type: "function",
   },
   {
     inputs: [
       {
-        internalType: "address",
-        name: "spender",
-        type: "address",
+        internalType: "uint256",
+        name: "_amountA",
+        type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "addedValue",
+        name: "_amountB",
         type: "uint256",
       },
     ],
-    name: "increaseAllowance",
+    name: "removeLiquidity",
     outputs: [
       {
-        internalType: "bool",
+        internalType: "uint256",
         name: "",
-        type: "bool",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
     stateMutability: "nonpayable",
@@ -364,7 +364,33 @@ export const LJC_MATIC_ABI = [
   },
   {
     inputs: [],
+    name: "getLJCryptoBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "getLJCryptoReserve",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getMaticBalance",
     outputs: [
       {
         internalType: "uint256",
@@ -428,4 +454,4 @@ export const LJC_MATIC_ABI = [
     type: "function",
   },
 ];
-export const LJC_MATIC_ADDRESS = "0x2cB62C940f9C816402A77c18c798AC2391Ad0122"
+export const LJC_MATIC_ADDRESS = "0x9Fe9d3423ca684e656E317863D6dF5f18e87b58E";

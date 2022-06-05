@@ -1,14 +1,9 @@
-export const LJC_LJS_ABI = [
+export const LJS_MATIC_ABI = [
   {
     inputs: [
       {
         internalType: "uint256",
         name: "_amountA",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_amountB",
         type: "uint256",
       },
     ],
@@ -20,7 +15,7 @@ export const LJC_LJS_ABI = [
         type: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -75,9 +70,65 @@ export const LJC_LJS_ABI = [
     inputs: [
       {
         internalType: "address",
-        name: "_LJCryptoTokenAddress",
+        name: "spender",
         type: "address",
       },
+      {
+        internalType: "uint256",
+        name: "addedValue",
+        type: "uint256",
+      },
+    ],
+    name: "increaseAllowance",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_minTokens",
+        type: "uint256",
+      },
+    ],
+    name: "maticToLJStableCoinToken",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "transfer",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
       {
         internalType: "address",
         name: "_LJStableCoinAddress",
@@ -115,59 +166,17 @@ export const LJC_LJS_ABI = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "addedValue",
-        type: "uint256",
-      },
-    ],
-    name: "increaseAllowance",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint256",
         name: "_tokensSold",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "_minljStable",
+        name: "_minMatic",
         type: "uint256",
       },
     ],
-    name: "ljcryptoTokenToLJStableToken",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokensSold",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_minljCrypto",
-        type: "uint256",
-      },
-    ],
-    name: "ljstableTokenToLJCryptoToken",
+    name: "ljStableCoinTokenToMatic",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -196,30 +205,6 @@ export const LJC_LJS_ABI = [
         internalType: "uint256",
         name: "",
         type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "transfer",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
       },
     ],
     stateMutability: "nonpayable",
@@ -324,19 +309,6 @@ export const LJC_LJS_ABI = [
   },
   {
     inputs: [],
-    name: "currentPriceOfLJCryptoToken",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "decimals",
     outputs: [
       {
@@ -379,32 +351,6 @@ export const LJC_LJS_ABI = [
   },
   {
     inputs: [],
-    name: "getLJCryptoBalance",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getLJCrytpoReserve",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "getLJStableBalance",
     outputs: [
       {
@@ -431,12 +377,12 @@ export const LJC_LJS_ABI = [
   },
   {
     inputs: [],
-    name: "LJCryptoTokenAddress",
+    name: "getMaticBalance",
     outputs: [
       {
-        internalType: "address",
+        internalType: "uint256",
         name: "",
-        type: "address",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -495,4 +441,4 @@ export const LJC_LJS_ABI = [
     type: "function",
   },
 ];
-export const LJC_LJS_ADDRESS = "0x7fFdA3684408F314147d25a30507c08caD4855fc";
+export const LJS_MATIC_ADDRESS = "0x27f44071E502aff6479f03f2c0D2F1F12Dc083DF";

@@ -81,10 +81,10 @@ contract LJCryptoToken is ERC20 {
       uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
       uint mintedTokens = uint(balance * 100000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //10000% interest per year
       _mint(address(this), (mintedTokens));
-      uint newBalance = balance + mintedTokens;
-      stakingBalance[msg.sender] = newBalance;
+      uint newBalance = mintedTokens;
+      stakingBalance[msg.sender] += newBalance;
+      stakingTimestamps[msg.sender] = block.timestamp;
     }
-
 
     function userBalanceInEther() external view returns(uint) {
        return (balanceOf(msg.sender)/1e18) * currentPricePerToken();

@@ -24,21 +24,24 @@ contract LJStableCoin is ERC20 {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       uint priceOfAmount = _amount * 0.0004 ether;
       require(msg.value >= priceOfAmount, "INSUFFICIENT_FUNDS");
-      _transfer(address(this), msg.sender, (_amount * 10 ** 18));
+      _transfer(address(this), msg.sender, (_amount));
     }
        
 
      function sellTokens(uint _amount) external payable isItPaused {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       uint priceOfAmount = _amount * 0.0004 ether;
-       _transfer(msg.sender, address(this), (_amount * 10 ** 18));
+       _transfer(msg.sender, address(this), (_amount));
       payable(msg.sender).transfer(priceOfAmount);
     }
 
      function stakeTokens(uint _amount) external isItPaused {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
+      if(stakingTimestamps[msg.sender] != 0) {
+          stakedBalance();
+      }
       stakingBalance[msg.sender] += _amount;
-      _transfer(msg.sender, address(this), (_amount * 10 ** 18));
+      _transfer(msg.sender, address(this), (_amount));
        if(stakingTimestamps[msg.sender] == 0) {
         stakingTimestamps[msg.sender] = block.timestamp;
       }
@@ -49,7 +52,7 @@ contract LJStableCoin is ERC20 {
        stakedBalance();
        require(_amount <= stakingBalance[msg.sender], "INSUFFICIENT_STAKE_BALANCE");
        stakingBalance[msg.sender] -= _amount;
-       _transfer(address(this), msg.sender, (_amount * 10 ** 18));
+       _transfer(address(this), msg.sender, (_amount));
        if(stakingBalance[msg.sender] == 0) {
            stakingTimestamps[msg.sender] = 0;
        }
@@ -61,9 +64,10 @@ contract LJStableCoin is ERC20 {
       uint time = block.timestamp;
       uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
       uint mintedTokens = uint((balance * 1000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60)); //100% interest per year
-      _mint(address(this), (mintedTokens * 10 ** 18));
-      uint newBalance = balance + mintedTokens;
-      stakingBalance[msg.sender] = newBalance;
+      _mint(address(this), (mintedTokens));
+      uint newBalance = mintedTokens;
+      stakingBalance[msg.sender] += newBalance;
+      stakingTimestamps[msg.sender] = block.timestamp;
     }
 
     function userBalanceInEther() external view returns(uint) {
@@ -84,5 +88,4 @@ contract LJStableCoin is ERC20 {
         require(msg.sender == owner, "NOT_OWNER");
         payable(msg.sender).transfer(address(this).balance);
     }
-    
 }

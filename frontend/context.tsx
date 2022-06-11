@@ -46,6 +46,15 @@ const Web3Provider = ({ children }: Props) => {
     return thisAccount;
   };
 
+  const getNetwork = async() => {
+     const web3Provider = new providers.Web3Provider(window.ethereum);
+     const { chainId } = await web3Provider.getNetwork();
+     if (chainId !== 80001) {
+       alert("Change the network to Mumbai");
+       throw new Error("Change network to Mumbai");
+     }
+  }
+
   const getProviderOrSigner = async (needSigner = false): Promise<providers.Web3Provider | providers.JsonRpcSigner> => {
     const provider = await web3ModalRef.current.connect();
     const web3Provider = new providers.Web3Provider(provider);
@@ -80,6 +89,7 @@ const Web3Provider = ({ children }: Props) => {
         }
       setInterval(async() => {
         await getAddress()
+        await getNetwork()
       }, 1 * 1000)
   }, [walletConnected, account])
 

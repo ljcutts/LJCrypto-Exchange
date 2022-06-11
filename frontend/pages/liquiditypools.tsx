@@ -5,8 +5,6 @@ import { providers, Contract, BigNumber, ethers } from "ethers";
 import styles from "../styles/Home.module.css";
 
 
-//need to update token contracts especially the staking
-
 import {
   LJCRYPTO_TOKEN_ABI,
   LJCRYPTO_TOKEN_ADDRESS,
@@ -310,7 +308,7 @@ const LiquidityPools: React.FC = () => {
                setHowMuchPolygon(amountNeeded.toString());
             } else {
                amountNeeded = (parseFloat(secondAmountOne) * maticReserve.toNumber())/ljcryptoReserve;
-               setHowMuchPolygon(amountNeeded.toString());
+              setSecondAmountTwo(amountNeeded.toString());
             }
           }  
      }
@@ -341,12 +339,11 @@ const LiquidityPools: React.FC = () => {
        }
        if (thirdAmountOne !== "0.0") {
          if (theLJStableReserve === "0" || tab === "Remove Liquidity") {
-           amountNeeded =
-             parseFloat(thirdAmountOne) * (parseFloat(ljstablePrice));
+           amountNeeded = parseFloat(thirdAmountOne) * (parseFloat(ljstablePrice));
            setHowMuchPolygon2(amountNeeded.toString());
          } else {
            amountNeeded =
-             (parseFloat(thirdAmountOne) * parseInt(maticReserve)) /
+             (parseFloat(thirdAmountOne) * parseFloat(maticReserve)) /
              ljstableReserve;
            setHowMuchPolygon2(amountNeeded.toString());
          }
@@ -429,7 +426,7 @@ const LiquidityPools: React.FC = () => {
   const addLJCMaticLiquidity = async (amountOne: string, amountTwo: string) => {
     const weiAmountOne = ethers.utils.parseEther(amountOne.toString());
     const weiAmountTwo = ethers.utils.parseEther(amountTwo.toString());
-    await approveLJCryptoTokens(LJC_MATIC_ADDRESS,weiAmountOne);
+    await approveLJCryptoTokens(LJC_MATIC_ADDRESS, weiAmountOne);
     try {
       setLoading(true);
       const signer = await getProviderOrSigner(true);
@@ -613,14 +610,15 @@ const LiquidityPools: React.FC = () => {
               <input
                 className="pt-4 placeholder:text-black placeholder:opacity-60 font-semibold pl-4 bg-transparent mb-2 relative top-3 w-40 h-20 text-3xl outline-none pb-16 "
                 type="number"
+                value={secondAmountTwo === "0.0" || secondAmountTwo === "" ? "0.0" : secondAmountTwo}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSecondAmountTwo(e.target.value)
                 }
-                placeholder={
-                  howMuchPolygon === "NaN" || howMuchPolygon === undefined
-                    ? "0.0"
-                    : howMuchPolygon
-                }
+                // placeholder={
+                //   howMuchPolygon === "NaN" || howMuchPolygon === undefined
+                //     ? "0.0"
+                //     : howMuchPolygon
+                // }
               />
               <div className="flex flex-col item-center pl-2 pt-3 w-40">
                 <div className="flex items-center pr-3 pb-3 justify-end text-black font-semibold">
@@ -949,30 +947,32 @@ const LiquidityPools: React.FC = () => {
          ) {
            return (
              <>
-               <div className="flex justify-start md:mx-auto w-auto md:w-80 md:justify-center mb-10 items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold  whitespace-nowrap">
-                 Pool LJCrypto Reserves:
-               </div>
-               <div className="flex justify-items-start md:w-80 md:justify-center items-center w-auto mb-10 rounded-md px-2 py-3 h-8 bg-black text-yellow-500 ml-n130 font-semibold md:ml-0 whitespace-nowrap">
-                 Amount: {ljcReserveTwo}
-               </div>
-               <div className="flex justify-start md:w-80 md:justify-center mb-10 md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold whitespace-nowrap">
-                 Pool Matic Reserves:
-               </div>
-               <div className="flex justify-items-start md:w-80 md:justify-center items-center w-auto mb-10 rounded-md px-2 py-3 h-8 bg-black text-yellow-500 ml-n130 font-semibold md:ml-0 whitespace-nowrap">
-                 Amount: {maticReserveOne}
-               </div>
-               <div className="flex justify-start mb-10 md:w-80 md:justify-center md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold whitespace-nowrap">
-                 Your LJC Liquidity Balance:
-               </div>
-               <div className="flex justify-items-start md:w-80 md:justify-center items-center w-auto mb-10 rounded-md px-2 py-3 h-8 bg-black text-yellow-500 ml-n130 font-semibold md:ml-0 whitespace-nowrap">
-                 Amount: {ljcLiquidityBalanceTwo}
-               </div>
-               <div className="flex justify-start mb-10 md:w-80 md:justify-center md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold whitespace-nowrap">
-                 Your Matic Liquidity Balance:
-               </div>
-               <div className="flex justify-start mb-10 md:w-80 md:justify-center md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-black text-yellow-500 ml-n130 font-semibold whitespace-nowrap">
-                 Amount: {maticBalanceTwo}
-               </div>
+               <main className="mb-5 h-auto">
+                 <div className="flex justify-start md:mx-auto w-auto md:w-80 md:justify-center mb-10 items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold  whitespace-nowrap">
+                   Pool LJCrypto Reserves:
+                 </div>
+                 <div className="flex justify-items-start md:w-80 md:justify-center items-center w-auto mb-10 rounded-md px-2 py-3 h-8 bg-black text-yellow-500 ml-n130 font-semibold md:ml-0 whitespace-nowrap">
+                   Amount: {ljcReserveTwo}
+                 </div>
+                 <div className="flex justify-start md:w-80 md:justify-center mb-10 md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold whitespace-nowrap">
+                   Pool Matic Reserves:
+                 </div>
+                 <div className="flex justify-items-start md:w-80 md:justify-center items-center w-auto mb-10 rounded-md px-2 py-3 h-8 bg-black text-yellow-500 ml-n130 font-semibold md:ml-0 whitespace-nowrap">
+                   Amount: {maticReserveOne}
+                 </div>
+                 <div className="flex justify-start mb-10 md:w-80 md:justify-center md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold whitespace-nowrap">
+                   Your LJC Liquidity Balance:
+                 </div>
+                 <div className="flex justify-items-start md:w-80 md:justify-center items-center w-auto mb-10 rounded-md px-2 py-3 h-8 bg-black text-yellow-500 ml-n130 font-semibold md:ml-0 whitespace-nowrap">
+                   Amount: {ljcLiquidityBalanceTwo}
+                 </div>
+                 <div className="flex justify-start mb-10 md:w-80 md:justify-center md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-n130 font-semibold whitespace-nowrap">
+                   Your Matic Liquidity Balance:
+                 </div>
+                 <div className="flex justify-start mb-10 md:w-80 md:justify-center md:mx-auto w-auto items-center rounded-md px-2 h-8 bg-black text-yellow-500 ml-n130 font-semibold whitespace-nowrap">
+                   Amount: {maticBalanceTwo}
+                 </div>
+               </main>
              </>
            );
          }
@@ -1017,7 +1017,7 @@ const LiquidityPools: React.FC = () => {
       return (
         <button
         onClick={() => addLJSLJCLiquidity(amountOne, amountTwo)}
-        className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+        className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500 mb-5"
       >
         Add Liquidity
       </button>
@@ -1027,7 +1027,7 @@ const LiquidityPools: React.FC = () => {
       return (
         <button
           onClick={() => addLJCMaticLiquidity(secondAmountOne, secondAmountTwo)}
-          className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+          className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500 mb-5"
         >
           Add Liquidity
         </button>
@@ -1037,7 +1037,7 @@ const LiquidityPools: React.FC = () => {
       return (
         <button
           onClick={() => addLJSMaticLiquidity(thirdAmountOne, thirdAmountTwo)}
-          className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+          className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500 mb-5"
         >
           Add Liquidity
         </button>
@@ -1054,7 +1054,7 @@ const LiquidityPools: React.FC = () => {
         return (
           <button
             onClick={() => removeLJSLJCLiquidity(amountOne, amountTwo)}
-            className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+            className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500 mb-5"
           >
             Remove Liquidity
           </button>
@@ -1064,7 +1064,7 @@ const LiquidityPools: React.FC = () => {
         return (
           <button
             onClick={() => removeLJSMaticLiquidity(thirdAmountOne, thirdAmountTwo)}
-            className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+            className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500 mb-5"
           >
             Remove Liquidity
           </button>
@@ -1076,7 +1076,7 @@ const LiquidityPools: React.FC = () => {
             onClick={() =>
               removeLJCMaticLiquidity(secondAmountOne, secondAmountTwo)
             }
-            className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500"
+            className="h-14 w-80 rounded-2xl bg-black font-semibold hover:text-white text-yellow-500 mb-5"
           >
             Remove Liquidity
           </button>
@@ -1309,6 +1309,29 @@ const LiquidityPools: React.FC = () => {
             )}
           </div>
         </>
+      )}
+      {!loading && (
+        <div
+          className={`${
+            tab === "Stats"
+              ? "flex flex-row justify-between mx-auto justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 relative top-300 pr-4 whitespace-nowrap overflow-x-scroll"
+              : "flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400  pr-4 whitespace-nowrap overflow-x-scroll"
+          }`}
+        >
+          <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
+            Tokens
+          </a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+            Lottery Game
+          </a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+            Liquidity Pools
+          </a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+            Tokens&NFTs
+          </a>
+        </div>
       )}
     </main>
   );

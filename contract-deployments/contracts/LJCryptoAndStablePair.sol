@@ -94,7 +94,7 @@ function getAmountOfTokens(
         uint256 denominator = (inputReserve * 100) + inputAmountWithFee;
         return numerator / denominator;
     }
-
+    
       /**
      @dev Swaps LJCrypto for LJStable
     */
@@ -106,7 +106,6 @@ function getAmountOfTokens(
         ljcryptoTokenReserve,
         ljstableTokenReserve
     );
-
     require(tokensBought >= _minljStable, "INSUFFICIENT_AMOUNT");
     IERC20(LJCryptoTokenAddress).transferFrom(msg.sender, address(this), _tokensSold);
     IERC20(LJStableCoinAddress).transfer(msg.sender, tokensBought);

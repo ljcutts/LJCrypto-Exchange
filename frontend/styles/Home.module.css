@@ -12,6 +12,7 @@
     animation: rotation 2s infinite linear;
 }
 
+
 @media only screen and (max-width: 768px) {
   .card {
     width: 16rem;

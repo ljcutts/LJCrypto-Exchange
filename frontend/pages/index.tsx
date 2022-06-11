@@ -1,8 +1,6 @@
 import type { NextPage } from 'next'
 import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
 import Link from "next/link";
 import SideBarMenu from './sidebarmenu'
 import Web3Modal from "web3modal";

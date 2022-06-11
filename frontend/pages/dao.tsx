@@ -161,7 +161,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
    }
  }
 
- const approveTokenFunds = async (amount: string) => {
+ const approveTokenFunds = async (amount: BigNumber) => {
    try {
      setLoading(true);
      const signer = await getProviderOrSigner(true);
@@ -179,12 +179,13 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
 
 
   const getPowerThroughToken = async (amount: string) => {
-    await approveTokenFunds(amount)
+    const weiAmountOne = ethers.utils.parseEther(amount.toString());
+    await approveTokenFunds(weiAmountOne)
     try {
       setLoading(true);
       const signer = await getProviderOrSigner(true);
       const contract = getLJCryptoDAOInstance(signer);
-      const tx = await contract.receivePowerThroughToken(amount);
+      const tx = await contract.receivePowerThroughToken(weiAmountOne);
       await tx.wait();
       setTokenPowerTab(false);
       window.alert(`${amount} Has Been Added To Your Dao Power Balance`);
@@ -197,8 +198,6 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
       window.alert(error.data.message);
     }
   };
-
- 
 
   const getNumOfProposals = async() => {
       const provider = window.ethereum;
@@ -338,6 +337,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
 
 
   useEffect(() => {
+     fetchAllProposals();
     if (tab === "Vote On Proposal" || tab === "View Proposals") {
       fetchAllProposals();
     } 

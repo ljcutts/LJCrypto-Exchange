@@ -47,11 +47,9 @@ const Tokens: React.FC = () => {
   const [ljstablecoinEtherBalance, setLJStableCoinEtherBalance] =
     useState<IState["ljstablecoinBalance"]>("0");
   const [ljcryptoStakingBalance, setLJCryptoStakingBalance] = useState("0");
-  const [ljstablecoinStakingBalance, setLJStableCoinStakingBalance] =
-    useState("0");
+  const [ljstablecoinStakingBalance, setLJStableCoinStakingBalance] = useState("0");
   const [ljcryptoStakingInEther, setLJCryptoStakingInEther] = useState("0");
-  const [ljstableCoinStakingInEther, setLJStableCoinStakingInEther] =
-    useState("0");
+  const [ljstableCoinStakingInEther, setLJStableCoinStakingInEther] = useState("0");
   const [walletConnected, setWalletConnected] = useState(false);
   const [thisAmount, setAmount] = useState<IState["amount"]>("");
   const [buyljCrypto, setbuyLJCrypto] = useState(false);

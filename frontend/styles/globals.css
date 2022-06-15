@@ -8,6 +8,7 @@ a {
 * {
   box-sizing: border-box;
   font-family: 'Kanit', sans-serif;
+  list-style: normal;
 } 
 
 input[type=number]::-webkit-inner-spin-button, 

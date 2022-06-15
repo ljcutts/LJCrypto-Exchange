@@ -307,8 +307,12 @@ const LiquidityPools: React.FC = () => {
                amountNeeded = parseFloat(secondAmountOne) * (parseFloat(ljcryptoPrice) / 1e18)
                setHowMuchPolygon(amountNeeded.toString());
             } else {
-               amountNeeded = (parseFloat(secondAmountOne) * maticReserve.toNumber())/ljcryptoReserve;
-              setSecondAmountTwo(amountNeeded.toString());
+              const actualMaticReserve = maticReserve.toNumber() - (parseFloat(secondAmountOne)*1e18)
+              const one = maticReserve.add(ethers.utils.parseEther(`${secondAmountOne}`)).mul(ethers.utils.parseEther(`${secondAmountOne}`).div(ljcryptoReserve))
+               amountNeeded =
+                 ((parseFloat(secondAmountOne) * 1e18) * actualMaticReserve) /
+                 ljcryptoReserve;
+              setHowMuchPolygon(ethers.utils.formatEther(one));
             }
           }  
      }
@@ -406,13 +410,16 @@ const LiquidityPools: React.FC = () => {
   };
 
   const removeLJSLJCLiquidity = async (amountOne: string, amountTwo: string) => {
-    const weiAmountOne = ethers.utils.parseEther(amountOne.toString());
-    const weiAmountTwo = ethers.utils.parseEther(amountTwo.toString());
+    // const weiAmountOne = ethers.utils.parseEther(amountOne.toString());
+    // const weiAmountTwo = ethers.utils.parseEther(amountTwo.toString());
     try {
       setLoading(true);
       const signer = await getProviderOrSigner(true);
       const contract = getLJCJStablePairInstance(signer);
-      const tx = await contract.removeLiquidity(weiAmountOne, weiAmountTwo);
+      const tx = await contract.removeLiquidity(
+        ethers.utils.parseEther(amountOne.toString()),
+        ethers.utils.parseEther(amountTwo.toString())
+      );
       await tx.wait();
       window.alert(`You Have Removed Liquidity From The LJC/LJS Pair`);
       setLoading(false);
@@ -610,15 +617,15 @@ const LiquidityPools: React.FC = () => {
               <input
                 className="pt-4 placeholder:text-black placeholder:opacity-60 font-semibold pl-4 bg-transparent mb-2 relative top-3 w-40 h-20 text-3xl outline-none pb-16 "
                 type="number"
-                value={secondAmountTwo === "0.0" || secondAmountTwo === "" ? "0.0" : secondAmountTwo}
+                // value={secondAmountTwo === "0.0" || secondAmountTwo === "" ? "0.0" : secondAmountTwo}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSecondAmountTwo(e.target.value)
                 }
-                // placeholder={
-                //   howMuchPolygon === "NaN" || howMuchPolygon === undefined
-                //     ? "0.0"
-                //     : howMuchPolygon
-                // }
+                placeholder={
+                  howMuchPolygon === "NaN" || howMuchPolygon === undefined
+                    ? "0.0"
+                    : howMuchPolygon
+                }
               />
               <div className="flex flex-col item-center pl-2 pt-3 w-40">
                 <div className="flex items-center pr-3 pb-3 justify-end text-black font-semibold">
@@ -818,7 +825,7 @@ const LiquidityPools: React.FC = () => {
                    setSecondAmountTwo(e.target.value)
                  }
                  placeholder={
-                   howMuchPolygon === "NaN" || howMuchPolygon === undefined
+                   howMuchPolygon === "NaN" || howMuchPolygon === undefined || howMuchPolygon === ""
                      ? "0.0"
                      : howMuchPolygon
                  }

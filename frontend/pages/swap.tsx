@@ -11,9 +11,7 @@ type IState = {
   maticBalance: string | undefined;
   setMaticBalance: React.Dispatch<React.SetStateAction<string | undefined>>;
   ljstablecoinBalance: string | undefined;
-  setLJStableCoinBalance: React.Dispatch<
-    React.SetStateAction<string | undefined>
-  >;
+  setLJStableCoinBalance: React.Dispatch<React.SetStateAction<string | undefined>>;
   amountOne: string | undefined;
   setAmountOne: React.Dispatch<React.SetStateAction<string | undefined>>;
   amountTwo: string | undefined;
@@ -640,7 +638,9 @@ calculateSwapAmounts();
             <div className="h-28 w-80 ml-4 flex bg-yellow-500 rounded-2xl mb-2 md:mx-auto">
               <input
                 disabled
-                value={amountTwo === "0" || amountOne === "" ? "0.0" : amountTwo}
+                value={
+                  amountTwo === "0" || amountOne === "" ? "0.0" : amountTwo
+                }
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setAmountTwo(e.target.value)
                 }
@@ -1035,6 +1035,25 @@ calculateSwapAmounts();
             )}
           </section>
         </>
+      )}
+      {!loading && (
+        <div
+          className="flex flex-row justify-between mx-auto justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 relative top-20  pr-4 whitespace-nowrap overflow-x-scroll"
+        >
+          <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
+            Tokens
+          </a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+            Lottery Game
+          </a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+            Liquidity Pools
+          </a>
+          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+            Tokens&NFTs
+          </a>
+        </div>
       )}
     </main>
   );

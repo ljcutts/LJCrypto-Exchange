@@ -9,10 +9,14 @@
       }`;
     }
 
-// export function FETCH_WINNER() {
-//   return `query {
-//        guessingGames(orderBy:id, orderDirection:desc, first: 2) {
-//              Winner  
-//         }
-//       }`;
-// }
+    export function FETCH_LOTTERYGAME() {
+      return `query {
+       lotteryGames(orderBy:id) {
+             id
+             entryAmount
+             winner
+             requestId
+             player
+        }
+      }`;
+    }

@@ -35,9 +35,9 @@ const Home: NextPage = () => {
 
    // If user is not connected to the Rinkeby network, let them know and throw an error
    const { chainId } = await web3Provider.getNetwork();
-   if (chainId !== 4) {
-     alert("Change the network to Rinkeby");
-     throw new Error("Change network to Rinkeby");
+   if (chainId !== 80001) {
+     alert("Change the network to Mumbai");
+     throw new Error("Change network to Mumbai");
    }
 
    if (needSigner) {
@@ -135,19 +135,6 @@ const Home: NextPage = () => {
             </button>
           </div>
         </main>
-
-        {/* <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer> */}
       </div>
       {modal && (
         <SideBarMenu

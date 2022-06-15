@@ -22,7 +22,7 @@ contract LJStableCoin is ERC20 {
 
      function buyTokens(uint _amount) external payable isItPaused {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
-      uint priceOfAmount = _amount * 0.0004 ether;
+      uint priceOfAmount = (_amount * 1)/2500;
       require(msg.value >= priceOfAmount, "INSUFFICIENT_FUNDS");
       _transfer(address(this), msg.sender, (_amount));
     }
@@ -30,7 +30,7 @@ contract LJStableCoin is ERC20 {
 
      function sellTokens(uint _amount) external payable isItPaused {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
-      uint priceOfAmount = _amount * 0.0004 ether;
+      uint priceOfAmount = (_amount * 1)/2500;
        _transfer(msg.sender, address(this), (_amount));
       payable(msg.sender).transfer(priceOfAmount);
     }
@@ -70,13 +70,13 @@ contract LJStableCoin is ERC20 {
       stakingTimestamps[msg.sender] = block.timestamp;
     }
 
-    function userBalanceInEther() external view returns(uint) {
-       return (balanceOf(msg.sender)/1e18) * 0.0004 ether;
+    function userBalanceInWei() external view returns(uint) {
+       return ((balanceOf(msg.sender)/1e18) * 1)/2500;
     }
 
 
-    function stakingBalanceInEther() external view returns(uint) {
-        return stakingBalance[msg.sender] * 0.0004 ether;
+    function stakingBalanceInWei() external view returns(uint) {
+        return (stakingBalance[msg.sender] * 1)/2500;
     }
 
     function setPauseValue(bool value) external {

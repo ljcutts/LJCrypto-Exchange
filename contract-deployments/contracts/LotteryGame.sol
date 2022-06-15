@@ -9,125 +9,97 @@ interface KeeperCompatibleInterface {
 }
 
 contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
-    event Winners(address winner, bytes32 requestId);
+    event Winners(address winner, bytes32 requestId, uint256 lotteryDay);
     event PlayersOnLotteryDay(address player, uint256 lotteryDay, uint entryAmount);
-    address payable[] public players;
+    address payable[] private players;
     address payable immutable owner;
-    address private lastWinner;
-    //This is for the Rinkeby Testnet. The addresses and bytes differ depending on the network
-    address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
-    address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
-    bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
-    uint64 public entryAmount;
-    uint64 public maxPrize;
-    uint64 public lotteryDay;
-    uint64 constant _chainlinkFee = 0.25 * 10 ** 18;
-    uint lastUpKeep;
-    uint public immutable deadline;
+    address constant _linkToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address constant _vrfCoordinator = 0x8C7382F9D8f56b33781fE506E897a4F1e2d17255;
+    bytes32 constant _keyHash = 0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4;
+    uint128 entryAmount;
+    uint128 maxPrize;
+    uint128 lotteryDay;
+    uint128 constant _chainlinkFee = 0.0001 * 10 ** 18;
+    uint public deadline;
     mapping(address => bool) private playerInTheGame;
 
     
    constructor(uint64 _entryAmount, uint64 _maxPrize) VRFConsumerBase(_vrfCoordinator, _linkToken) payable {
-       entryAmount = _entryAmount * 1 ether;
+       entryAmount = _entryAmount;
        owner = payable(msg.sender);
-       deadline =  block.timestamp + 24 hours;
-       maxPrize = _maxPrize * 1 ether;
-       lastUpKeep = block.timestamp;
+       maxPrize = _maxPrize;
   }
 
     modifier onlyOwner {
-        require(msg.sender == owner, "You are not the owner");
+        require(msg.sender == owner, "NOT_OWNER");
         _;
     }
 
-    //The more the player pays for entryAmount the higher their chances
-    //or when they deposit ether to the contract manually, they will increase their chances, maybe put more functoinality in the receive or fallback function for this
-
-    function enterTheGame() public payable {
-        // require(msg.sender != address(0), "This address does not exist");  //maybe check if the msg.sender is a contract address
-        require(!playerInTheGame[msg.sender], "You have already entered the lottery");
-        require(msg.value >= entryAmount, "Your amount has to be equal or greater than the entryAmount");
+    function enterTheGame() external payable {
+        require(!playerInTheGame[msg.sender], "ALREADY_ENTERED");
+        require(msg.value >= entryAmount, "INSUFFICIENT_FUNDS");
         playerInTheGame[msg.sender] = true;
         players.push(payable(msg.sender));
+        if(players.length == 2) {
+           deadline = block.timestamp + 24 hours;
+        }
         emit PlayersOnLotteryDay(msg.sender, lotteryDay, entryAmount);
     }
 
-    function changeMaxPrize(uint64 _maxPrize) public onlyOwner {
-       maxPrize = _maxPrize * 1 ether;
+    function changeMaxPrize(uint128 _maxPrize) external onlyOwner {
+       maxPrize = _maxPrize;
     }
 
-     function changeEntryAmount(uint64 _entryAmount) public onlyOwner {
-       entryAmount = _entryAmount * 1 ether;
+     function changeEntryAmount(uint128 _entryAmount) external onlyOwner {
+       entryAmount = _entryAmount;
     }
 
      function removeLotteryFunds() external onlyOwner {
-       require(address(this).balance > 0, "There are no funds in the contract");
+       require(address(this).balance > 0, "NO_FUNDS");
        payable(msg.sender).transfer(address(this).balance);
     }
 
 
     function checkUpkeep(bytes calldata /*checkData*/) external view override returns (bool upkeepNeeded, bytes memory /*performData*/) {
         bool hasLink = LINK.balanceOf(address(this)) >= _chainlinkFee;
-        bool deadlinePassed = (block.timestamp - lastUpKeep) > deadline;
+        bool deadlinePassed = block.timestamp > deadline;
         bool enoughPlayers = players.length > 1;
-        bool etherInContract = address(this).balance >= 5 ether;
+        bool etherInContract = address(this).balance >= 1 ether;
         upkeepNeeded = hasLink && deadlinePassed && enoughPlayers && etherInContract;
     }
 
     function performUpkeep(bytes calldata /*performData*/) external override {
-       require(LINK.balanceOf(address(this)) >= _chainlinkFee, "not enough LINK");
+       require(LINK.balanceOf(address(this)) >= _chainlinkFee, "MORE_LINK");
        requestRandomness(_keyHash, _chainlinkFee);
-       lastUpKeep = block.timestamp;
+       deadline = block.timestamp + 5 minutes;
        lotteryDay++;
     }
 
-    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-     uint256 randomPrizeAmount = (randomness % maxPrize) * 1 ether;
+    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal virtual override {
+     uint256 randomPrizeAmount = (randomness % maxPrize);
      address payable winner = players[randomness % players.length];
      (bool success, ) = winner.call{value: randomPrizeAmount}("");
-     require(success, "Failed to send lottery prize to winner");
+     require(success, "FAILED_SEND");
      if(success == true) {
-         lastWinner = winner;
-         emit Winners(winner, requestId);
+         emit Winners(winner, requestId, lotteryDay);
      }
    }
 
-//maybe use the graph for more of these getter functions
-   function balanceOfContract() public view returns(uint) {
-       return address(this).balance;
-   }
-   
-
-   function getMsgSender() public view returns(address) {
-       return msg.sender;
-   }
-
-    function areYouIn() public view returns(bool) {
+    function areYouIn() external view returns(bool) {
        return playerInTheGame[msg.sender];
     }
 
-    function playerCount() public view returns(uint) {
-        return players.length;
+    function getEntryAmount() external view returns(uint) {
+        return entryAmount;
     }
 
-    function previousWinner() public view returns(address) {
-        return lastWinner;
+      function getMaxPrize() external view returns(uint) {
+        return maxPrize;
     }
 
-   //use the graph to query all players
-    function getAllPlayers() public view returns (address payable[] memory) {
-        // address payable[] memory allPlayers = new address payable[](players.length);
-
-        // for(uint i = 0; i < allPlayers.length; i++) {
-        //   allPlayers[i] = players[i];
-        // }  
-
-        // return allPlayers;
-        return players;
+     function getLotteryDay() external view returns(uint) {
+        return lotteryDay;
     }
-
-    //Use the graph to ouput who the last winner was
-    
 
     receive() external payable{}
     fallback() external payable{}

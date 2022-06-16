@@ -1037,22 +1037,34 @@ calculateSwapAmounts();
         </>
       )}
       {!loading && (
-        <div
-          className="flex flex-row justify-between mx-auto justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 relative top-20  pr-4 whitespace-nowrap overflow-x-scroll"
-        >
+        <div className="flex flex-row justify-between mx-auto justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 relative top-20  pr-4 whitespace-nowrap overflow-x-scroll">
           <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-            Tokens
+           Swap
           </a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-            Lottery Game
-          </a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-            Liquidity Pools
-          </a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-            Tokens&NFTs
-          </a>
+          <Link href="/lotterygame">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Lottery Game
+            </a>
+          </Link>
+          <Link href="/tokens">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Tokens</a>
+          </Link>
+          <Link href="/nft">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">NFTs</a>
+          </Link>
+          <Link href="/guessinggame">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Guessing Game
+            </a>
+          </Link>
+          <Link href="/liquiditypools">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Liquidity Pools
+            </a>
+          </Link>
+          <Link href="/dao">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Governance</a>
+          </Link>
         </div>
       )}
     </main>

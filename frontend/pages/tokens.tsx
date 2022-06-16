@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Link from "next/link";
+import { Web3Context, useWeb3 } from "../context";
 import { providers, Contract, BigNumber, ethers } from "ethers";
-import Web3Modal from "web3modal";
 import styles from "../styles/Home.module.css";
 
 import {
@@ -14,28 +14,36 @@ import {
   LJSTABLE_COIN_ADDRESS,
 } from "../constants/ljstablecoin";
 
-
 type IState = {
   account: string | null;
   setAccount: React.Dispatch<React.SetStateAction<string | null>>;
   ljcryptoPrice: string;
   setLJCryptoPrice: React.Dispatch<React.SetStateAction<string>>;
-  ljcryptoBalance: string;
-  setLJCryptoBalance: React.Dispatch<React.SetStateAction<string>>;
+  ljcryptoBalance: string | undefined;
+  setLJCryptoBalance: React.Dispatch<React.SetStateAction<string | undefined>>;
   ljcryptoEtherBalance: string;
   setLJCryptoEtherBalance: React.Dispatch<React.SetStateAction<string>>;
-  ljstablecoinBalance: string;
-  setLJStableCoinBalance: React.Dispatch<React.SetStateAction<string>>;
+  ljstablecoinBalance: string | undefined;
+  setLJStableCoinBalance: React.Dispatch<
+    React.SetStateAction<string | undefined>
+  >;
   ljstablecoinEtherBalance: string;
   setLJStableCoinEtherBalance: React.Dispatch<React.SetStateAction<string>>;
   amount: string;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
 };
 
-
 const Tokens: React.FC = () => {
+  const {
+    account,
+    connectWallet,
+    getProviderOrSigner,
+    getAddress,
+    loading,
+    setLoading,
+  } = useContext(Web3Context) as useWeb3;
+
   const zero = BigNumber.from(0);
-  const [account, setAccount] = useState<IState["account"]>(null);
   const [ljcryptoPrice, setLJCryptoPrice] =
     useState<IState["ljcryptoPrice"]>("0");
   const [ljcryptoBalance, setLJCryptoBalance] =
@@ -47,10 +55,11 @@ const Tokens: React.FC = () => {
   const [ljstablecoinEtherBalance, setLJStableCoinEtherBalance] =
     useState<IState["ljstablecoinBalance"]>("0");
   const [ljcryptoStakingBalance, setLJCryptoStakingBalance] = useState("0");
-  const [ljstablecoinStakingBalance, setLJStableCoinStakingBalance] = useState("0");
+  const [ljstablecoinStakingBalance, setLJStableCoinStakingBalance] =
+    useState("0");
   const [ljcryptoStakingInEther, setLJCryptoStakingInEther] = useState("0");
-  const [ljstableCoinStakingInEther, setLJStableCoinStakingInEther] = useState("0");
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [ljstableCoinStakingInEther, setLJStableCoinStakingInEther] =
+    useState("0");
   const [thisAmount, setAmount] = useState<IState["amount"]>("");
   const [buyljCrypto, setbuyLJCrypto] = useState(false);
   const [sellljCrypto, setSellLJCrypto] = useState(false);
@@ -60,9 +69,6 @@ const Tokens: React.FC = () => {
   const [unStakeLJCrypto, setUnstakeLJCrypto] = useState(false);
   const [stakeLJStable, setStakeLJStable] = useState(false);
   const [unStakeLJStable, setUnstakeLJStable] = useState(false);
-  const [loading, setLoading] = useState(false)
-
-  const web3ModalRef: any = useRef();
 
   const getLJCryptoTokenInstance = (
     providerOrSigner: providers.Web3Provider | providers.JsonRpcSigner
@@ -85,19 +91,22 @@ const Tokens: React.FC = () => {
   };
 
   const getLJCryptoTokenPrice = async () => {
-    const provider = await getProviderOrSigner(true);
-    const contract = getLJCryptoTokenInstance(provider);
+    const provider = window.ethereum;
+    const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const contract = getLJCryptoTokenInstance(web3Provider);
     const value = await contract.currentPricePerToken();
     setLJCryptoPrice(ethers.utils.formatEther(value));
     return value;
   };
 
   const getLJCryptoTokenBalance = async () => {
-    const provider = await getProviderOrSigner(true);
-    const contract = getLJCryptoTokenInstance(provider);
+    const re = new RegExp("^-?\\d+(?:.\\d{0," + (5 || -1) + "})?");
+     const provider = window.ethereum;
+     const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const contract = getLJCryptoTokenInstance(web3Provider);
     const currentAccount = await getAddress();
     const value = await contract.balanceOf(currentAccount);
-    setLJCryptoBalance(ethers.utils.formatEther(value));
+    setLJCryptoBalance(ethers.utils.formatEther(value).match(re)?.[0]);
     return value;
   };
 
@@ -129,11 +138,9 @@ const Tokens: React.FC = () => {
     setStakeLJStable(!stakeLJStable);
   };
 
-
   const toggleUnstakeLJStable = () => {
     setUnstakeLJStable(!unStakeLJStable);
   };
-
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -142,58 +149,61 @@ const Tokens: React.FC = () => {
   };
 
   const buyLJCrytptoToken = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
       const number = await getLJCryptoTokenPrice();
       const priceZero = ethers.utils.formatEther(number);
       const thisZero = ethers.utils.formatEther(zero);
       if (priceZero === thisZero) {
-        setbuyLJCrypto(false)
-        setLoading(true)
+        setbuyLJCrypto(false);
+        setLoading(true);
         const signer = await getProviderOrSigner(true);
         const contract = getLJCryptoTokenInstance(signer);
-        const tx = await contract.buyTokens(amount, {
+        const tx = await contract.buyTokens(weiAmount, {
           value: ethers.utils.parseEther(`0.1`),
         });
         await tx.wait();
-        window.alert(`You have successfully bought ${amount} LJCryptoTokens `)
-        setLoading(false)
+        window.alert(`You have successfully bought ${amount} LJCryptoTokens `);
+        setLoading(false);
       } else {
-        setbuyLJCrypto(false)
-        setLoading(true)
+        setbuyLJCrypto(false);
+        setLoading(true);
         const price = await getLJCryptoTokenPrice();
         const signer = await getProviderOrSigner(true);
         const contract = getLJCryptoTokenInstance(signer);
-        const amountToPay = price.mul(parseInt(amount));
-        const tx = await contract.buyTokens(amount, {
-          value: amountToPay
+        const amountToPay =
+          (parseInt(price) / 1e18) * parseInt(amount.toString());
+        const tx = await contract.buyTokens(weiAmount, {
+          value: ethers.utils.parseEther(`${amountToPay}`),
         });
         await tx.wait();
         window.alert(`You have successfully bought ${amount} LJCryptoTokens `);
-        setLoading(false)
+        setLoading(false);
       }
-    } catch (error:any) {
-      setbuyLJCrypto(false)
-      setLoading(false)
+    } catch (error: any) {
+      setbuyLJCrypto(false);
+      setLoading(false);
       console.log(error);
       window.alert(error.error.message);
     }
   };
 
   const sellLJCryptoToken = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
-      setSellLJCrypto(false)
-      setLoading(true)
+      setSellLJCrypto(false);
+      setLoading(true);
       const signer = await getProviderOrSigner(true);
       const contract = getLJCryptoTokenInstance(signer);
-      const tx = await contract.sellTokens(amount);
+      const tx = await contract.sellTokens(weiAmount);
       await tx.wait();
-      window.alert(`You have successfully sold ${amount} LJCryptoTokens`)
-      setLoading(false)
-    } catch (error:any) {
-      setSellLJCrypto(false)
-      setLoading(false)
+      window.alert(`You have successfully sold ${amount} LJCryptoTokens`);
+      setLoading(false);
+    } catch (error: any) {
+      setSellLJCrypto(false);
+      setLoading(false);
       console.log(error);
-      window.alert(error.error.message)
+      window.alert(error.error.message);
     }
   };
 
@@ -202,7 +212,7 @@ const Tokens: React.FC = () => {
       const provider = await getProviderOrSigner(true);
       const contract = getLJCryptoTokenInstance(provider);
       const currentAccount = await getAddress();
-      const value = await contract.userBalanceInEther({ from: currentAccount });
+      const value = await contract.userBalancePrice({ from: currentAccount });
       setLJCryptoEtherBalance(ethers.utils.formatEther(value));
       return value;
     } catch (error) {
@@ -211,40 +221,42 @@ const Tokens: React.FC = () => {
   };
 
   const buyljStableCoin = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
-      setbuyLJStable(false)
-      setLoading(true)
+      setbuyLJStable(false);
+      setLoading(true);
       const signer = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(signer);
-      const price = 0.0004;
-      const paidAmount = parseInt(amount) * price;
-      const tx = await contract.buyTokens(amount, {
-        value: ethers.utils.parseEther(`${paidAmount}`)
+      const paidAmount = (parseInt(amount) * 1) / 2500;
+      // const amountToPay = (parseInt(price) / 1e18) * parseInt(amount.toString());
+      const tx = await contract.buyTokens(weiAmount, {
+        value: ethers.utils.parseEther(`${paidAmount}`),
       });
       await tx.wait();
-      window.alert(`You Have Successfully Bought ${amount} LJStableCoins`)
-      setLoading(false)
-    } catch (error:any) {
-      setbuyLJStable(false)
-      setLoading(false)
+      window.alert(`You Have Successfully Bought ${amount} LJStableCoins`);
+      setLoading(false);
+    } catch (error: any) {
+      setbuyLJStable(false);
+      setLoading(false);
       console.log(error);
       window.alert(error.data.message);
     }
   };
 
   const sellLJStableCoin = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
-      setsellLJStable(false)
-      setLoading(true)
+      setsellLJStable(false);
+      setLoading(true);
       const signer = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(signer);
-      const tx = await contract.sellTokens(amount);
+      const tx = await contract.sellTokens(weiAmount);
       await tx.wait();
-      window.alert(`You Have Successfully Sold ${amount} LJStableCoins`)
-      setLoading(false)
-    } catch (error:any) {
+      window.alert(`You Have Successfully Sold ${amount} LJStableCoins`);
+      setLoading(false);
+    } catch (error: any) {
       setsellLJStable(false);
-      setLoading(false)
+      setLoading(false);
       console.error(error);
       window.alert(error.error.message);
     }
@@ -255,7 +267,7 @@ const Tokens: React.FC = () => {
       const provider = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(provider);
       const currentAccount = await getAddress();
-      const value = await contract.userBalanceInEther({
+      const value = await contract.userBalancePrice({
         from: currentAccount,
       });
       setLJStableCoinEtherBalance(ethers.utils.formatEther(value));
@@ -266,197 +278,154 @@ const Tokens: React.FC = () => {
   };
 
   const getLJStableCoinBalance = async () => {
-    const provider = await getProviderOrSigner(true);
-    const contract = getLJStableCoinInstance(provider);
+    const re = new RegExp("^-?\\d+(?:.\\d{0," + (5 || -1) + "})?");
+     const provider = window.ethereum;
+     const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const contract = getLJStableCoinInstance(web3Provider);
     const currentAccount = await getAddress();
     const value = await contract.balanceOf(currentAccount);
-    setLJStableCoinBalance(ethers.utils.formatEther(value));
+    setLJStableCoinBalance(ethers.utils.formatEther(value).match(re)?.[0]);
     return value;
   };
 
   const getStakingBalances = async () => {
-    const provider = await getProviderOrSigner(true);
-    const ljcryptoContract = getLJCryptoTokenInstance(provider);
+    const provider = window.ethereum;
+    const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const ljcryptoContract = getLJCryptoTokenInstance(web3Provider);
     const currentAccount = await getAddress();
     const stakingBalanceOne = await ljcryptoContract.stakingBalance(
       currentAccount
     );
-    setLJCryptoStakingBalance(BigNumber.from(stakingBalanceOne).toString());
-    const ljstablecoinContract = getLJStableCoinInstance(provider);
+    setLJCryptoStakingBalance(ethers.utils.formatEther(stakingBalanceOne));
+    const ljstablecoinContract = getLJStableCoinInstance(web3Provider);
     const stakingBalanceTwo = await ljstablecoinContract.stakingBalance(
       currentAccount
     );
-    setLJStableCoinStakingBalance(BigNumber.from(stakingBalanceTwo).toString());
-    const stakingInEtherOne = await ljcryptoContract.stakingBalanceInEther();
+    setLJStableCoinStakingBalance(ethers.utils.formatEther(stakingBalanceTwo));
+    const stakingInEtherOne = await ljcryptoContract.stakingBalancePrice();
     setLJCryptoStakingInEther(ethers.utils.formatEther(stakingInEtherOne));
-    const stakingInEtherTwo =
-      await ljstablecoinContract.stakingBalanceInEther();
+    const stakingInEtherTwo = await ljstablecoinContract.stakingBalancePrice();
     setLJStableCoinStakingInEther(ethers.utils.formatEther(stakingInEtherTwo));
   };
 
   const stakeLJCryptoTokens = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
-      setStakeLJCrypto(false)
-      setLoading(true)
+      setStakeLJCrypto(false);
+      setLoading(true);
       const provider = await getProviderOrSigner(true);
       const contract = getLJCryptoTokenInstance(provider);
-      const tx = await contract.stakeTokens(amount);
+      const tx = await contract.stakeTokens(weiAmount);
       await tx.wait();
-      window.alert(`You Have Successfully staked ${amount} LJCryptoTokens`)
-      setLoading(false)
+      window.alert(`You Have Successfully staked ${amount} LJCryptoTokens`);
+      setLoading(false);
     } catch (error: any) {
       setStakeLJCrypto(false);
-      setLoading(false)
+      setLoading(false);
       console.log(error);
       window.alert(error.error.message);
     }
   };
 
   const unstakeLJCryptoTokens = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
       setUnstakeLJCrypto(false);
-      setLoading(true)
+      setLoading(true);
       const provider = await getProviderOrSigner(true);
       const contract = getLJCryptoTokenInstance(provider);
-      const tx = await contract.unstakeTokens(amount);
+      const tx = await contract.unstakeTokens(weiAmount);
       await tx.wait();
-      window.alert(`You Have Successfully Unstaked ${amount} LJCryptoTokens`)
-      setLoading(false)
+      window.alert(`You Have Successfully Unstaked ${amount} LJCryptoTokens`);
+      setLoading(false);
     } catch (error: any) {
       setUnstakeLJCrypto(false);
-      setLoading(false)
+      setLoading(false);
       console.log(error);
       window.alert(error.error.message);
     }
   };
 
   const stakeLJStableCoins = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
       setStakeLJStable(false);
-      setLoading(true)
+      setLoading(true);
       const provider = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(provider);
-      const tx = await contract.stakeTokens(amount);
+      const tx = await contract.stakeTokens(weiAmount);
       await tx.wait();
-      window.alert(`You Have Successfully Staked ${amount} LJStableCoins`)
-      setLoading(false)
+      window.alert(`You Have Successfully Staked ${amount} LJStableCoins`);
+      setLoading(false);
     } catch (error: any) {
-       setStakeLJStable(false);
-      setLoading(false)
+      setStakeLJStable(false);
+      setLoading(false);
       console.log(error);
       window.alert(error.error.message);
     }
   };
 
   const unstakeLJStableCoins = async (amount: string) => {
+    const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
-      setUnstakeLJStable(false)
-      setLoading(true)
+      setUnstakeLJStable(false);
+      setLoading(true);
       const provider = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(provider);
-      const tx = await contract.unstakeTokens(amount);
+      const tx = await contract.unstakeTokens(weiAmount);
       await tx.wait();
-      window.alert(`You Have Successfully Unstaked ${amount} LJStableCoins`)
-      setLoading(false)
+      window.alert(`You Have Successfully Unstaked ${amount} LJStableCoins`);
+      setLoading(false);
     } catch (error: any) {
       setUnstakeLJStable(false);
-      setLoading(false)
+      setLoading(false);
       console.log(error);
       window.alert(error.error.message);
     }
   };
 
-  const updateLJCryptoStakingBalance = async() => {
+  const updateLJCryptoStakingBalance = async () => {
     try {
-        setLoading(true)
-        const provider = await getProviderOrSigner(true);
-        const contract = getLJCryptoTokenInstance(provider)
-        const tx = await contract.stakedBalance();
-        await tx.wait()
-        window.alert(`You Have Successfully Updated Your LJCryptoToken Balance`)
-        setLoading(false)
-    } catch (error:any) {
-       setLoading(false)
-       console.log(error);
-       window.alert(error.data.message);
+      setLoading(true);
+      const provider = await getProviderOrSigner(true);
+      const contract = getLJCryptoTokenInstance(provider);
+      const tx = await contract.stakedBalance();
+      await tx.wait();
+      window.alert(`You Have Successfully Updated Your LJCryptoToken Balance`);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error);
+      window.alert(error.data.message);
     }
-  }
-
-  const updateLJStableCoinStakingBalance = async() => {
-    try {
-       setLoading(true)
-       const provider = await getProviderOrSigner(true);
-       const contract = getLJStableCoinInstance(provider);
-       const tx = await contract.stakedBalance()
-       await tx.wait()
-       window.alert(`You Have Successfully Updated Your LJStableCoin Balance`);
-       setLoading(false)
-    } catch (error:any) {
-       setLoading(false)
-       console.log(error);
-       window.alert(error.data.message);
-    }
-  }
-
-  const getAddress = async () => {
-    const provider = await web3ModalRef.current.connect();
-    const web3Provider = new providers.Web3Provider(provider);
-    const thisAccount = await web3Provider.getSigner().getAddress();
-    setAccount(await web3Provider.getSigner().getAddress());
-    return thisAccount;
   };
 
-  const getProviderOrSigner = async (needSigner = false) => {
-    // Connect to Metamask
-    // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
-    const provider = await web3ModalRef.current.connect();
-    const web3Provider = new providers.Web3Provider(provider);
-
-    // If user is not connected to the Rinkeby network, let them know and throw an error
-    const { chainId } = await web3Provider.getNetwork();
-    if (chainId !== 80001) {
-      alert("Change the network to Mumbai");
-      throw new Error("Change network to Mumbai");
-    }
-
-    if (needSigner) {
-      const signer = web3Provider.getSigner();
-      return signer;
-    }
-    return web3Provider;
-  };
-
-  const connectWallet = async () => {
+  const updateLJStableCoinStakingBalance = async () => {
     try {
-      // Get the provider from web3Modal, which in our case is MetaMask
-      // When used for the first time, it prompts the user to connect their wallet
-      await getProviderOrSigner();
-      setWalletConnected(true);
-    } catch (err) {
-      console.error(err);
+      setLoading(true);
+      const provider = await getProviderOrSigner(true);
+      const contract = getLJStableCoinInstance(provider);
+      const tx = await contract.stakedBalance();
+      await tx.wait();
+      window.alert(`You Have Successfully Updated Your LJStableCoin Balance`);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error);
+      window.alert(error.data.message);
     }
   };
+
 
   useEffect(() => {
-    if (!walletConnected) {
-      // Assign the Web3Modal class to the reference object by setting it's `current` value
-      // The `current` value is persisted throughout as long as this page is open
-      web3ModalRef.current = new Web3Modal({
-        network: "mumbai",
-        providerOptions: {},
-        //  disableInjectedProvider: false,
-      });
-    }
-    setInterval(async function () {
-      await getAddress();
-      await getLJCryptoTokenPrice();
-      await getLJCryptoTokenBalance();
-      await getLJStableCoinBalance();
-      await ljcryptoBalanceInEther();
-      await ljstableBalanceInEther();
-      await getStakingBalances();
-    }, 2 * 1000);
-  }, [walletConnected, account]);
+    getAddress();
+    getLJCryptoTokenPrice();
+    getLJCryptoTokenBalance();
+    getLJStableCoinBalance();
+    ljcryptoBalanceInEther();
+    ljstableBalanceInEther();
+    getStakingBalances();
+  });
 
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
@@ -529,7 +498,7 @@ const Tokens: React.FC = () => {
             DISCLAIMER: THESE PRICES ARE IN MATIC CURRENCY AND NOT
             FIAT(USD/CAD/EUD....)
           </p>
-          <div className="flex flex-col md:mx-auto h-32 w-80 md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
+          <div className="flex flex-col md:mx-auto h-auto w-80 md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
             <div className="flex mt-5 ml-3 md:mx-auto md:text-lg">
               <img
                 src="/ljcrypto.webp"
@@ -555,7 +524,7 @@ const Tokens: React.FC = () => {
           <div className="flex justify-start w-32 md:mx-auto items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
             Your Balances:
           </div>
-          <div className="flex flex-col h-32 w-80 md:mx-auto md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
+          <div className="flex flex-col h-auto w-80 md:mx-auto md:w-96 bg-black rounded-md ml-4 relative top-10 mb-20">
             <div className="flex mt-5 ml-3 md:text-xl md:mx-auto">
               <img
                 src="/ljcrypto.webp"
@@ -580,7 +549,7 @@ const Tokens: React.FC = () => {
           <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
             Balance Amounts:
           </div>
-          <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
+          <div className="flex flex-col h-auto w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
             <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
               <img
                 src="/ljcrypto.webp"
@@ -605,7 +574,7 @@ const Tokens: React.FC = () => {
           <div className="flex justify-start md:mx-auto w-36 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
             Staking Balances:
           </div>
-          <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
+          <div className="flex flex-col h-auto w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
             <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
               <img
                 src="/ljcrypto.webp"
@@ -630,8 +599,8 @@ const Tokens: React.FC = () => {
           <div className="flex justify-start md:mx-auto w-52 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-5 whitespace-nowrap">
             Update Staking Balances:
           </div>
-          {ljcryptoStakingBalance === "0" &&
-          ljstablecoinStakingBalance === "0" ? (
+          {ljcryptoStakingBalance === "0.0" &&
+          ljstablecoinStakingBalance === "0.0" ? (
             <>
               <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
                 You don't have a staking balance to update
@@ -653,7 +622,7 @@ const Tokens: React.FC = () => {
                 Recommended To Update Balance Every Day
               </p>
               <div className="md:flex md:justify-center">
-                {ljcryptoStakingBalance === "0" ? (
+                {ljcryptoStakingBalance === "0.0" ? (
                   <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white">
                     LJCryptoToken
                   </button>
@@ -667,8 +636,8 @@ const Tokens: React.FC = () => {
                 )}
               </div>
               <div className="md:flex md:justify-center">
-                {ljstablecoinStakingBalance === "0" ? (
-                  <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12 hover:text-white">
+                {ljstablecoinStakingBalance === "0.0" ? (
+                  <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12">
                     LJStableCoin
                   </button>
                 ) : (
@@ -685,7 +654,7 @@ const Tokens: React.FC = () => {
           <div className="flex justify-start md:mx-auto w-52 items-center rounded-md px-2 h-8 bg-yellow-500 ml-4 font-semibold mb-2  whitespace-nowrap">
             Staking Balances In MATIC:
           </div>
-          <div className="flex flex-col h-32 w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
+          <div className="flex flex-col h-auto w-80 md:mx-auto bg-black rounded-md ml-4 relative top-10 mb-20">
             <div className="flex mt-5 ml-3 md:mx-auto md:text-xl">
               <img
                 src="/ljcrypto.webp"
@@ -899,7 +868,7 @@ const Tokens: React.FC = () => {
             STAKING BALANCE GETS UPDATED WHEN YOU UNSTAKE
           </p>
           <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
-            LJCryptoToken APY: 10000%
+            LJCryptoToken APY: 100%
           </p>
           <p className="text-sm md:text-center md:text-xl font-bold ml-4 relative top-2 text-white">
             LJStableCoin APY: 100%
@@ -1088,23 +1057,39 @@ const Tokens: React.FC = () => {
           </div>
           <div className="flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
             <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-              Tokens
+             Tokens
             </a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-              Lottery Game
-            </a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-              Liquidity Pools
-            </a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-              Tokens&NFTs
-            </a>
+            <Link href="/lotterygame">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Lottery Game
+              </a>
+            </Link>
+            <Link href="/dao">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Governance
+              </a>
+            </Link>
+            <Link href="/nft">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">NFTs</a>
+            </Link>
+            <Link href="/guessinggame">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Guessing Game
+              </a>
+            </Link>
+            <Link href="/liquiditypools">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Liquidity Pools
+              </a>
+            </Link>
+            <Link href="/swap">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">Swap</a>
+            </Link>
           </div>
         </>
       )}
     </main>
   );
-}
+};
 
-export default Tokens
+export default Tokens;

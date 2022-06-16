@@ -1,6 +1,6 @@
 import React from 'react'
 import { IState as Props } from './index';
-import type { NextPage } from "next";
+import Link from "next/link";
 
 const links = () => {
   `mb-5 hover:opacity-50`
@@ -17,13 +17,41 @@ const SideBarMenu: React.FC<IProps> = ({modalToggle}) => {
     <main className="fixed top-0 left-0 w-full h-full grid z-50 bg-gray-800 bg-gradient-to-r from-yellow-400 to-black p-7">
       <div className="flex justify-between text-3xl text-white font-bold">
         <div className="flex justify-start flex-col cursor-pointer">
-          <h1 className="mb-5 hover:text-black">Swap</h1>
-          <h1 className="mb-5">Liquidity Pools</h1>
-          <h1 className="mb-5">Staking</h1>
-          <h1 className="mb-5">Governance</h1>
-          <h1 className="mb-5">Tokens And NFTs</h1>
-          <h1 className="mb-5">LotteryGame</h1>
-          <h1 className="mb-5">GuessingGame</h1>
+          <Link href="/guessinggame">
+            <a>
+              <h1 className="mb-5 hover:text-black">GuessingGame</h1>
+            </a>
+          </Link>
+          <Link href="/tokens">
+            <a>
+              <h1 className="mb-5 hover:text-black">Tokens</h1>
+            </a>
+          </Link>
+          <Link href="/nft">
+            <a>
+              <h1 className="mb-5 hover:text-black">NFTs</h1>
+            </a>
+          </Link>
+          <Link href="/dao">
+            <a>
+              <h1 className="mb-5 hover:text-black">Governance</h1>
+            </a>
+          </Link>
+          <Link href="/liquiditypools">
+            <a>
+              <h1 className="mb-5 hover:text-black">Liquidity Pools</h1>
+            </a>
+          </Link>
+          <Link href="/swap">
+            <a>
+              <h1 className="mb-5 hover:text-black">Swap</h1>
+            </a>
+          </Link>
+          <Link href="/lotterygame">
+            <a>
+              <h1 className="mb-5 hover:text-black">LotteryGame</h1>
+            </a>
+          </Link>
         </div>
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -41,7 +41,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
         playerInTheGame[msg.sender] = true;
         players.push(payable(msg.sender));
         if(players.length == 2) {
-           deadline = block.timestamp + 24 hours;
+           deadline = block.timestamp + 12 hours;
         }
         emit PlayersOnLotteryDay(msg.sender, lotteryDay, entryAmount);
     }
@@ -71,7 +71,7 @@ contract LotteryGame is VRFConsumerBase, KeeperCompatibleInterface {
     function performUpkeep(bytes calldata /*performData*/) external override {
        require(LINK.balanceOf(address(this)) >= _chainlinkFee, "MORE_LINK");
        requestRandomness(_keyHash, _chainlinkFee);
-       deadline = block.timestamp + 5 minutes;
+       deadline = block.timestamp + 12 hours;
        lotteryDay++;
     }
 

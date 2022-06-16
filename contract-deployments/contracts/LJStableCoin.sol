@@ -70,13 +70,13 @@ contract LJStableCoin is ERC20 {
       stakingTimestamps[msg.sender] = block.timestamp;
     }
 
-    function userBalanceInWei() external view returns(uint) {
-       return ((balanceOf(msg.sender)/1e18) * 1)/2500;
+    function userBalancePrice() external view returns(uint) {
+       return (balanceOf(msg.sender)/1e18) * 0.0004 ether;
     }
 
 
-    function stakingBalanceInWei() external view returns(uint) {
-        return (stakingBalance[msg.sender] * 1)/2500;
+    function stakingBalancePrice() external view returns(uint) {
+        return (stakingBalance[msg.sender]/1e18) * 0.0004 ether;
     }
 
     function setPauseValue(bool value) external {

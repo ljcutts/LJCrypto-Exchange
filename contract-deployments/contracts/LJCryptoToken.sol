@@ -25,14 +25,13 @@ contract LJCryptoToken is ERC20 {
     }
 
 
-   //The user might not be able to buy one whole of a token
     function buyTokens(uint _amount) external payable isItPaused {
       uint tokenPrice = (address(this).balance - msg.value)/(totalSupply()/10 ** 18);
       if(tokenPrice == 0) {
         require(msg.value > 0 && _amount > 0, "INSUFFICIENT_FUNDS");
         _transfer(address(this), msg.sender, (_amount));
       } else {
-      uint priceOfAmount = _amount * tokenPrice;
+      uint priceOfAmount = (_amount*1/1e18) * tokenPrice;
       require(msg.value >= priceOfAmount && _amount > 0, "INSUFFICIENT_FUNDS");
       _transfer(address(this), msg.sender, (_amount));
       }
@@ -41,7 +40,7 @@ contract LJCryptoToken is ERC20 {
      function sellTokens(uint _amount) external payable isItPaused {
       require(_amount != 0, "NO_AMOUNT_SPECIFIED");
       uint tokenPrice = currentPricePerToken();
-      uint priceOfAmount = _amount * tokenPrice;
+      uint priceOfAmount = (_amount*1/1e18) * tokenPrice;
        _transfer(msg.sender, address(this), (_amount));
        payable(msg.sender).transfer(priceOfAmount);
     }
@@ -79,19 +78,18 @@ contract LJCryptoToken is ERC20 {
       require(balance > 0, "NO_BALANCE");
       uint time = block.timestamp;
       uint timeElapsed = time - stakingTimestamps[msg.sender]; //seconds
-      uint mintedTokens = uint(balance * 100000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //10000% interest per year
+      uint mintedTokens = uint(balance * 1000 * timeElapsed) / (1000 * 365 * 24 * 60 * 60); //100% interest per year
       _mint(address(this), (mintedTokens));
       uint newBalance = mintedTokens;
       stakingBalance[msg.sender] += newBalance;
       stakingTimestamps[msg.sender] = block.timestamp;
     }
 
-    function userBalanceInEther() external view returns(uint) {
+    function userBalancePrice() external view returns(uint) {
        return (balanceOf(msg.sender)/1e18) * currentPricePerToken();
     }
-
-    function stakingBalanceInEther() external view returns(uint) {
-        return stakingBalance[msg.sender] * currentPricePerToken();
+    function stakingBalancePrice() external view returns(uint) {
+        return (stakingBalance[msg.sender]/1e18) * currentPricePerToken();
     }
 
     function setPauseValue(bool value) external {

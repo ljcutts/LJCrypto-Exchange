@@ -5,7 +5,7 @@ import Link from "next/link";
 import SideBarMenu from './sidebarmenu'
 import Web3Modal from "web3modal";
 import { useRouter } from "next/router";
-import { providers, Contract } from "ethers";
+import { providers } from "ethers";
 
 export type IState = {
   modal: boolean;
@@ -100,12 +100,41 @@ const Home: NextPage = () => {
               </a>
             </Link>
             <div className="hidden md:flex md:items-center md:justify-between">
-              <h1 className="">Liquidity Pools</h1>
-              <h1 className="pl-5">Staking</h1>
-              <h1 className="pl-5">Governance</h1>
-              <h1 className="pl-5">Tokens And NFTs</h1>
-              <h1 className="pl-5">LotteryGame</h1>
-              <h1 className="pl-5">GuessingGame</h1>
+              <Link href="/guessinggame">
+                <a>
+                  <h1 className="hover:text-white">GuessingGame</h1>
+                </a>
+              </Link>
+              <Link href="/tokens">
+                <a>
+                  <h1 className="pl-5 hover:text-white">Tokens</h1>
+                </a>
+              </Link>
+              <Link href="/nft">
+                <a>
+                  <h1 className="pl-5 hover:text-white">NFTs</h1>
+                </a>
+              </Link>
+              <Link href="/dao">
+                <a>
+                  <h1 className="pl-5 hover:text-white">Governance</h1>
+                </a>
+              </Link>
+              <Link href="/liquiditypools">
+                <a>
+                  <h1 className="pl-5 hover:text-white">Liquidity Pools</h1>
+                </a>
+              </Link>
+              <Link href="/swap">
+                <a>
+                  <h1 className="pl-5 hover:text-white">Swap</h1>
+                </a>
+              </Link>
+              <Link href="/lotterygame">
+                <a>
+                  <h1 className="pl-5 hover:text-white">LotteryGame</h1>
+                </a>
+              </Link>
               <button
                 onClick={connectWallet}
                 className="rounded-2xl bg-black ml-5 text-white h-8 shadow-button w-24 font-bold transition ease-in-out hover:scale-75"

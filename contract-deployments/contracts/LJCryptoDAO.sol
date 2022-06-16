@@ -16,10 +16,6 @@ interface ILJCryptoToken {
 } 
 
 contract LJCryptoDAO is ERC1155Holder {
-    //users can create one propsal per NFT
-    //also can maybe use their LJCryptoToken and maybe do a transfer?
-    //users can only vote on a proposal one time
-    //once a propsal is created, users have a day to vote on it
 ILJCryptoNFT LJCryptoNFT;
 ILJCryptoToken LJCryptoToken;
 address immutable owner;
@@ -89,7 +85,8 @@ function receivePowerThroughNFT(uint _id) external {
 function receivePowerThroughToken(uint _amount) external {
   require(powerAmountNotEmpty[msg.sender] == false, "USE_POWER_FIRST");
   require(LJCryptoToken.balanceOf(msg.sender) >= _amount, "AMOUNT_EXCEEDS_BALANCE");
-  powerAmount[msg.sender] += _amount;
+  require(_amount % 1 ether == 0, "HAVE_TO_BE_DIVISIBLE_BY_1_MATIC");
+  powerAmount[msg.sender] += _amount/1e18;
   powerAmountNotEmpty[msg.sender] = true;
   LJCryptoToken.transferFrom(msg.sender, address(this), _amount); 
 }

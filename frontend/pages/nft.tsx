@@ -457,10 +457,7 @@ useEffect(() => {
             <article className={styles.card}>
               <section className={styles.cardSideFront}>
                 <h1 className="h1">
-                  <img
-                    className="rounded-1400"
-                    src="/ljcrypto.webp"
-                  />
+                  <img className="rounded-1400" src="/ljcrypto.webp" />
                 </h1>
               </section>
             </article>
@@ -471,7 +468,10 @@ useEffect(() => {
               View NFT Collection Here
             </p>
             <Link href="https://testnets.opensea.io/collection/unidentified-contract-pp3ki7zvnb">
-              <a className="md:flex md:justify-content md:mx-auto w-40" target="_blank">
+              <a
+                className="md:flex md:justify-content md:mx-auto w-40"
+                target="_blank"
+              >
                 <button className="rounded-2xl ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white mb-12">
                   View NFTs
                 </button>
@@ -1026,16 +1026,32 @@ useEffect(() => {
             <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
               NFTs
             </a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-              Lottery Game
-            </a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-              Liquidity Pools
-            </a>
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-              Tokens&NFTs
-            </a>
+            <Link href="/lotterygame">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Lottery Game
+              </a>
+            </Link>
+            <Link href="/tokens">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Tokens
+              </a>
+            </Link>
+            <Link href="/dao">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">Governance</a>
+            </Link>
+            <Link href="/guessinggame">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Guessing Game
+              </a>
+            </Link>
+            <Link href="/liquiditypools">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Liquidity Pools
+              </a>
+            </Link>
+            <Link href="/swap">
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">Swap</a>
+            </Link>
           </div>
         )}
       </main>

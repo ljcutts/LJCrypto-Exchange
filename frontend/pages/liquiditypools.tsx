@@ -1326,18 +1326,32 @@ const LiquidityPools: React.FC = () => {
           }`}
         >
           <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-            Tokens
+           Liquidity Pools
           </a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-            Lottery Game
-          </a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">Staking</a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-            Liquidity Pools
-          </a>
-          <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-            Tokens&NFTs
-          </a>
+          <Link href="/lotterygame">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Lottery Game
+            </a>
+          </Link>
+          <Link href="/tokens">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Tokens</a>
+          </Link>
+          <Link href="/nft">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">NFTs</a>
+          </Link>
+          <Link href="/guessinggame">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Guessing Game
+            </a>
+          </Link>
+          <Link href="/dao">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+             Governance
+            </a>
+          </Link>
+          <Link href="/swap">
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Swap</a>
+          </Link>
         </div>
       )}
     </main>

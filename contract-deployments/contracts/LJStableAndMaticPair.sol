@@ -37,9 +37,7 @@ function addLiquidity(uint _amountA) external payable returns(uint) {
     } else {
         uint maticReserve = maticBalance - msg.value;
         uint ljstableCoinAmount = (msg.value * LJStableReserve)/(maticReserve);
-        uint maticAmount = (_amountA * maticReserve)/(LJStableReserve);
          require(_amountA >= ljstableCoinAmount, "INSUFFICIENT_AMOUNT");
-         require(msg.value >= maticAmount, "INSUFFICIENT_AMOUNT");
          userMaticBalance[msg.sender] += msg.value;
          ljstableBalance[msg.sender] += _amountA;
          LJStableCoin.transferFrom(msg.sender, address(this), ljstableCoinAmount);

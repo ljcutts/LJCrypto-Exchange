@@ -44,9 +44,7 @@ function addLiquidity(uint _amountA) external payable returns(uint) {
     } else {
         uint maticReserve = maticBalance - msg.value;
         uint ljcryptoTokenAmount = (msg.value * LJCryptoTokenReserve)/(maticReserve);
-        uint maticAmount = (_amountA * maticReserve)/(LJCryptoTokenReserve);
          require(_amountA >= ljcryptoTokenAmount, "INSUFFICIENT_AMOUNT");
-         require(msg.value >= maticAmount, "INSUFFICIENT_AMOUNT");
          userMaticBalance[msg.sender] += msg.value;
          ljcryptoBalance[msg.sender] += _amountA;
          LJCryptoToken.transferFrom(msg.sender, address(this), ljcryptoTokenAmount);

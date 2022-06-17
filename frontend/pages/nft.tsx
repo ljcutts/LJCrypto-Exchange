@@ -594,7 +594,7 @@ useEffect(() => {
             {myStakingBalance === "0" ? (
               <>
                 <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
-                  You don't have a staking balance to update
+                  You dont have a staking balance to update
                 </p>
                 <div className="md:flex md:justify-center">
                   <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12">

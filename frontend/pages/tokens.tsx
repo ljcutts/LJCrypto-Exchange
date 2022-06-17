@@ -148,7 +148,7 @@ const Tokens: React.FC = () => {
     setAmount(e.target.value);
   };
 
-  const buyLJCrytptoToken = async (amount: string) => {
+  const buyLJCryptoToken = async (amount: string) => {
     const weiAmount = ethers.utils.parseEther(amount.toString());
     try {
       const number = await getLJCryptoTokenPrice();
@@ -184,7 +184,7 @@ const Tokens: React.FC = () => {
       setbuyLJCrypto(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.error.message);
+      window.alert(error.data.message);
     }
   };
 
@@ -203,7 +203,7 @@ const Tokens: React.FC = () => {
       setSellLJCrypto(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.error.message);
+      window.alert(error.data.message);
     }
   };
 
@@ -258,7 +258,7 @@ const Tokens: React.FC = () => {
       setsellLJStable(false);
       setLoading(false);
       console.error(error);
-      window.alert(error.error.message);
+      window.alert(error.data.message);
     }
   };
 
@@ -603,7 +603,7 @@ const Tokens: React.FC = () => {
           ljstablecoinStakingBalance === "0.0" ? (
             <>
               <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
-                You don't have a staking balance to update
+                You dont have a staking balance to update
               </p>
               <div className="md:flex md:justify-center">
                 <button className="rounded-2xl opacity-50 whitespace-nowrap ml-4 md:mx-auto bg-black text-yellow-500 h-8 shadow-button w-48 font-bold transition ease-in-out mb-12">
@@ -722,7 +722,7 @@ const Tokens: React.FC = () => {
                       </div>
                       <button
                         className="rounded-2xl mx-auto bg-black  text-yellow-500 h-8 shadow-button w-40 font-bold transition ease-in-out hover:text-white "
-                        onClick={() => buyLJCrytptoToken(thisAmount)}
+                        onClick={() => buyLJCryptoToken(thisAmount)}
                       >
                         Buy Tokens
                       </button>
@@ -1057,7 +1057,7 @@ const Tokens: React.FC = () => {
           </div>
           <div className="flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 z-50 bottom-0 right-1/2 pr-4 whitespace-nowrap overflow-x-scroll">
             <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-             Tokens
+              Tokens
             </a>
             <Link href="/lotterygame">
               <a className="pr-4 hover:text-yellow-500 cursor-pointer">

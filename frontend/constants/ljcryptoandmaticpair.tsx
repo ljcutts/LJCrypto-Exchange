@@ -454,4 +454,4 @@ export const LJC_MATIC_ABI = [
     type: "function",
   },
 ];
-export const LJC_MATIC_ADDRESS = "0x9Fe9d3423ca684e656E317863D6dF5f18e87b58E";
+export const LJC_MATIC_ADDRESS = "0x8deFf92E59d4F6D6E6c79eD2e3D896368626DCD2";

@@ -34,20 +34,20 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     // uint128 public constant TIER9 = 8;
     // uint128 public constant TIER10 = 9;
     // uint256 public constant STAKING = 10;
-    constructor() ERC1155("https://gateway.pinata.cloud/ipfs/QmRyToa47VAA9sDHAX8DymcBR98jqML7PgPppFHt6uTwxK/{id}.json") VRFConsumerBase(_vrfCoordinator, _linkToken)  {
+    constructor() ERC1155("https://ipfs.io/ipfs/QmezZXvvU2NjEsPPfnceAuZLzgmvcv6V1MaPpbZLNcAWkQ/{id}.json") VRFConsumerBase(_vrfCoordinator, _linkToken)  {
          owner = msg.sender;
     }
 
      modifier onlyWhenNotPaused {
-            require(!_paused, "Contract currently paused");
+            require(!_paused, "PAUSED");
             _;
         }
      
    function mintToken() external payable onlyWhenNotPaused {
-    require(_currentSupply.current() < 1000, "We have reached the maxiumum supply");
-    require(randomNumber > 0, "A random number hasn't been generated yet");
+    require(_currentSupply.current() < 1000, "MAXIMUM_SUPPLY_REACHED");
+    require(randomNumber > 0, "NO_GENERATION");
     uint tokenAmount = 0.01 ether;
-    require(msg.value >= tokenAmount, "You didn't pay enough to receive NFT");
+    require(msg.value >= tokenAmount, "INSUFFICIENT_FUNDS");
     uint randomId = randomNumber % 10;
     _mint(msg.sender, randomId, 1, "");
     _currentSupply.increment();
@@ -61,7 +61,7 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     }
 
     function performUpkeep(bytes calldata /*performData*/) external {
-       require(LINK.balanceOf(address(this)) >= _chainlinkFee, "not enough LINK");
+       require(LINK.balanceOf(address(this)) >= _chainlinkFee, "MORE_LINK");
        requestRandomness(_keyHash, _chainlinkFee);
     }
 
@@ -92,21 +92,21 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
     }
     
    function setPause(bool _value) external {
-       require(msg.sender == owner, "You are not the owner");
+       require(msg.sender == owner, "NOT_OWNER");
        _paused = _value;
    }
 
    function burn(address user, uint id, uint amount) public onlyWhenNotPaused {
-       require(msg.sender == user, "You can only get rid of your own token");
+       require(msg.sender == user, "BURN_ONLY_YOUR_TOKENS");
        _burn(user, id, amount);
    }
 
    function uri(uint _tokenId) override public pure returns(string memory) {
-       return string(abi.encodePacked("https://gateway.pinata.cloud/ipfs/QmdTLaJeFdRwgMvBynK892uG8mAuSN9UYvkG9R2QPRsd4b/", Strings.toString(_tokenId), ".json"));
+       return string(abi.encodePacked("https://ipfs.io/ipfs/QmezZXvvU2NjEsPPfnceAuZLzgmvcv6V1MaPpbZLNcAWkQ/", Strings.toString(_tokenId), ".json"));
    }
 
    function mintTokensToStakingContract(address _stakingContract, uint _amount) external onlyWhenNotPaused {
-        require(msg.sender == owner, "You are not the owner");
+        require(msg.sender == owner, "NOT_OWNER");
         _mint(_stakingContract, 10, _amount, "");
    }
 
@@ -115,10 +115,10 @@ contract LJCryptoNFTCollection is ERC1155, VRFConsumerBase {
    }
 
          function withdraw() external {
-            require(msg.sender == owner, "You are not the owner");
+            require(msg.sender == owner, "NOT_OWNER");
             uint256 amount = address(this).balance;
             (bool sent, ) =  payable(msg.sender).call{value: amount}("");
-            require(sent, "Failed to send Ether");
+            require(sent, "SEND_FAILED");
         }
 
          // Function to receive Ether. msg.data must be empty

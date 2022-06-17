@@ -441,4 +441,4 @@ export const LJS_MATIC_ABI = [
     type: "function",
   },
 ];
-export const LJS_MATIC_ADDRESS = "0x27f44071E502aff6479f03f2c0D2F1F12Dc083DF";
+export const LJS_MATIC_ADDRESS = "0xad82dD4ca868a511F36579e61e36DC78689BE586";

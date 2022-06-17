@@ -307,12 +307,10 @@ const LiquidityPools: React.FC = () => {
                amountNeeded = parseFloat(secondAmountOne) * (parseFloat(ljcryptoPrice) / 1e18)
                setHowMuchPolygon(amountNeeded.toString());
             } else {
-              const actualMaticReserve = maticReserve.toNumber() - (parseFloat(secondAmountOne)*1e18)
-              const one = maticReserve.add(ethers.utils.parseEther(`${secondAmountOne}`)).mul(ethers.utils.parseEther(`${secondAmountOne}`).div(ljcryptoReserve))
-               amountNeeded =
-                 ((parseFloat(secondAmountOne) * 1e18) * actualMaticReserve) /
-                 ljcryptoReserve;
-              setHowMuchPolygon(ethers.utils.formatEther(one));
+             amountNeeded =
+               (maticReserve.toNumber() * parseFloat(secondAmountOne)) /
+              ljcryptoReserve;
+              setHowMuchPolygon(amountNeeded.toString());
             }
           }  
      }
@@ -410,8 +408,6 @@ const LiquidityPools: React.FC = () => {
   };
 
   const removeLJSLJCLiquidity = async (amountOne: string, amountTwo: string) => {
-    // const weiAmountOne = ethers.utils.parseEther(amountOne.toString());
-    // const weiAmountTwo = ethers.utils.parseEther(amountTwo.toString());
     try {
       setLoading(true);
       const signer = await getProviderOrSigner(true);

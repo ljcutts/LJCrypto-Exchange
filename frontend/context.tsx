@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { providers, Contract, BigNumber, ethers } from "ethers";
+import { providers} from "ethers";
 import Web3Modal from "web3modal";
 import { createContext, useContext } from "react";
 import { setInterval } from "timers";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
 
+import {INFURA_ID} from "./infura-id"
 
 type Props = {
   children: JSX.Element;
@@ -84,7 +86,28 @@ const Web3Provider = ({ children }: Props) => {
         if (!walletConnected) {
           web3ModalRef.current = new Web3Modal({
             network: "mumbai",
-            providerOptions: {},
+            providerOptions: {
+              walletconnect: {
+                package: WalletConnectProvider, // required
+                options: {
+                  infuraId: INFURA_ID, // required
+                },
+              },
+              coinbasewallet: {
+                package: CoinbaseWalletSDK, // Required
+                options: {
+                  appName: "LJCrypto-Exchange", // Required
+                  infuraId: INFURA_ID, // Required
+                  rpc: "", // Optional if `infuraId` is provided; otherwise it's required
+                  // chainId: 1, // Optional. It defaults to 1 if not provided
+                  darkMode: false, // Optional. Use dark theme, defaults to false
+                },
+              },
+              binancechainwallet: {
+                package: true,
+              },
+            },
+            disableInjectedProvider: false,
           });
         }
       setInterval(async() => {

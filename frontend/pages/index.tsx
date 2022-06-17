@@ -1,11 +1,11 @@
 import type { NextPage } from 'next'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useContext } from 'react'
 import Head from 'next/head'
 import Link from "next/link";
 import SideBarMenu from './sidebarmenu'
-import Web3Modal from "web3modal";
 import { useRouter } from "next/router";
-import { providers } from "ethers";
+import { Web3Context, useWeb3 } from "../context";
+
 
 export type IState = {
   modal: boolean;
@@ -16,65 +16,24 @@ export type IState = {
 
 const Home: NextPage = () => {
  const [modal, setModal] = useState<IState["modal"]>(false);
-  const [walletConnected, setWalletConnected] = useState(false);
-
-  const web3ModalRef: any = useRef();
-
 
   const router = useRouter();
 
  const modalToggle = () => {
    setModal(!modal);
  };
-
- const getProviderOrSigner = async (needSigner = false) => {
-   // Connect to Metamask
-   // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
-   const provider = await web3ModalRef.current.connect();
-   const web3Provider = new providers.Web3Provider(provider);
-
-   // If user is not connected to the Rinkeby network, let them know and throw an error
-   const { chainId } = await web3Provider.getNetwork();
-   if (chainId !== 80001) {
-     alert("Change the network to Mumbai");
-     throw new Error("Change network to Mumbai");
-   }
-
-   if (needSigner) {
-     const signer = web3Provider.getSigner();
-     return signer;
-   }
-   return web3Provider;
- };
-
- const connectWallet = async () => {
-   try {
-     // Get the provider from web3Modal, which in our case is MetaMask
-     // When used for the first time, it prompts the user to connect their wallet
-     await getProviderOrSigner();
-     setWalletConnected(true);
-     router.push("/guessinggame");
-   } catch (err) {
-     console.error(err);
-   }
- };
-
-   useEffect(() => {
-     // if wallet is not connected, create a new instance of Web3Modal and connect the MetaMask wallet
-     if (!walletConnected) {
-       // Assign the Web3Modal class to the reference object by setting it's `current` value
-       // The `current` value is persisted throughout as long as this page is open
-       web3ModalRef.current = new Web3Modal({
-         network: "rinkeby",
-         providerOptions: {},
-         //  disableInjectedProvider: false,
-       });
-     } 
-     getProviderOrSigner()
-   }, [walletConnected]);
+ const {
+   account,
+   connectWallet,
+ } = useContext(Web3Context) as useWeb3;
 
 
-
+ const launchButton = async () => {
+  if(account === null) {
+    await connectWallet();
+  }
+  router.push("/guessinggame")
+ }
 
   return (
     <>
@@ -132,11 +91,11 @@ const Home: NextPage = () => {
               </Link>
               <Link href="/lotterygame">
                 <a>
-                  <h1 className="pl-5 hover:text-white">LotteryGame</h1>
+                  <h1 className="pl-5 hover:text-white">Lottery</h1>
                 </a>
               </Link>
               <button
-                onClick={connectWallet}
+                onClick={launchButton}
                 className="rounded-2xl bg-black ml-5 text-white h-8 shadow-button w-24 font-bold transition ease-in-out hover:scale-75"
               >
                 Launch
@@ -157,7 +116,7 @@ const Home: NextPage = () => {
               A Lottery And A Guessing Game, Breed NFTs.
             </p>
             <button
-              onClick={connectWallet}
+              onClick={launchButton}
               className="md:hidden rounded-2xl bg-yellow-500 text-white h-8 shadow-button w-24 font-bold ml-2 transition ease-in-out hover:bg-yellow-300"
             >
               Launch

@@ -27,14 +27,14 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://eth-rinkeby.alchemyapi.io/v2/Emiy8piVA9OqFcDwjxy87Vb24pQAgn7l",
+        url: "https://rpc-mumbai.matic.today",
       },
     },
     mumbai: {
       url: process.env.MUMBAI_URL || "",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-        gasPrice: 100000000,
+      gasPrice: 100000000,
     },
     rinkeby: {
       url: process.env.RINKEBY_URL || "",

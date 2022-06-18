@@ -43,6 +43,51 @@ export const GUESSING_GAME_ABI = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "enterGuessingGame",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "guess",
+        type: "bool",
+      },
+    ],
+    name: "guessTheNumberValue",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "requestId",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "randomness",
+        type: "uint256",
+      },
+    ],
+    name: "rawFulfillRandomness",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "timeIsUp",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     anonymous: false,
     inputs: [
       {
@@ -70,6 +115,17 @@ export const GUESSING_GAME_ABI = [
   {
     stateMutability: "payable",
     type: "fallback",
+  },
+  {
+    inputs: [],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
   },
   {
     inputs: [
@@ -137,26 +193,6 @@ export const GUESSING_GAME_ABI = [
   },
   {
     inputs: [],
-    name: "enterGuessingGame",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bool",
-        name: "guess",
-        type: "bool",
-      },
-    ],
-    name: "guessTheNumberValue",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "nonce",
     outputs: [
       {
@@ -181,41 +217,5 @@ export const GUESSING_GAME_ABI = [
     stateMutability: "view",
     type: "function",
   },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "requestId",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "randomness",
-        type: "uint256",
-      },
-    ],
-    name: "rawFulfillRandomness",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "timeIsUp",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "withdraw",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    stateMutability: "payable",
-    type: "receive",
-  },
 ];
-export const GUESSING_GAME_ADDRESS = "0xf76b8E784B522093151b4578e57c6F8428ecF005";
+export const GUESSING_GAME_ADDRESS = "0xf893c2c098f846655a2Fbd6F8765d2b7EB341F11";

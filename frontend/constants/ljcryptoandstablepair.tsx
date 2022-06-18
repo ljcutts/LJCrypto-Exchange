@@ -392,7 +392,7 @@ export const LJC_LJS_ABI = [
   },
   {
     inputs: [],
-    name: "getLJCrytpoReserve",
+    name: "getLJCryptoReserve",
     outputs: [
       {
         internalType: "uint256",
@@ -495,4 +495,4 @@ export const LJC_LJS_ABI = [
     type: "function",
   },
 ];
-export const LJC_LJS_ADDRESS = "0x7fFdA3684408F314147d25a30507c08caD4855fc";
+export const LJC_LJS_ADDRESS = "0x40CEECBa9aaf5E6a0a3f2a54033dfa004474e0D6";

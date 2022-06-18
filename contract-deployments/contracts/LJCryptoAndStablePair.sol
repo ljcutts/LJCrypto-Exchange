@@ -71,8 +71,8 @@ function removeLiquidity(uint _amountA, uint _amountB) external returns(uint, ui
     uint LJCryptoTokenReserve = getLJCryptoReserve();
     uint LJCryptoStableReserve = getLJStableReserve();
     uint _totalSupply = totalSupply();
-    uint LJCryptoTokenAmount = (LJCryptoTokenReserve * _amountA)/ _totalSupply;
-    uint LJStableAmount = (LJCryptoStableReserve * _amountB)/ _totalSupply;
+    uint LJCryptoTokenAmount = (LJCryptoTokenReserve * (_amountA/1e18))/ _totalSupply;
+    uint LJStableAmount = (LJCryptoStableReserve * (_amountB/1e18))/ _totalSupply;
     IERC20 LJCryptoToken = IERC20(LJCryptoTokenAddress);
     IERC20 LJStableCoin = IERC20(LJStableCoinAddress);
     ljcryptoBalance[msg.sender] -= LJCryptoTokenAmount;

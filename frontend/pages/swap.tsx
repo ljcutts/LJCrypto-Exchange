@@ -40,6 +40,7 @@ import {
   LJS_MATIC_ABI,
   LJS_MATIC_ADDRESS,
 } from "../constants/ljstableandmaticpair";
+import Head from "next/head";
 
 
 
@@ -179,7 +180,7 @@ const calculateSwapAmounts = async() => {
  const ljcLjscontract = await getLJCJStablePairInstance(web3Provider);
  const ljsMaticcontract = await getLJSMaticPairInstance(web3Provider);
  const ljcMaticcontract = await getLJCMaticPairInstance(web3Provider);
- const ljcryptoReserve = await  ljcLjscontract.getLJCrytpoReserve();
+ const ljcryptoReserve = await  ljcLjscontract.getLJCryptoReserve();
  const ljcryptoReserve2 = await ljcMaticcontract.getLJCryptoReserve();
  const ljstableReserve = await ljcLjscontract.getLJStableReserve();
  const ljstableReserve2 = await ljsMaticcontract.getLJStableReserve();
@@ -464,6 +465,11 @@ calculateSwapAmounts();
 
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
+      <Head>
+        <title>Swapping</title>
+        <meta name="description" content="Swap Tokens" />
+        <link rel="icon" href="/ljcrypto.webp" />
+      </Head>
       <nav className="flex px-4 items-center justify-between h-16 pt-3">
         <Link href="/">
           <a>
@@ -1039,7 +1045,7 @@ calculateSwapAmounts();
       {!loading && (
         <div className="flex flex-row justify-between mx-auto justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400 relative top-20  pr-4 whitespace-nowrap overflow-x-scroll">
           <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-           Swap
+            Swap
           </a>
           <Link href="/lotterygame">
             <a className="pr-4 hover:text-yellow-500 cursor-pointer">
@@ -1063,7 +1069,9 @@ calculateSwapAmounts();
             </a>
           </Link>
           <Link href="/dao">
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Governance</a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+              Governance
+            </a>
           </Link>
         </div>
       )}

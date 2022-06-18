@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Web3Context, useWeb3 } from "../context";
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import styles from "../styles/Home.module.css";
-
+import Head from "next/head";
 
 import {
   LJCRYPTO_TOKEN_ABI,
@@ -18,6 +18,7 @@ import {
 import {LJC_LJS_ABI, LJC_LJS_ADDRESS} from  "../constants/ljcryptoandstablepair"
 import {LJC_MATIC_ABI, LJC_MATIC_ADDRESS} from "../constants/ljcryptoandmaticpair"
 import {LJS_MATIC_ABI, LJS_MATIC_ADDRESS} from "../constants/ljstableandmaticpair"
+
 
 type IState = {
   howMuchLJCrypto: string | undefined;
@@ -201,7 +202,7 @@ const LiquidityPools: React.FC = () => {
      const ljcMaticcontract = await getLJCMaticPairInstance(web3Provider);
      const ljcMaticcontractBalance = await new providers.Web3Provider(provider).getBalance(LJC_MATIC_ADDRESS);
      const ljsMaticcontractBalance = await new providers.Web3Provider(provider).getBalance(LJS_MATIC_ADDRESS);
-     const ljcReserveOne = await ljcLjscontract.getLJCrytpoReserve();
+     const ljcReserveOne = await ljcLjscontract.getLJCryptoReserve();
      const ljcReserveTwo = await ljcMaticcontract.getLJCryptoReserve();
      const ljsReserveOne = await ljcLjscontract.getLJStableReserve();
       const ljsReserveTwo = await ljsMaticcontract.getLJStableReserve();
@@ -231,7 +232,7 @@ const LiquidityPools: React.FC = () => {
     const provider = window.ethereum;
     const web3Provider = new providers.Web3Provider(provider).getSigner();
     const liquiditycontract = getLJCJStablePairInstance(web3Provider);
-    const ljcryptoReserve = await liquiditycontract.getLJCrytpoReserve();
+    const ljcryptoReserve = await liquiditycontract.getLJCryptoReserve();
     const ljstableReserve = await liquiditycontract.getLJStableReserve();
     const contract = getLJCryptoTokenInstance(web3Provider);
     const ljcryptoPrice = await contract.currentPricePerToken();
@@ -613,7 +614,6 @@ const LiquidityPools: React.FC = () => {
               <input
                 className="pt-4 placeholder:text-black placeholder:opacity-60 font-semibold pl-4 bg-transparent mb-2 relative top-3 w-40 h-20 text-3xl outline-none pb-16 "
                 type="number"
-                // value={secondAmountTwo === "0.0" || secondAmountTwo === "" ? "0.0" : secondAmountTwo}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSecondAmountTwo(e.target.value)
                 }
@@ -1105,6 +1105,11 @@ const LiquidityPools: React.FC = () => {
       onClick={toggleOutside}
       className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll"
     >
+      <Head>
+        <title>Liquidity Pools</title>
+        <meta name="description" content="Add Liquidity" />
+        <link rel="icon" href="/ljcrypto.webp" />
+      </Head>
       <nav className="flex px-4 items-center justify-between h-16 pt-3">
         <Link href="/">
           <a>
@@ -1322,7 +1327,7 @@ const LiquidityPools: React.FC = () => {
           }`}
         >
           <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-           Liquidity Pools
+            Liquidity Pools
           </a>
           <Link href="/lotterygame">
             <a className="pr-4 hover:text-yellow-500 cursor-pointer">
@@ -1342,7 +1347,7 @@ const LiquidityPools: React.FC = () => {
           </Link>
           <Link href="/dao">
             <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-             Governance
+              Governance
             </a>
           </Link>
           <Link href="/swap">

@@ -6,6 +6,7 @@ import styles from "../styles/Home.module.css";
 import Web3Modal from "web3modal";
 import {NFT_COLLECTION_ABI, NFT_COLLECTION_ADDRESS} from "../constants/nft"
 import {NFT_STAKING_ABI, NFT_STAKING_ADDRESS} from "../constants/nftstaking"
+import Head from 'next/head';
 
 
 
@@ -17,7 +18,7 @@ type IState = {
 };
 
 function NFT() {
-  const { account, numberIsZero, setNumberIsZero, getProviderOrSigner, getAddress, connectWallet, walletConnected, web3ModalRef} = useContext(Web3Context) as useWeb3;
+  const { account, numberIsZero, setNumberIsZero, getProviderOrSigner, getAddress, connectWallet} = useContext(Web3Context) as useWeb3;
 
   const [nftBalanceOne, setNftBalanceOne] = useState("0");
   const [nftBalanceTwo, setNftBalanceTwo] = useState("0");
@@ -105,16 +106,18 @@ function NFT() {
 
 
   const isNumberAboveZero = async (): Promise<boolean> => {
-      const provider = await getProviderOrSigner(true);
-      const contract = getNFTContractInstance(provider);
+      const provider = window.ethereum;
+      const web3Provider = new providers.Web3Provider(provider).getSigner();
+      const contract = getNFTContractInstance(web3Provider);
       const value = await contract.numberAboveZero();
       setNumberIsZero(value);
       return value;
   };
 
   const getStakingBalance = async(): Promise<string> => {
-     const provider = await getProviderOrSigner(true);
-     const contract = getNFTStakingContractInstance(provider);
+      const provider = window.ethereum;
+      const web3Provider = new providers.Web3Provider(provider).getSigner();
+     const contract = getNFTStakingContractInstance(web3Provider);
      const value = await contract.checkStakingBalance()
      setStakingBalance(BigNumber.from(value).toString());
      return BigNumber.from(value).toString();
@@ -122,8 +125,9 @@ function NFT() {
 
   const totalNFTBalance = async() => {
     try {
-       const provider = await getProviderOrSigner(true);
-       const contract = getNFTContractInstance(provider);
+       const provider = window.ethereum;
+       const web3Provider = new providers.Web3Provider(provider).getSigner();
+       const contract = getNFTContractInstance(web3Provider);
        const value = await contract.totalNFTBalance();
        setTotalBalance(BigNumber.from(value).toString());
        return BigNumber.from(value).toString();
@@ -149,8 +153,9 @@ function NFT() {
   }
 
   const fetchNFTBalances = async() => {
-    const provider = await getProviderOrSigner(true);
-    const contract = getNFTContractInstance(provider);
+    const provider = window.ethereum;
+    const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const contract = getNFTContractInstance(web3Provider);
     const thisAccount =  await new providers.Web3Provider(window.ethereum).getSigner().getAddress()
     const balanceOne =  await contract.balanceOf(thisAccount, 0);
     setNftBalanceOne(BigNumber.from(balanceOne).toString())
@@ -179,8 +184,9 @@ function NFT() {
   }
 
   const fetchStakedNFTBalances = async() => {
-    const provider = await getProviderOrSigner(true);
-    const contract = getNFTStakingContractInstance(provider);
+    const provider = window.ethereum;
+    const web3Provider = new providers.Web3Provider(provider).getSigner();
+    const contract = getNFTStakingContractInstance(web3Provider);
     const balanceOne = await contract.checkStakedNFTs(0)
     setStakedNFTOne(BigNumber.from(balanceOne).toString())
     const balanceTwo = await contract.checkStakedNFTs(1);
@@ -251,8 +257,9 @@ function NFT() {
 
   const claimAmount = async() => {
     let amount = BigNumber.from(0).toNumber()
-     const provider = await getProviderOrSigner(true);
-     const contract = getNFTStakingContractInstance(provider);
+      const provider = window.ethereum;
+      const web3Provider = new providers.Web3Provider(provider).getSigner();
+     const contract = getNFTStakingContractInstance(web3Provider);
     for (let i = 0; i < 12; i++) {
       const value = await contract.checkStakedNFTs([i])
       amount += BigNumber.from(value).toNumber()
@@ -398,29 +405,27 @@ function NFT() {
    ) => {
      setAmount(e.target.value);
    };
-    
 
-useEffect(() => {
-  if (!walletConnected) {
-          web3ModalRef.current = new Web3Modal({
-            network: "mumbai",
-            providerOptions: {},
-          });
-        }
-  setInterval(async function () {
-    await getAddress();
-    await isNumberAboveZero();
-    await fetchNFTBalances();
-    await totalNFTBalance();
-    await getStakingBalance();
-    await fetchStakedNFTBalances();
-    await claimAmount();
-  }, 2 * 1000);
-}, [walletConnected, account]);
+useEffect(() => { 
+   getAddress();
+   setInterval(async() => {
+    await isNumberAboveZero()
+   })
+   fetchNFTBalances();
+   totalNFTBalance();
+   getStakingBalance();
+   fetchStakedNFTBalances();
+   claimAmount();
+});
 
   return (
     <>
       <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
+        <Head>
+          <title>LJCrypto-NFTs</title>
+          <meta name="description" content="Mint, Stake, Breed NFTs" />
+          <link rel="icon" href="/ljcrypto.webp" />
+        </Head>
         <nav className="flex px-4 items-center justify-between h-16 pt-3">
           <Link href="/">
             <a>
@@ -467,7 +472,7 @@ useEffect(() => {
             <p className="text-white text-2xl font-bold uppercase md:flex md:justify-center md:px-0 px-4 mb-10">
               View NFT Collection Here
             </p>
-            <Link href="https://testnets.opensea.io/collection/unidentified-contract-pp3ki7zvnb">
+            <Link href="https://testnets.opensea.io/collection/unidentified-contract-wlagrxhzdt">
               <a
                 className="md:flex md:justify-content md:mx-auto w-40"
                 target="_blank"
@@ -1037,7 +1042,9 @@ useEffect(() => {
               </a>
             </Link>
             <Link href="/dao">
-              <a className="pr-4 hover:text-yellow-500 cursor-pointer">Governance</a>
+              <a className="pr-4 hover:text-yellow-500 cursor-pointer">
+                Governance
+              </a>
             </Link>
             <Link href="/guessinggame">
               <a className="pr-4 hover:text-yellow-500 cursor-pointer">

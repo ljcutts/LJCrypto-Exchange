@@ -1,0 +1,7 @@
+type LotteryGame @entity {
+  id: ID!
+  entryAmount: BigInt!
+  winner: [Bytes!]!
+  requestId: Bytes
+  player: [Bytes!]!
+}

@@ -234,43 +234,4 @@ export const LOTTERY_ABI = [
     type: "function",
   },
 ];
-export const LOTTERY_ADDRESS = "0xD91E944dF0Df293fFb6Aa229729A3978A0E4a024";
-
-
-
-export const DEADLINE_ABI = [
-  {
-    inputs: [],
-    name: "setDeadline",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "deadline",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getDeadline",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
-export const DEADLINE_ADDRESS = "0x2dE4aAce5bCD72beB7A3f8876C1e42A00711A335";
+export const LOTTERY_ADDRESS = "0x4617BBb71e9729aAb93337d8c9fb2a8a7fDB60Dd";

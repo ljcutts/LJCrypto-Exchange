@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { providers} from "ethers";
+import {providers} from "ethers";
 import Web3Modal from "web3modal";
 import { createContext, useContext } from "react";
 import { setInterval } from "timers";
@@ -84,31 +84,30 @@ const Web3Provider = ({ children }: Props) => {
 
   useEffect(() => { 
         if (!walletConnected) {
-          web3ModalRef.current = new Web3Modal({
-            network: "mumbai",
-            providerOptions: {
-              walletconnect: {
-                package: WalletConnectProvider, // required
-                options: {
-                  infuraId: INFURA_ID, // required
-                },
-              },
-              coinbasewallet: {
-                package: CoinbaseWalletSDK, // Required
-                options: {
-                  appName: "LJCrypto-Exchange", // Required
-                  infuraId: INFURA_ID, // Required
-                  rpc: "", // Optional if `infuraId` is provided; otherwise it's required
-                  // chainId: 1, // Optional. It defaults to 1 if not provided
-                  darkMode: false, // Optional. Use dark theme, defaults to false
-                },
-              },
-              binancechainwallet: {
-                package: true,
-              },
-            },
-            disableInjectedProvider: false,
-          });
+             web3ModalRef.current = new Web3Modal({
+               network: "mumbai",
+               providerOptions: {
+                //  walletconnect: {
+                //    package: WalletConnectProvider, // required
+                //    options: {
+                //      infuraId: INFURA_ID, // required
+                //    },
+                //  },
+                //  coinbasewallet: {
+                //    package: CoinbaseWalletSDK, // Required
+                //    options: {
+                //      appName: "LJCrypto-Exchange", // Required
+                //      infuraId: INFURA_ID, // Required
+                //      rpc: "", // Optional if `infuraId` is provided; otherwise it's required
+                //      // chainId: 1, // Optional. It defaults to 1 if not provided
+                //      darkMode: false, // Optional. Use dark theme, defaults to false
+                //    },
+                //  },
+                //  binancechainwallet: {
+                //    package: true,
+                //  },
+               },
+             });
         }
       setInterval(async() => {
         await getAddress()

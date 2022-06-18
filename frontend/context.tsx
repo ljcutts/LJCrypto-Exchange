@@ -6,7 +6,7 @@ import { setInterval } from "timers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
 
-import {INFURA_ID} from "./infura-id"
+// import {INFURA_ID} from "./infura-id"
 
 type Props = {
   children: JSX.Element;

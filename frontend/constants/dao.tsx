@@ -322,4 +322,4 @@ export const LJCRYPTO_DAO_ABI = [
     type: "function",
   },
 ];
-export const LJCRYPTO_DAO_ADDRESS = "0x4B56e1c3e2A60088a4Bbf6DCB0D1370803507739";
+export const LJCRYPTO_DAO_ADDRESS = "0x3f1966d8fd77Afa10C039dc21BC2291c94c0cCbE";

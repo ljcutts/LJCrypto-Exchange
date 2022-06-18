@@ -12,6 +12,7 @@ import {
   LJCRYPTO_TOKEN_ABI,
   LJCRYPTO_TOKEN_ADDRESS,
 } from "../constants/ljcryptotoken";
+import Head from "next/head";
 
 type IState = {
   proposals: (
@@ -137,15 +138,16 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
  const getPowerThroughNFT = async(id:string) => {
     const value = await isNFTFundsApproved();
     if (value === false) {
+      setNFTPowerTab(false);
       await approveNFTFunds();
     } 
    try {
+      setNFTPowerTab(false);
       setLoading(true)
       const signer = await getProviderOrSigner(true);
       const contract = getLJCryptoDAOInstance(signer);
       const tx = await contract.receivePowerThroughNFT(id);
       await tx.wait();
-      setNFTPowerTab(false)
      if(id === "0") {
        window.alert(`One Has Been Added To Your Dao Power Balance`)
      } else {
@@ -163,6 +165,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
 
  const approveTokenFunds = async (amount: BigNumber) => {
    try {
+     setTokenPowerTab(false);
      setLoading(true);
      const signer = await getProviderOrSigner(true);
      const tokenContract = getLJCryptoTokenInstance(signer);
@@ -182,12 +185,12 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
     const weiAmountOne = ethers.utils.parseEther(amount.toString());
     await approveTokenFunds(weiAmountOne)
     try {
+      setTokenPowerTab(false);
       setLoading(true);
       const signer = await getProviderOrSigner(true);
       const contract = getLJCryptoDAOInstance(signer);
       const tx = await contract.receivePowerThroughToken(weiAmountOne);
       await tx.wait();
-      setTokenPowerTab(false);
       window.alert(`${amount} Has Been Added To Your Dao Power Balance`);
       setLoading(false);
       await getPowerBalance()
@@ -651,6 +654,14 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
  }
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
+      <Head>
+        <title>LJCrypto-DAO</title>
+        <meta
+          name="description"
+          content="Create, Vote, View, Execute Proposals"
+        />
+        <link rel="icon" href="/ljcrypto.webp" />
+      </Head>
       <nav className="flex px-4 items-center justify-between h-16 pt-3">
         <Link href="/">
           <a>
@@ -735,7 +746,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
       {!loading && (
         <div className="flex flex-row justify-between mx-auto  justify-self-center max-w-xs md:max-w-lg bg-black text-white rounded-2xl border border-solid border-yellow-400  pr-4 whitespace-nowrap overflow-x-scroll">
           <a className=" text-black font-semibold mr-4 px-2 rounded-3xl bg-yellow-400 flex items-center justify-center">
-           Governance
+            Governance
           </a>
           <Link href="/lotterygame">
             <a className="pr-4 hover:text-yellow-500 cursor-pointer">
@@ -750,7 +761,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
           </Link>
           <Link href="/guessinggame">
             <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-             Guessing Game
+              Guessing Game
             </a>
           </Link>
           <Link href="/liquiditypools">

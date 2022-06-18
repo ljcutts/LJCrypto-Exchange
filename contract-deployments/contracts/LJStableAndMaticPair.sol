@@ -55,8 +55,8 @@ function removeLiquidity(uint _amountA, uint _amountB) external returns(uint, ui
     require(LJStableAmount >= MaticAmount || MaticAmount >= LJStableAmount, "NOT_BALANCED");
     uint maticReserve = address(this).balance;
     uint _totalSupply = totalSupply();
-    uint maticAmount = (maticReserve * _amountB)/ _totalSupply;
-    uint ljstableCoinAmount = (getLJStableReserve() * _amountA)/ _totalSupply;
+    uint maticAmount = (maticReserve * (_amountB/1e18))/ _totalSupply;
+    uint ljstableCoinAmount = (getLJStableReserve() * (_amountA/1e18))/ _totalSupply;
     ljstableBalance[msg.sender] -= ljstableCoinAmount;
     userMaticBalance[msg.sender] -= maticAmount;
     _burn(msg.sender, _amountA);

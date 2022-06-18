@@ -8,13 +8,14 @@ import {LOTTERY_ADDRESS, LOTTERY_ABI} from "../constants/lotterygame"
 
 import {subgraphQuery2} from '../utils'
 import { FETCH_LOTTERYGAME } from "../queries";
+import Head from "next/head";
 
 
 type IState = {
-  players: string[] | undefined;
-  setPlayers: React.Dispatch<React.SetStateAction<string[] | undefined>>;
-  winners: string[] | undefined;
-  setWinners: React.Dispatch<React.SetStateAction<string[] | undefined>>;
+  players: string[];
+  setPlayers: React.Dispatch<React.SetStateAction<string[]>>;
+  winners: string[];
+  setWinners: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const LotteryGame: React.FC = () => {
@@ -22,7 +23,6 @@ const LotteryGame: React.FC = () => {
     account,
     connectWallet,
     getProviderOrSigner,
-    getAddress,
     loading,
     setLoading,
   } = useContext(Web3Context) as useWeb3;
@@ -51,24 +51,23 @@ const LotteryGame: React.FC = () => {
     const lotteryDay = await getLotteryDay()
     const gameArray = await subgraphQuery2(FETCH_LOTTERYGAME());
    const totalPlayers = [];
-   for (let i = 0; i < lotteryDay + 1; i++) {
+   for (let i = 0; i < lotteryDay; i++) {
     for (let z = 0; z < gameArray.lotteryGames[i].player.length; z++) {
       totalPlayers.push(gameArray.lotteryGames[i].player[z]);
     }
    }
    setPlayers(totalPlayers);
    const allWinners = []
-   for (let i = 0; i < lotteryDay + 1; i++) { 
+   for (let i = 0; i < lotteryDay+1; i++) { 
     for (let z = 0; z < gameArray.lotteryGames[i].winner.length; z++) {
       allWinners.push(gameArray.lotteryGames[i].winner[z]);
     }
    }
     setWinners(allWinners);
-    const winners = gameArray.lotteryGames[lotteryDay].winner;
     const lastWinnerOne = winners[winners.length-1]?.slice(0, 6)
     const lastWinnerTwo = winners[winners.length-1]?.slice(-4)
     const lastWinner =  `${lastWinnerOne}...${lastWinnerTwo}`
-    setLastWinner(lastWinner)  
+    setLastWinner(lastWinner);  
   }
 
   const getLotteryDay = async () => {
@@ -127,10 +126,10 @@ const LotteryGame: React.FC = () => {
 
   useEffect(() => {
      getLotteryDay()
-    const interval = setInterval(() => {
-      setCountDown(countDownDate - new Date().getTime());
-    }, 1000);
-    return () => clearInterval(interval);
+         const interval = setInterval(() => {
+           setCountDown(countDownDate - new Date().getTime());
+         }, 1000);
+         return () => clearInterval(interval);
   }, [countDownDate]);
 
   useEffect(() => {
@@ -150,6 +149,14 @@ const LotteryGame: React.FC = () => {
 
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
+      <Head>
+        <title>Lottery Game</title>
+        <meta
+          name="description"
+          content="Enter Lottery Game for a chance to win some matic"
+        />
+        <link rel="icon" href="/ljcrypto.webp" />
+      </Head>
       <nav className="flex px-4 items-center justify-between h-16 pt-3">
         <Link href="/">
           <a>
@@ -196,20 +203,49 @@ const LotteryGame: React.FC = () => {
           <p className="flex justify-center mb-3 text-white text-2xl font-bold uppercase">
             Time Left Until Next Winner Is Chosen
           </p>
-          <div className="flex justify-center mb-16">
-            <div className="flex items-center mr-3 flex-col">
-              <p className="font-bold text-2xl text-yellow-400">{minutes}</p>
-              <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
-                Minutes
+          {countDownDate > new Date().getTime() ? (
+            <div className="flex justify-center mb-16">
+              <div className="flex items-center mr-3 flex-col">
+                <p className="font-bold text-2xl text-yellow-400">{hours}</p>
+                <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
+                  Hours
+                </div>
+              </div>
+              <div className="flex items-center mr-3 flex-col">
+                <p className="font-bold text-2xl text-yellow-400">{minutes}</p>
+                <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
+                  Minutes
+                </div>
+              </div>
+              <div className="flex items-center mr-3 flex-col">
+                <p className="font-bold text-2xl text-yellow-400">{seconds}</p>
+                <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
+                  Seconds
+                </div>
               </div>
             </div>
-            <div className="flex items-center mr-3 flex-col">
-              <p className="font-bold text-2xl text-yellow-400">{seconds}</p>
-              <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
-                Seconds
+          ) : (
+            <div className="flex justify-center mb-16">
+              <div className="flex items-center mr-3 flex-col">
+                <p className="font-bold text-2xl text-yellow-400">0</p>
+                <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
+                  Hours
+                </div>
+              </div>
+              <div className="flex items-center mr-3 flex-col">
+                <p className="font-bold text-2xl text-yellow-400">0</p>
+                <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
+                  Minutes
+                </div>
+              </div>
+              <div className="flex items-center mr-3 flex-col">
+                <p className="font-bold text-2xl text-yellow-400">0</p>
+                <div className="flex items-center rounded-md px-2 h-8 bg-yellow-500 font-semibold mb-2  whitespace-nowrap">
+                  Seconds
+                </div>
               </div>
             </div>
-          </div>
+          )}
           <p className="flex justify-center mb-8 text-white text-2xl font-bold uppercase">
             Current Game Number:
             <span className="pl-2 text-yellow-500">{lotteryDay}</span>
@@ -245,7 +281,13 @@ const LotteryGame: React.FC = () => {
                   {players?.length}
                 </span>
               </p>
-              <div className="w-64 h-48 mr-4 bg-black rounded-md overflow-scroll">
+              <div
+                className={
+                  players.length === 0
+                    ? "w-64 h-48 mr-4 bg-black rounded-md overflow-scroll"
+                    : "w-auto pr-2 h-48 mr-4 bg-black rounded-md overflow-scroll"
+                }
+              >
                 <ol start={1} className="text-yellow-500 font-bold pl-6">
                   {players?.map((p, idx) => {
                     return (
@@ -262,14 +304,18 @@ const LotteryGame: React.FC = () => {
               <p className="text-white flex flex-nowrap text-lg font-bold">
                 Last Winner:
                 <span className="pl-2 text-yellow-500 text-lg font-bold">
-                  {lastWinner.includes(`UNDEFINED`) ? (
+                  {lastWinner.includes(`undefined`) ? (
                     "NO_WINNER_YET"
                   ) : (
-                    <p className="whitespace-nowrap">{lastWinner}</p>
+                    <span className="whitespace-nowrap">{lastWinner}</span>
                   )}
                 </span>
               </p>
-              <div className="w-64 h-48 mr-4 bg-black rounded-md overflow-scroll">
+              <div className={
+                  winners.length === 0
+                    ? "w-64 h-48 mr-4 bg-black rounded-md overflow-scroll"
+                    : "w-auto pr-2 h-48 mr-4 bg-black rounded-md overflow-scroll"
+                }>
                 <ol className="text-yellow-500 font-bold pl-6">
                   {winners?.map((w, idx) => {
                     return (

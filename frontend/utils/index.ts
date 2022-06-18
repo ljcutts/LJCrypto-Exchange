@@ -4,7 +4,7 @@ export async function subgraphQuery(query:any) {
   try {
     // Replace YOUR-SUBGRAPH-URL with the url of your subgraph
     const SUBGRAPH_URL =
-      "https://api.thegraph.com/subgraphs/name/ljcutts/guessinggamev1";
+      "https://api.thegraph.com/subgraphs/name/ljcutts/guessinggamev2";
     const response = await axios.post(SUBGRAPH_URL, {
       query,
     });
@@ -22,7 +22,7 @@ export async function subgraphQuery2(query: any) {
   try {
     // Replace YOUR-SUBGRAPH-URL with the url of your subgraph
     const SUBGRAPH_URL =
-      "https://api.thegraph.com/subgraphs/name/ljcutts/lotterygamev3";
+      "https://api.thegraph.com/subgraphs/name/ljcutts/lotterygamev4";
     const response = await axios.post(SUBGRAPH_URL, {
       query,
     });

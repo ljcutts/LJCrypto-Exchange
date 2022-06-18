@@ -9,15 +9,15 @@ contract GuessingGame is VRFConsumerBase {
    event Ended(address Player, uint GameId);
    address payable[] players;
    address immutable owner;
-   address constant _linkToken = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
-   address constant _vrfCoordinator = 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B;
-   bytes32 constant _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
+   address constant _linkToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+   address constant _vrfCoordinator = 0x8C7382F9D8f56b33781fE506E897a4F1e2d17255;
+   bytes32 constant _keyHash = 0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4;
    bytes32 currentRequestId;
    uint currentNumberValue = 0;
    uint public currentGameId = 1;
    uint timeLimit;
    uint128 public nonce;
-   uint128 constant _chainlinkFee = 0.1 * 10 ** 18;
+   uint128 constant _chainlinkFee = 0.0001 * 10 ** 18;
    mapping(address => bool) public alreadyGuessed;
    mapping(address => bool) public alreadyEntered;
 
@@ -25,30 +25,30 @@ contract GuessingGame is VRFConsumerBase {
       owner = msg.sender;
    }
    
-   function enterGuessingGame() public payable {
-     require(players.length < 2, "You will have to wait to enter the next game");
-     require(msg.value >= 0.1 ether, "You need to at least put in 0.1 ether to join the game");
-     require(alreadyEntered[msg.sender] == false, "You can't enter twice");
+   function enterGuessingGame() external payable {
+     require(players.length < 2, "WAIT_NEXT_NAME");
+     require(msg.value >= 0.1 ether, "INSUFFICIENT_FUNDS");
+     require(alreadyEntered[msg.sender] == false, "ALREADY_ENTERED");
      players.push(payable(msg.sender));
      alreadyGuessed[msg.sender] = false;
      if(players.length == 2) {
       generateRandomNumberValue();
-      timeLimit = 10 minutes;
+      timeLimit = 20 minutes;
      }
      alreadyEntered[msg.sender] = true;
      emit CurrentGame(msg.sender, currentGameId);
    }
 
    function generateRandomNumberValue() private returns(bytes32 requestId) {
-      require(LINK.balanceOf(address(this)) >= _chainlinkFee, "Not enough LINK");
+      require(LINK.balanceOf(address(this)) >= _chainlinkFee, "MORE_LINK");
       return requestRandomness(_keyHash, _chainlinkFee);
    }
    
    
-   function guessTheNumberValue(bool guess) public payable {
-      require(msg.sender == players[0] || msg.sender == players[1], "You are not one of the players");
-      require(!alreadyGuessed[msg.sender], "You already made a guess");
-      require(currentNumberValue > 0, "The number hasn't changed value yet");
+   function guessTheNumberValue(bool guess) external payable {
+      require(msg.sender == players[0] || msg.sender == players[1], "NOT_A_PLAYERR");
+      require(!alreadyGuessed[msg.sender], "ALREADY_GUESSED");
+      require(currentNumberValue > 0, "WAIT_FOR_NUMBER");
       if((currentNumberValue > 50) == guess) {
           payable(msg.sender).transfer(address(this).balance);
           alreadyEntered[players[0]] = false;
@@ -75,8 +75,8 @@ contract GuessingGame is VRFConsumerBase {
       }
    }
 
-   function timeIsUp() public {
-      require(block.timestamp > timeLimit && currentNumberValue > 0, "Hasn't Been 10 Minutes After Number Was Generated");
+   function timeIsUp() external {
+      require(block.timestamp > timeLimit && currentNumberValue > 0, "CANT_END_YET");
           alreadyEntered[players[0]] = false;
           alreadyEntered[players[1]] = false;
           emit Ended(players[0], currentGameId);
@@ -92,18 +92,18 @@ contract GuessingGame is VRFConsumerBase {
       currentRequestId = requestId;
    }
 
-    function withdraw() public  {
-            require(msg.sender == owner, "You are not the owner");
+    function withdraw() external  {
+            require(msg.sender == owner, "NOT_OWNER");
             uint256 amount = address(this).balance;
             (bool sent, ) =  payable(msg.sender).call{value: amount}("");
-            require(sent, "Failed to send Ether");
+            require(sent, "SEND_FAILED");
    }
 
-   function didYouGuess() public view returns(bool) {
+   function didYouGuess() external view returns(bool) {
       return alreadyGuessed[msg.sender];
    }
 
-   function numberAboveZero() public view returns(bool) {
+   function numberAboveZero() external view returns(bool) {
       return currentNumberValue > 0;
    }
 

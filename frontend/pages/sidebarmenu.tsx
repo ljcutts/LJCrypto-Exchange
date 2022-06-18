@@ -52,6 +52,11 @@ const SideBarMenu: React.FC<IProps> = ({modalToggle}) => {
               <h1 className="mb-5 hover:text-black">LotteryGame</h1>
             </a>
           </Link>
+          <Link href="https://mumbaifaucet.com/">
+            <a target="_blank">
+              <h1 className="mb-5 hover:text-black">Mumbai Faucet</h1>
+            </a>
+          </Link>
         </div>
         <svg
           xmlns="http://www.w3.org/2000/svg"

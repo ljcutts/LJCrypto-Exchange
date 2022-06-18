@@ -5,6 +5,7 @@ import { FETCH_GUESSINGGAME } from "../queries";
 import { subgraphQuery } from "../utils";
 import { Web3Context, useWeb3 } from "../context";
 import styles from "../styles/Home.module.css";
+import Head from "next/head";
 
 import {
   GUESSING_GAME_ABI,
@@ -203,6 +204,14 @@ const GuessingGame: React.FC = () => {
 
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
+      <Head>
+        <title>Guessing Game</title>
+        <meta
+          name="description"
+          content="Make a guess to potentially win some maitc"
+        />
+        <link rel="icon" href="/ljcrypto.webp" />
+      </Head>
       <nav className="flex px-4 items-center justify-between h-16 pt-3">
         <Link href="/">
           <a>
@@ -260,7 +269,7 @@ const GuessingGame: React.FC = () => {
 
           {page === false && (
             <p className="text-white text-2xl font-bold uppercase mx-auto px-4 mb-10">
-              You need to pay 0.1 Ether Or More To Enter The Game
+              You need to pay 0.1 Matic Or More To Enter The Game
             </p>
           )}
 
@@ -356,7 +365,7 @@ const GuessingGame: React.FC = () => {
             Restart The Game
           </p>
           <p className="mx-auto text-white text-xl font-bold uppercase mb-5 md:text-2xl">
-            (This is only if 10 minutes passed and the 2 players have not
+            (This is only if 20 minutes passed and the 2 players have not
             guessed yet)
           </p>
           <button
@@ -394,9 +403,7 @@ const GuessingGame: React.FC = () => {
             </a>
           </Link>
           <Link href="/swap">
-            <a className="pr-4 hover:text-yellow-500 cursor-pointer">
-              Swap
-            </a>
+            <a className="pr-4 hover:text-yellow-500 cursor-pointer">Swap</a>
           </Link>
         </div>
       )}

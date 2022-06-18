@@ -13,6 +13,7 @@ import {
   LJSTABLE_COIN_ABI,
   LJSTABLE_COIN_ADDRESS,
 } from "../constants/ljstablecoin";
+import Head from "next/head";
 
 type IState = {
   account: string | null;
@@ -429,6 +430,14 @@ const Tokens: React.FC = () => {
 
   return (
     <main className="bg-gradient-to-r from-yellow-300 to-black bg-no-repeat bg-[length:auto_100%] h-screen overflow-y-scroll">
+      <Head>
+        <title>LJCrypto-Tokens</title>
+        <meta
+          name="description"
+          content="Buy, Sell, Stake LJCrypto/LJStable Tokens"
+        />
+        <link rel="icon" href="/ljcrypto.webp" />
+      </Head>
       <nav className="flex px-4 items-center justify-between h-16 pt-3">
         <Link href="/">
           <a>

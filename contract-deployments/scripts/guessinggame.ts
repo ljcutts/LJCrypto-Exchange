@@ -6,7 +6,7 @@
 // async function main() {
 //   const GuessingGame = await ethers.getContractFactory("GuessingGame");
 //   const guessingGame = await GuessingGame.deploy({
-//     value: ethers.utils.parseEther("0.2"),
+//     value: ethers.utils.parseEther("1"),
 //   });
 
 //   await guessingGame.deployed();

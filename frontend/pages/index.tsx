@@ -44,9 +44,8 @@ const Home: NextPage = () => {
             name="description"
             content="The Exchange where you can swap, stake, add liquidity, and play games"
           />
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/ljcrypto.webp" />
         </Head>
-
         <main className="">
           <nav className="flex px-4 items-center justify-between h-16 bg-yellow-500 mb-16">
             <Link href="/">
@@ -94,6 +93,11 @@ const Home: NextPage = () => {
                   <h1 className="pl-5 hover:text-white">Lottery</h1>
                 </a>
               </Link>
+              <Link href="https://mumbaifaucet.com/">
+                <a target="_blank">
+                  <h1 className="pl-5 hover:text-white">Mumbai Faucet</h1>
+                </a>
+              </Link>
               <button
                 onClick={launchButton}
                 className="rounded-2xl bg-black ml-5 text-white h-8 shadow-button w-24 font-bold transition ease-in-out hover:scale-75"
@@ -115,6 +119,41 @@ const Home: NextPage = () => {
               Swap, Stake, Become A Automatic Market Maker, Make Proposals, Join
               A Lottery And A Guessing Game, Breed NFTs.
             </p>
+            <div className="flex mb-10">
+              <Link href="https://twitter.com/LarryCutts6">
+                <a target="_blank">
+                  <img
+                    src="/twitter.png"
+                    alt=""
+                    width="40"
+                    height="40"
+                    className="hover:opacity-50 mr-8"
+                  />
+                </a>
+              </Link>
+              <Link href="https://www.youtube.com/channel/UCifzIH_LbTJVjHbP97Qy8-A/featured">
+                <a target="_blank">
+                  <img
+                    src="/youtube.webp"
+                    alt=""
+                    width="45"
+                    height="45"
+                    className="hover:opacity-50 mr-8"
+                  />
+                </a>
+              </Link>
+              <Link href="https://github.com/ljcutts/LJCrypto-Exchange">
+                <a target="_blank">
+                  <img
+                    src="/github.png"
+                    alt=""
+                    width="45"
+                    height="45"
+                    className="hover:opacity-50 mr-8 rounded-3xl relative bottom-2 bg-white"
+                  />
+                </a>
+              </Link>
+            </div>
             <button
               onClick={launchButton}
               className="md:hidden rounded-2xl bg-yellow-500 text-white h-8 shadow-button w-24 font-bold ml-2 transition ease-in-out hover:bg-yellow-300"

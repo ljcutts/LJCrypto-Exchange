@@ -89,7 +89,7 @@ const GuessingGame: React.FC = () => {
       setLoading(false);
     } catch (error:any) {
       setLoading(false)
-       window.alert(error.data.message);
+       window.alert(error);
       console.log(error);
     }
   };
@@ -110,7 +110,7 @@ const GuessingGame: React.FC = () => {
     } catch (error:any) {
       setLoading(false)
       console.log(error);
-      window.alert(error.data.message)
+      window.alert(error)
     }
   };
 
@@ -137,7 +137,7 @@ const GuessingGame: React.FC = () => {
     } catch (error:any) {
       setLoading(false)
       console.log(error);
-      window.alert(error.data.message)
+      window.alert(error)
     }
   };
 

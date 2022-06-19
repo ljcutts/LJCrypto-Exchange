@@ -37,7 +37,7 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <div className="bg-background bg-no-repeat bg-[length:auto_100%] h-screen">
+      <div className="bg-background bg-no-repeat bg-[length:auto_900px] h-screen">
         <Head>
           <title>LJCrypto Exchange</title>
           <meta

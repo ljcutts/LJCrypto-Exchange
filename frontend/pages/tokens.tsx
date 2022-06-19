@@ -185,7 +185,7 @@ const Tokens: React.FC = () => {
       setbuyLJCrypto(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error)
     }
   };
 
@@ -204,14 +204,15 @@ const Tokens: React.FC = () => {
       setSellLJCrypto(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
   const ljcryptoBalanceInEther = async () => {
     try {
-      const provider = await getProviderOrSigner(true);
-      const contract = getLJCryptoTokenInstance(provider);
+      const provider = window.ethereum;
+     const web3Provider = new providers.Web3Provider(provider).getSigner();
+      const contract = getLJCryptoTokenInstance(web3Provider);
       const currentAccount = await getAddress();
       const value = await contract.userBalancePrice({ from: currentAccount });
       setLJCryptoEtherBalance(ethers.utils.formatEther(value));
@@ -229,7 +230,6 @@ const Tokens: React.FC = () => {
       const signer = await getProviderOrSigner(true);
       const contract = getLJStableCoinInstance(signer);
       const paidAmount = (parseInt(amount) * 1) / 2500;
-      // const amountToPay = (parseInt(price) / 1e18) * parseInt(amount.toString());
       const tx = await contract.buyTokens(weiAmount, {
         value: ethers.utils.parseEther(`${paidAmount}`),
       });
@@ -240,7 +240,7 @@ const Tokens: React.FC = () => {
       setbuyLJStable(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -259,14 +259,15 @@ const Tokens: React.FC = () => {
       setsellLJStable(false);
       setLoading(false);
       console.error(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
   const ljstableBalanceInEther = async () => {
     try {
-      const provider = await getProviderOrSigner(true);
-      const contract = getLJStableCoinInstance(provider);
+       const provider = window.ethereum;
+       const web3Provider = new providers.Web3Provider(provider).getSigner();
+      const contract = getLJStableCoinInstance(web3Provider);
       const currentAccount = await getAddress();
       const value = await contract.userBalancePrice({
         from: currentAccount,
@@ -324,7 +325,7 @@ const Tokens: React.FC = () => {
       setStakeLJCrypto(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.error.message);
+      window.alert(error);
     }
   };
 
@@ -343,7 +344,7 @@ const Tokens: React.FC = () => {
       setUnstakeLJCrypto(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.error.message);
+      window.alert(error);
     }
   };
 
@@ -362,7 +363,7 @@ const Tokens: React.FC = () => {
       setStakeLJStable(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.error.message);
+      window.alert(error);
     }
   };
 
@@ -381,7 +382,7 @@ const Tokens: React.FC = () => {
       setUnstakeLJStable(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.error.message);
+      window.alert(error);
     }
   };
 
@@ -397,7 +398,7 @@ const Tokens: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -413,7 +414,7 @@ const Tokens: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 

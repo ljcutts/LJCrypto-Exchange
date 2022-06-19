@@ -285,6 +285,7 @@ const approveLJCryptoTokens = async (address: string, amountOne: BigNumber) => {
   } catch (error: any) {
     setLoading(false);
     console.log(error);
+    window.alert(error)
   }
 };
 
@@ -302,6 +303,7 @@ const approveLJStableCoins = async (address: string, amountOne: BigNumber) => {
   } catch (error: any) {
     setLoading(false);
     console.log(error);
+    window.alert(error)
   }
 };
 
@@ -322,7 +324,7 @@ const ljcryptoTokenToLJStableToken = async (amountOne: string, amountTwo: string
   } catch (error:any) {
    setLoading(false);
    console.log(error);
-   window.alert(error.data.message);
+   window.alert(error);
   }
 };
 
@@ -344,7 +346,7 @@ const ljStableTokenToLJCryptoToken = async (amountOne: string, amountTwo: string
   } catch (error: any) {
     setLoading(false);
     console.log(error);
-    window.alert(error.data.message);
+    window.alert(error);
   }
 };
 
@@ -366,7 +368,7 @@ const ljStableCoinToMatic = async (amountOne: string, amountTwo: string) => {
   } catch (error: any) {
     setLoading(false);
     console.log(error);
-    window.alert(error.data.message);
+    window.alert(error);
   }
 };
 
@@ -385,7 +387,7 @@ const maticToLJStableCoin = async (amountOne: string, amountTwo: string) => {
   } catch (error: any) {
     setLoading(false);
     console.log(error);
-    window.alert(error.data.message);
+    window.alert(error);
   }
 };
 
@@ -405,7 +407,7 @@ const ljcryptoTokenToMatic = async (amountOne: string, amountTwo: string) => {
   } catch (error: any) {
     setLoading(false);
     console.log(error);
-    window.alert(error.data.message);
+    window.alert(error);
   }
 };
 
@@ -424,7 +426,7 @@ const maticToLJCryptoToken = async (amountOne: string, amountTwo: string) => {
   } catch (error: any) {
     setLoading(false);
     console.log(error);
-    window.alert(error.data.message);
+    window.alert(error);
   }
 };
 

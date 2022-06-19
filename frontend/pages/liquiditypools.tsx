@@ -366,6 +366,7 @@ const LiquidityPools: React.FC = () => {
    } catch (error:any) {
      setLoading(false)
      console.log(error)
+     window.alert(error)
    }
   }
 
@@ -385,6 +386,7 @@ const LiquidityPools: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
+      window.alert(error)
     }
   };
 
@@ -404,7 +406,7 @@ const LiquidityPools: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -423,7 +425,7 @@ const LiquidityPools: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   }
 
@@ -442,7 +444,7 @@ const LiquidityPools: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -463,7 +465,7 @@ const LiquidityPools: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -484,7 +486,7 @@ const LiquidityPools: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -502,7 +504,7 @@ const LiquidityPools: React.FC = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 

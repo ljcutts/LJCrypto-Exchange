@@ -2,10 +2,6 @@ import React from 'react'
 import { IState as Props } from './index';
 import Link from "next/link";
 
-const links = () => {
-  `mb-5 hover:opacity-50`
-}
-
 interface IProps {
   setModal: React.Dispatch<React.SetStateAction<Props["modal"]>>;
   modal: Props["modal"];

@@ -3,7 +3,6 @@ import Link from "next/link";
 import {Web3Context, useWeb3} from "../context"
 import { providers, Contract, BigNumber, ethers } from "ethers";
 import styles from "../styles/Home.module.css";
-import Web3Modal from "web3modal";
 import {NFT_COLLECTION_ABI, NFT_COLLECTION_ADDRESS} from "../constants/nft"
 import {NFT_STAKING_ABI, NFT_STAKING_ADDRESS} from "../constants/nftstaking"
 import Head from 'next/head';
@@ -148,7 +147,7 @@ function NFT() {
     } catch (error: any) {
       setIsLoading(false);
       console.log(error)
-      window.alert(error.data.message)
+      window.alert(error)
     }
   }
 
@@ -227,7 +226,7 @@ function NFT() {
     } catch (error:any) {
        setIsLoading(false);
       console.log(error)
-      window.alert(error.data.message)
+      window.alert(error)
     }
   }
 
@@ -251,7 +250,7 @@ function NFT() {
     } catch (error:any) {
       setIsLoading(false)
       console.log(error)
-      window.alert(error.data.message)
+      window.alert(error)
     }
   }
 
@@ -288,7 +287,7 @@ function NFT() {
     } catch (error:any) {
       setIsLoading(false)
       console.log(error)
-      window.alert(error.data.message)
+      window.alert(error)
     }
   }
 
@@ -312,7 +311,7 @@ function NFT() {
             setIsLoading(false)
             console.log(error);
             window.alert(
-              error.data.message
+              error
             );
           } 
   }
@@ -333,7 +332,7 @@ function NFT() {
       setUnstakingTab(false)
       setIsLoading(false)
       console.log(error)
-      window.alert(error.data.message)
+      window.alert(error)
     }
   }
 
@@ -352,7 +351,7 @@ function NFT() {
       setBreedTab(false)
       setIsLoading(false)
       console.log(error)
-      window.alert(error.data.message)
+      window.alert(error)
     }
   }
 
@@ -377,7 +376,7 @@ function NFT() {
       setTransferTab(false)
       setIsLoading(false)
       console.log(error)
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -396,7 +395,7 @@ function NFT() {
       setBurnTab(false)
        setIsLoading(false)
        console.log(error);
-       window.alert(error.data.message);
+       window.alert(error);
     }
   }
 

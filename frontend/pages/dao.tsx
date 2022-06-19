@@ -118,7 +118,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
    } catch (error: any) {
      setLoading(false);
      console.log(error);
-     window.alert(error.data.message);
+     window.alert(error);
    }
  };
 
@@ -159,7 +159,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
      setNFTPowerTab(false);
      setLoading(false)
      console.log(error)
-     window.alert(error.data.message)
+     window.alert(error)
    }
  }
 
@@ -176,7 +176,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
    } catch (error: any) {
      setLoading(false);
      console.log(error);
-     window.alert(error.data.message);
+     window.alert(error);
    }
  };
 
@@ -198,7 +198,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
       setTokenPowerTab(false);
       setLoading(false);
       console.log(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -284,7 +284,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
     } catch (error:any) {
        setLoading(false);
        console.log(error);
-       window.alert(error.data.message);
+       window.alert(error);
     }
   }
 
@@ -312,7 +312,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
      } catch (error:any) {
        setLoading(false)
        console.log(error)
-       window.alert(error.data.message)
+       window.alert(error)
      }
    }
 
@@ -330,7 +330,7 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
      } catch (error:any) {
        setLoading(false)
        console.log(error)
-       window.alert(error.data.message)
+       window.alert(error)
      }
    };
 
@@ -341,7 +341,9 @@ const { account, connectWallet, getProviderOrSigner, getAddress, loading, setLoa
 
 
   useEffect(() => {
-     fetchAllProposals();
+    setInterval(async() => {
+      await fetchAllProposals()
+    }, 1*1000)
   })
 
  const changeTabs = () => {

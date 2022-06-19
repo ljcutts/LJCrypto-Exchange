@@ -116,7 +116,7 @@ const Home: NextPage = () => {
             <h1 className="text-white text-5xl">LJCrypto</h1>
             <h1 className="text-white text-5xl mb-5">Exchange</h1>
             <p className="text-white text-2xl mb-5">
-              Swap, Stake, Become A Automatic Market Maker, Make Proposals, Join
+              Swap, Stake, Trade Tokens, Become A Automatic Market Maker, Make Proposals, Join
               A Lottery And A Guessing Game, Breed NFTs.
             </p>
             <div className="flex mb-10">

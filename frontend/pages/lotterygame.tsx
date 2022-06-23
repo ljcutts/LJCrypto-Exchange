@@ -51,14 +51,14 @@ const LotteryGame: React.FC = () => {
     const lotteryDay = await getLotteryDay()
     const gameArray = await subgraphQuery2(FETCH_LOTTERYGAME());
    const totalPlayers = [];
-   for (let i = 0; i < lotteryDay + 1; i++) {
+   for (let i = 0; i < lotteryDay; i++)  {
     for (let z = 0; z < gameArray.lotteryGames[i].player.length; z++) {
       totalPlayers.push(gameArray.lotteryGames[i].player[z]);
     }
    }
    setPlayers(totalPlayers);
    const allWinners = []
-   for (let i = 0; i < lotteryDay+1; i++) { 
+   for (let i = 0; i < lotteryDay; i++) { 
     for (let z = 0; z < gameArray.lotteryGames[i].winner.length; z++) {
       allWinners.push(gameArray.lotteryGames[i].winner[z]);
     }

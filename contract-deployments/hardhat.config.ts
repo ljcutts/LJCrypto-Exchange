@@ -26,9 +26,9 @@ const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
     hardhat: {
-      forking: {
-        url: "https://rpc-mumbai.matic.today",
-      },
+      // forking: {
+      //   url: "https://rpc-mumbai.matic.today",
+      // },
     },
     mumbai: {
       url: process.env.MUMBAI_URL || "",

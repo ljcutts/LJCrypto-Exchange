@@ -6,7 +6,7 @@
    git clone https://github.com/ljcutts/LJCrypto-Exchange.git
    ```
 
-2. Install dependencies:
+2. Install dependencies in both `contract-deployments` and `frontend` folder:
 
   ```bash
   yarn 

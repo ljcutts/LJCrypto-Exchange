@@ -51,6 +51,17 @@ All Smart Contracts can be found in the `contract-deployments` folder:
 [LJStableMaticPair](https://mumbai.polygonscan.com/address/0x5787e6966a40A873471514e0c0169F75A9537C33) - 0x5787e6966a40A873471514e0c0169F75A9537C33
 
 
+# Chainlink Keepers
+LJCryptoNFTCollection - https://keepers.chain.link/mumbai/1815
+
+LotteryGame - https://keepers.chain.link/mumbai/1817
+
+
+# The Graph Subgraphs
+GuessingGame - https://thegraph.com/hosted-service/subgraph/ljcutts/guessinggamev2
+
+LotteryGame - https://thegraph.com/hosted-service/subgraph/ljcutts/lotterygamev4
+
 
 
 

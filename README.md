@@ -25,7 +25,7 @@ All Smart Contracts Are Deployed On The Mumbai Testnet
 3. Run local blockchain and webapp server:
 
   ```
-  npm run dev
+  yarn dev
   ```
 ##
 All Smart Contracts can be found in the `contract-deployments` folder:

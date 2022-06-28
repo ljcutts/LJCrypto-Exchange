@@ -4,6 +4,24 @@ This is an exchange built by me where you can buy, sell, stake tokens and nfts. 
 
 All Smart Contracts Are Deployed On The Mumbai Testnet
 
+# TechStack
+- HTML
+- CSS
+- Javascript
+- Typescript
+- Solidity
+- Nextjs
+- Chainlink
+- Hardhat
+- Ethersjs
+- Mocha/Chai
+- The Graph
+- IPFS
+- Tailwind
+- Axios
+- Web3Modal
+#
+
 
 1. Clone this repo:
 

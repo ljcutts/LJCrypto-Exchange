@@ -14,6 +14,11 @@ This is an exchange built by me where you can buy, sell, stake tokens and nfts. 
   ```bash
   yarn 
   ```
+  or 
+  
+  ```bash
+  npm install
+  ```
 
 3. Run local blockchain and webapp server:
 

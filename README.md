@@ -3,7 +3,7 @@
 1. Clone this repo:
 
    ```bash
-   git clone https://github.com/web3-storage/example-forum-dapp
+   git clone https://github.com/ljcutts/LJCrypto-Exchange.git
    ```
 
 2. Install dependencies:

@@ -2,7 +2,7 @@
 
 1. Clone this repo:
 
-   ```bash
+  ```bash
    git clone https://github.com/ljcutts/LJCrypto-Exchange.git
    ```
 
